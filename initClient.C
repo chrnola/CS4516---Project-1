@@ -1,14 +1,10 @@
-/*
- * initClient.C
- */
+// initClient.C
 
-#include <iostream>
 #include "did.h"
+#include <iostream>
 
 using namespace std;
 
-void StartClient(){
-
-	cout << "Starting client" << endl;
-
+void startClient(){
+	cout << "Starting client..." << endl;
 }

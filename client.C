@@ -2,12 +2,12 @@
  * client.C
  */
 
-#include <iostream>
 #include "did.h"
+#include <iostream>
 
 using namespace std;
 
-int main (){
+int main() {
 	cout << "Calling client init code..." << endl;
-	StartClient();
+	startClient();
 }
