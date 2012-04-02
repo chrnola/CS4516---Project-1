@@ -5,6 +5,7 @@
 #include <mysql.h>
 #include <string>
 #include <stdlib.h> //for atoi()
+#include <iostream>
 
 using namespace std;
 
@@ -47,15 +48,39 @@ int getRowCountTbl(const char* tbl){
 	MYSQL_RES *res = mysql_store_result(&mysql);
 	MYSQL_ROW rw = mysql_fetch_row(res);
 	if (rw != NULL){
-		mysql_free_result(res);
 		if(mysql_num_fields(res) > 0){
+			mysql_free_result(res);
 			return atoi(rw[0]);
 		} else{
+			mysql_free_result(res);
 			return -2;
 		}
 	}
 	mysql_free_result(res);
 	return -3;
+}
+
+bool createMissing(const char *first, const char *last, const char *location){
+	int count = getRowCountPublic();
+	if ((count >= 0) && (count < 100)){
+		char qry[350];
+		strcpy(qry, "INSERT INTO public (firstName, lastName, location) ");
+		strcat(qry, "VALUES (\'");
+		strcat(qry, first);
+		strcat(qry, "\', \'");
+		strcat(qry, last);
+		strcat(qry, "\', \'");
+		strcat(qry, location);
+		strcat(qry, "\')");
+		if(mysql_query(&mysql, qry) != 0){
+			cerr << mysql_error(&mysql) << endl;
+			return false;
+		}
+		cout << "Affected rows: ";
+		cout << (long)mysql_affected_rows(&mysql) << endl;
+		return true;
+	}
+	return false;
 }
 
 bool authenticateUser(const char *username, const char *password){
@@ -71,9 +96,9 @@ bool authenticateUser(const char *username, const char *password){
 	MYSQL_RES *res = mysql_store_result(&mysql);
 	MYSQL_ROW rw = mysql_fetch_row(res);
 	if(rw != NULL){
-		mysql_free_result(res);
-		if(mysql_num_fields(rw) > 0){
+		if(mysql_num_fields(res) > 0){
 			if (atoi(rw[0]) > 0){
+				mysql_free_result(res);
 				return true;
 			}
 		} else{

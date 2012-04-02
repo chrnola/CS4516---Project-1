@@ -10,9 +10,8 @@ int main(){
 	bool connected = connectToDB();
 	if (connected){
 		cout << "Connected!" << endl;
-		cout << "Looking up number of public rows..." << endl;
-		int rws = getRowCountPublic();
-		cout << "Result: " << rws << endl;
+		//int rws = getRowCountPublic();
+		//createMissing("Bob", "Smith", "Worcester, MA");
 	} else{
 		cout << "Connection error!" << endl;
 	}
