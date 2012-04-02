@@ -10,7 +10,11 @@ int main(){
 	bool connected = connectToDB();
 	if (connected){
 		cout << "Connected!" << endl;
+		cout << "Looking up number of public rows..." << endl;
+		int rws = getRowCountPublic();
+		cout << "Result: " << rws << endl;
 	} else{
 		cout << "Connection error!" << endl;
 	}
+	disconnectFromDB();
 }

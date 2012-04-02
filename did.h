@@ -12,6 +12,8 @@ void startClient();
 //returns true if connected to MySQL, false otherwise
 bool connectToDB();
 
+void disconnectFromDB();
+
 //returns the number of records in the public table
 int getRowCountPublic();
 
