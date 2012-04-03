@@ -4,6 +4,14 @@
 #define ___DID_H_INCLUDE___
 
 #include <string>
+#include <iostream>
+#include <stdlib.h>
+
+#include "Frame.h"
+#include "Packet.h"
+#include "DataLink.h"
+
+enum Type{data, ack};
 
 using namespace std;
 

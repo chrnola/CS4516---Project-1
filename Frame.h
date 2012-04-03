@@ -8,14 +8,12 @@
 #ifndef FRAME_H_
 #define FRAME_H_
 
-enum type{data, ack};
-
 class Frame {
 public:
 	unsigned char type;
 	unsigned short seq;
 	bool end;
-	unsigned char payload[];
+	unsigned char* payload;
 	unsigned short err;
 
 	Frame();
