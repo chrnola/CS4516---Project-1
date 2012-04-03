@@ -8,8 +8,8 @@
 #include "DataLink.h"
 
 DataLink::DataLink() {
-	// TODO Auto-generated constructor stub
-
+	// make a dummy network layer thread that will make and send packets to the DLL
+	
 }
 
 DataLink::~DataLink() {
@@ -17,7 +17,35 @@ DataLink::~DataLink() {
 }
 
 void DataLink::GoBack1() {
-
+	unsigned short fextSend = 0, frameExpect = 0;
+	Frame r, s;
+	Packet buffer;
+	Event event;
+	
+	FromNetworkLayer(&buffer);
+	s.info = buffer;
+	s.seq = nextSend;
+	ToPhysicalLayer(&s);
+	StartTimer(0);
+	
+	while(true) {
+		WaitForEvent(&event);
+		if(event == arrival) {
+			FromPhysicalLayer(&r);
+			if(r.type == ack) {
+				StopTimer(0);
+				FromNetworkLayer(&buffer);
+				inc(nextSend)
+			} else if(r.seq == frameExpect) {
+				ToNetworkLayer(&r.payload);
+				inc(frameExpect);
+			}
+		}
+		s.payload = buffer;
+		s.seq = nextSend;
+		ToPhysicalLayer(&s);
+		StartTimer(0);
+	}
 }
 
 void DataLink::GoBackN() {
@@ -25,7 +53,7 @@ void DataLink::GoBackN() {
 	Frame r;
 	Packet buffer[MAX_SEQ + 1];
 	int num_buff = 0, i = 0;
-	event event;
+	Event event;
 
 	while (true) {
 		WaitForEvent(&event);
@@ -75,9 +103,16 @@ void DataLink::WaitForEvent(event* e) {
 }
 
 void DataLink::FromNetworkLayer(Packet* p) {
-
+	Packet* p;
+	p = s_packets[0];
+	int size = sizeof(p->payload);
+	if(size <= MAX_FRAME) {
+	
+	} else {
+	
+	}
 }
-void DataLink::ToNetworkLayer(char p[]) {
+void DataLink::ToNetworkLayer(unsigned char p[]) {
 
 }
 void DataLink::FromPhysicalLayer(Frame* r) {

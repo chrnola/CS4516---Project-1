@@ -12,10 +12,10 @@ enum type{data, ack};
 
 class Frame {
 public:
-	char type;
+	unsigned char type;
 	unsigned short seq;
 	bool end;
-	char payload[];
+	unsigned char payload[];
 	unsigned short err;
 
 	Frame();
