@@ -1,4 +1,5 @@
 // message.h
+// Author: Chris Pinola
 
 #ifndef ___MESSAGE_H___
 #define ___MESSAGE_H___
@@ -12,6 +13,7 @@ class Message{
 		unsigned char *content;
 	public:
 		Message();
+		Message(char *_cmd, char *_content);
 		~Message();
 		void setCmd(char *_cmd);
 		char *getCmd();

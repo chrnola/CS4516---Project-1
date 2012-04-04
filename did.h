@@ -32,8 +32,9 @@ int getRowCountPublic();
 int getRowCountAdmin();
 
 //adds a new row to the 'public' table, if there's room
-//true = success
-bool createMissing(const char *first, const char *last, const char *location);
+//on success: returns person's new id
+//on success: returns negative number
+int createMissing(const char *first, const char *last, const char *location);
 
 //checks the users table to see if we should grant admin rights to user
 //true = valid credentials
