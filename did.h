@@ -11,6 +11,8 @@
 #include "Packet.h"
 #include "DataLink.h"
 
+#define WELL_KNOWN_PORT 2777 //Why not?
+
 enum Type{data, ack};
 
 using namespace std;

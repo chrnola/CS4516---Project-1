@@ -20,5 +20,9 @@ server.o: server.C did.h
 db.o: db.C did.h
 	g++ -c -I /usr/local/mysql-current/include db.C
 
+PhysicalLayer.o: PhysicalLayer.cpp PhysicalLayer.h
+	g++ -c PhysicalLayer.cpp PhysicalLayer.h
+
 clean:
-	rm *.o
+	rm *.o -f
+	rm *~ -f
