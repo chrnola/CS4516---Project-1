@@ -14,8 +14,10 @@ DataLink::DataLink() {
 	//window = (Frame*) calloc(4, sizeof(Frame)); // 4-sliding window
 	ready = (Frame*) calloc(20, sizeof(Frame)); // for frames ready to send
 	
-	s_packets = (Packet*) calloc(1, sizeof(Packet)); // should only send 1 packet for testing
-	r_packets = (Packet*) calloc(1, sizeof(Packet)); // should only ever receive 1 packet
+	// should only send 1 packet for testing
+	s_packets = (Packet*) calloc(1, sizeof(Packet)); 
+	// should only ever receive 1 packet
+	r_packets = (Packet*) calloc(1, sizeof(Packet)); 
 	r_frames = (Frame*) calloc(1, sizeof(Frame)); // receive only one frame
 	
 	// make a dummy network layer thread that will make and send packets to the DLL
@@ -165,13 +167,12 @@ unsigned char* DataLink::Serialize(Packet* p) {
 Packet* DataLink::UnserializeP(const unsigned char* d) {
 	Packet* p = (Packet*) calloc(1, sizeof(Packet));//new Packet();
 	string str ((const char*) d);
-	d[0] == 0 ? p->type = data : p->type = ack;
+	d[0] == 0 ? p->type = ack : p->type = data;
 	const char* temp = (const char*) ((str.substr(1,5)).c_str());
-	cout << (str.substr(1,5)).c_str() << "\n\n";
 	p->seq = (unsigned short) atoi(temp);
-	cout << p->seq << "\n\n";
 	d[6] == 0 ? p->end = false : p-> end = true;
 	p->payload = (unsigned char*) (const_cast<char*> ((str.substr(7, str.size()-1)).c_str()));
+	return p;
 }
 
 unsigned char* DataLink::itoa(unsigned short n) {
