@@ -22,6 +22,9 @@ db.o: db.C did.h
 
 PhysicalLayer.o: PhysicalLayer.cpp PhysicalLayer.h
 	g++ -c PhysicalLayer.cpp PhysicalLayer.h
+	
+DLTest: DataLink.h DataLink.cpp Frame.cpp Frame.h Packet.h Packet.cpp main.cpp
+	g++ main.cpp DataLink.cpp Frame.cpp Packet.cpp -o test -g
 
 clean:
 	rm *.o -f
