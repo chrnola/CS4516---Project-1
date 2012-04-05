@@ -12,28 +12,36 @@
 
 using namespace std;
 
-//void testDB();
+void testDB();
 void testPL();
 
 int main(){
-	testPL();
-	
+	//testPL();
+	testDB();
 }
 
-/*
+
 void testDB(){
 	cout << "Connecting to database" << endl;
 	bool connected = connectToDB();
+	char *bl;
 	if (connected){
 		cout << "Connected!" << endl;
 		//int rws = getRowCountPublic();
-		cout << createMissing("Bob", "Smith", "Worcester, MA") << endl;
+		//cout << createMissing("Bob", "Smith", "Worcester, MA") << endl;
+		cout << locationsWithMissing() << endl;
+		if(createMissingAdmin("000000008", "Haverhill, MA", "John", "Dough")){
+			cout << "it worked!" << endl;
+		}
+		if(createMissingAdmin("000000009", "Acton, MA", NULL, NULL)){
+			cout << "it also worked!" << endl;
+		}
 	} else{
 		cout << "Connection error!" << endl;
 	}
 	disconnectFromDB();
 }
-*/
+
 
 void testPL(){
 	int listen_socket;
