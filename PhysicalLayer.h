@@ -13,6 +13,7 @@ class PhysicalLayer {
 private:
 	int sockfd;
 	void run();
+	char* FoldSerializedFrame(char* sFrame);  //Note, sFrame may no longer be a valid pointer
 public:
 	PhysicalLayer(const char *hostname);
 	PhysicalLayer(int sockfd);
