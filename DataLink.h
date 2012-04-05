@@ -43,7 +43,7 @@ public:
 	//static Msg* UnserializeM(unsigned char d[]);
 	static Packet* UnserializeP(char* d);
 	static Frame* UnserializeF(char* d);
-	static unsigned char* itoa(unsigned short n);
+	//static unsigned char* itoa(unsigned short n);
 	
 	//void HandleTimeout(int sig);
 	

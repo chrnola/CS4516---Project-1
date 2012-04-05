@@ -13,6 +13,7 @@
 #include "Packet.h"
 #include "DataLink.h"
 #include "PhysicalLayer.h"
+#include "Utils.h"
 
 #define WELL_KNOWN_PORT 2777 //Why not?
 

@@ -261,7 +261,7 @@ void DataLink::DisableNetworkLayer(void) {
 unsigned char* DataLink::Serialize(Packet* p) {
 	unsigned char* data = (unsigned char*) calloc(strlen((char*) p->payload) + PACKET_HEAD + 1, sizeof(unsigned char));
 	p->type == ack ? strcat((char*) data, "1") : strcat((char*) data, "0");
-	strcat((char*) data, (char*) DataLink::itoa(p->seq));
+	strcat((char*) data, (char*) Utils::itoa(p->seq));
 	p->end ? strcat((char*) data, "1") : strcat((char*) data, "0");
 	strcat((char*) data, (char*) p->payload);
 	return data;
@@ -270,7 +270,7 @@ unsigned char* DataLink::Serialize(Packet* p) {
 unsigned char* DataLink::Serialize(Frame* f) {
 	unsigned char* data = (unsigned char*) calloc(strlen((char*) f->payload) + FRAME_HEAD + 1, sizeof(unsigned char));
 	f->type == ack ? strcat((char*) data, "1") : strcat((char*) data, "0");
-	strcat((char*) data, (char*) DataLink::itoa(f->seq));
+	strcat((char*) data, (char*) Utils::itoa(f->seq));
 	f->end ? strcat((char*) data, "1") : strcat((char*) data, "0");
 	strcat((char*) data, (char*) f->payload);
 	return data;
@@ -300,7 +300,7 @@ Frame* DataLink::UnserializeF(char* d) {
 	return f;
 }
 
-unsigned char* DataLink::itoa(unsigned short n) {
+/*unsigned char* DataLink::itoa(unsigned short n) {
 	char val = 0;
 	unsigned char* num = (unsigned char*) calloc(5, sizeof(unsigned char));
 	if(n > 9999) {
@@ -332,4 +332,4 @@ unsigned char* DataLink::itoa(unsigned short n) {
 	} else num[4] = 0x30;
 	
 	return num;
-}
+}*/
