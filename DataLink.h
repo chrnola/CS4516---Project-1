@@ -13,6 +13,7 @@
 #define MAX_SEQ 65535
 #define inc(k) if (k < MAX_SEQ) k++; else k = 0;
 #define PACKET_HEAD 4
+#define FRAME_HEAD 4
 #define MAX_FRAME 150
 #define MAX_READY 20
 
@@ -38,12 +39,11 @@ public:
 	
 	//static unsigned char* Serialize(Msg* m);
 	static unsigned char* Serialize(Packet* p);
+	static unsigned char* Serialize(Frame* f);
 	//static Msg* UnserializeM(unsigned char d[]);
 	static Packet* UnserializeP(char* d);
+	static Frame* UnserializeF(char* d);
 	static unsigned char* itoa(unsigned short n);
-	
-	bool networkReady;
-	//bool pktTimeout;
 	
 	//void HandleTimeout(int sig);
 	
