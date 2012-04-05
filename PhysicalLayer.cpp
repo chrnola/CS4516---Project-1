@@ -81,6 +81,29 @@ void PhysicalLayer::run(){
 	cout << "Frame received! i=" << i << endl;
 }
 
+//
+char* FoldSerializedFrame(char* sFrame){
+	int len = strlen(sFrame);
+	unsigned char foldByteA = 0;
+	unsigned char foldByteB = 0;
+	for(int i = 0; i < len; i++){
+		if(i % 2 == 0){
+			foldByteA = foldByteA ^ *(sFrame + i);
+		}
+		else{
+			foldByteB = foldByteB ^ *(sFrame + i);
+		}
+	}
+
+	sFrame = realloc(sFrame, len + 1 + 2); // + 1 for null termination, + 2 for folded bytes
+	*(sFrame + len) = foldByteA;
+	*(sFrame + len + 1) = foldByteB;
+	*(sFrame + len + 2) = 0;
+
+	return sFrame;
+	
+}
+
 PhysicalLayer::~PhysicalLayer() {
 	close(sockfd);
 }
