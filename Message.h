@@ -21,6 +21,7 @@ class Message{
 		void setContent(char *_content);
 		char *getContent();
 		unsigned char *getContentRaw();
+		unsigned char *serialize();
 };
 
 #endif
