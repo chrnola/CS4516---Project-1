@@ -17,11 +17,11 @@ Frame::~Frame() {
 }
 
 unsigned char* Frame::Serialize() {
-	unsigned char* data = (unsigned char*) calloc(strlen((char*) this.payload) + FRAME_HEAD + 1, sizeof(unsigned char));
-	this.type == ack ? strcat((char*) data, "1") : strcat((char*) data, "0");
-	strcat((char*) data, (char*) Utils::itoa(this.seq));
-	this.end ? strcat((char*) data, "1") : strcat((char*) data, "0");
-	strcat((char*) data, (char*) this.payload);
+	unsigned char* data = (unsigned char*) calloc(strlen((char*) this->payload) + FRAME_HEAD + 1, sizeof(unsigned char));
+	this->type == ack ? strcat((char*) data, "1") : strcat((char*) data, "0");
+	strcat((char*) data, (char*) Utils::itoa(this->seq));
+	this->end ? strcat((char*) data, "1") : strcat((char*) data, "0");
+	strcat((char*) data, (char*) this->payload);
 	return data;
 }
 

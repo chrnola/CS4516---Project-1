@@ -8,7 +8,7 @@
 #ifndef PACKET_H_
 #define PACKET_H_
 
-#include "Message.h"
+#include "did.h"
 
 class Packet {
 public:
@@ -20,7 +20,7 @@ public:
 	Packet();
 	virtual ~Packet();
 	unsigned char *Serialize();
-	Message Unserialize(char* d);
+	static Packet* Unserialize(char* d);
 };
 
 #endif /* PACKET_H_ */
