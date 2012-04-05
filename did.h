@@ -47,4 +47,14 @@ char *locationsWithMissing();
 
 bool createMissingAdmin(const char *id, const char *location, const char *firstName, const char *lastName);
 
+bool positiveID(const char *id, const char *firstName, const char *lastName);
+
+bool removeFromPublic(const char *id);
+
+bool removeFromAdmin(const char *id);
+
+bool newUser(const char *username, const char *password);
+
+bool changePassword(const char *username, const char *oldPass, const char *newPass);
+
 #endif

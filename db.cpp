@@ -5,9 +5,10 @@
 #include "did.h"
 #include <mysql.h>
 
-//forward declare this function, not included in header,
-// no need to expose it to everyone else
+//forward declare these function, not included in header,
+// don't want to expose them to everyone else
 int getRowCountTbl(const char*);
+bool removeFromTableWhereCol(const char *table, const char *col, const char *id);
 
 //the global MySQL connection object that will be used for all
 // transactions. decided to keep it here so the server code won't
@@ -74,7 +75,10 @@ int getRowCountTbl(const char* tbl){
 	
 	// issue the query to the server
 	if(mysql_query(&mysql, qry) != 0){
-		return -1;
+		// attempts to fetch and output the error message
+		// from mysql out to STDERR
+		cerr << mysql_error(&mysql) << endl;
+		return -1; //error
 	}
 	
 	// if that worked, fetch the resulting record set and
@@ -112,6 +116,176 @@ int getRowCountTbl(const char* tbl){
 	mysql_free_result(res);
 	// error :(
 	return -3;
+}
+
+bool removeFromPublic(const char *id){
+	return removeFromTableWhereCol("public", "id", id);
+}
+
+bool removeFromAdmin(const char *id){
+	return removeFromTableWhereCol("admin", "personID", id);
+}
+
+bool removeFromTableWhereCol(const char *table, const char *col, const char *id){
+	// ensures the connection to the server is still active, attempts to
+	// reconnect if its not
+	if(mysql_ping(&mysql)){
+		return false; //connection couldn't be re-established
+	}
+	
+	char *d1 = "DELETE FROM "; char *d2 = " WHERE ";
+	char *d3 = "=\'"; char *d4 = "\'";
+	
+	char *qry, *cleanId;
+	
+	//sanitize the only user-provided string
+	cleanId = (char *) calloc((2*strlen(id)) + 1, sizeof(char));
+	mysql_real_escape_string(&mysql, cleanId, id, strlen(id));
+	
+	int size = 1;
+	size += strlen(d1) + strlen(d2) + strlen(d3) + strlen(d4);
+	size += strlen(table) + strlen(col) + strlen(cleanId);
+	
+	qry = (char *) calloc(size, sizeof(char));
+	
+	strcpy(qry, d1); strcat(qry, table); strcat(qry, d2);
+	strcat(qry, col); strcat(qry, d3); strcat(qry, cleanId);
+	strcat(qry, d4);
+	
+	free(cleanId);
+	
+	// issue query to the server
+	if(mysql_query(&mysql, qry) != 0){
+		// attempts to fetch and output the error message
+		// from mysql out to STDERR
+		cerr << mysql_error(&mysql) << endl;
+		free(qry); //deallocate query string
+		return false; //error
+	}
+	
+	free(qry); //deallocate query string
+	
+	// checks that the query we just executed only affected one row
+	// like it was supposed to
+	if(mysql_store_result(&mysql) == 0 && mysql_field_count(&mysql) == 0 &&
+	 (unsigned long) mysql_affected_rows(&mysql) == 1){
+		return true;
+	}
+	
+	return false;
+}
+
+bool positiveID(const char *id, const char *firstName, const char *lastName){
+	// ensures the connection to the server is still active, attempts to
+	// reconnect if its not
+	if(mysql_ping(&mysql)){
+		return false; //connection couldn't be re-established
+	}
+	
+	char *qry, *cleanId, *cleanFirst, *cleanLast;
+	
+	//allocate temp strings for cleaning process
+	cleanId = (char *) calloc((2*strlen(id)) + 1, sizeof(char));
+	cleanFirst = (char *) calloc((2*strlen(firstName)) + 1, sizeof(char));
+	cleanLast = (char *) calloc((2*strlen(lastName)) + 1, sizeof(char));
+	
+	//sanitize strings for db
+	mysql_real_escape_string(&mysql, cleanId, id, strlen(id));
+	mysql_real_escape_string(&mysql, cleanFirst, firstName, strlen(firstName));
+	mysql_real_escape_string(&mysql, cleanLast, lastName, strlen(lastName));
+	
+	//declare constants
+	char *qStart = "UPDATE admin SET firstName=\'";
+	char *q1 = "\', lastName=\'";
+	char *q2 = "\' WHERE personID=\'";
+	char *qEnd = "\'";
+	
+	//calculate total length of qry
+	int size = 1;
+	size += strlen(qStart) + strlen(q1) + strlen(q2) + strlen(qEnd);
+	size += strlen(cleanId) + strlen(cleanFirst) + strlen(cleanLast);
+	
+	//allocate final query string
+	qry = (char *) calloc(size, sizeof(char));
+	
+	//piece it all together
+	strcpy(qry, qStart); strcat(qry, cleanFirst); strcat(qry, q1);
+	strcat(qry, cleanLast); strcat(qry, q2); strcat(qry, cleanId);
+	strcat(qry, qEnd);
+	
+	//clean up temp strings used for sanitation
+	free(cleanId); free(cleanFirst); free(cleanLast);
+	
+	// issue query to the server
+	if(mysql_query(&mysql, qry) != 0){
+		// attempts to fetch and output the error message
+		// from mysql out to STDERR
+		cerr << mysql_error(&mysql) << endl;
+		free(qry); //deallocate query string
+		return false; //error
+	}
+	
+	free(qry); //deallocate query string
+	
+	// checks that the query we just executed only affected one row
+	// like it was supposed to
+	if(mysql_store_result(&mysql) == 0 && mysql_field_count(&mysql) == 0 &&
+	 (unsigned long) mysql_affected_rows(&mysql) == 1){
+		return true;
+	}
+	
+	return false;
+}
+
+bool newUser(const char *username, const char *password){
+	// ensures the connection to the server is still active, attempts to
+	// reconnect if its not
+	if(mysql_ping(&mysql)){
+		return false; //connection couldn't be re-established
+	}
+	
+	char *qry, *cleanUser, *cleanPassword;
+	
+	cleanUser = (char *) calloc((2 * strlen(username)) + 1, sizeof(char));
+	cleanPassword = (char *) calloc((2 * strlen(password)) + 1, sizeof(char));
+	
+	mysql_real_escape_string(&mysql, cleanUser, username, strlen(username));
+	mysql_real_escape_string(&mysql, cleanPassword, password, strlen(password));
+	
+	char *q1 = "INSERT INTO users (username, password) VALUES (\'";
+	char *q2 = "\', \'";
+	char *q3 = "\')";
+	
+	int size = 1;
+	size += strlen(q1) + strlen(q2) + strlen(q3);
+	size += strlen(cleanUser) + strlen(cleanPassword);
+	
+	qry = (char *) calloc(size, sizeof(char));
+	
+	strcpy(qry, q1); strcat(qry, cleanUser); strcat(qry, q2);
+	strcat(qry, cleanPassword); strcat(qry, q3);
+	
+	free(cleanUser); free(cleanPassword);
+	
+	// issue the query to the database
+	if(mysql_query(&mysql, qry) != 0){
+		// attempts to fetch and output the error message
+		// from mysql out to STDERR
+		cerr << mysql_error(&mysql) << endl;
+		free(qry); //deallocate query string
+		return false; //error
+	}
+	
+	free(qry);
+	
+	if(mysql_store_result(&mysql) == 0 &&
+	 mysql_field_count(&mysql) == 0 &&
+	 (unsigned long) mysql_affected_rows(&mysql) == 1 &&
+	 mysql_insert_id(&mysql) != 0){
+		return true;
+	}
+	
+	return false;
 }
 
 // inserts a new missing person record into the public table, if there's room (<= 100 entries)
@@ -153,18 +327,12 @@ unsigned long createMissing(const char *first, const char *last, const char *loc
 		qry = (char *) calloc(size, sizeof(char));
 		
 		// piece it together
-		strcpy(qry, qIns);
-		strcat(qry, cleanFirst);
-		strcat(qry, qComma);
-		strcat(qry, cleanLast);
-		strcat(qry, qComma);
-		strcat(qry, cleanLocation);
+		strcpy(qry, qIns); strcat(qry, cleanFirst); strcat(qry, qComma);
+		strcat(qry, cleanLast); strcat(qry, qComma); strcat(qry, cleanLocation);
 		strcat(qry, qEnd);
 		
 		//free the temp strings
-		free(cleanFirst);
-		free(cleanLast);
-		free(cleanLocation);
+		free(cleanFirst); free(cleanLast); free(cleanLocation);
 
 		// issue the query to the database
 		if(mysql_query(&mysql, qry) != 0){
@@ -317,6 +485,54 @@ char *locationsWithMissing(){
 		return "There are no locations with unidentified bodies!";
 	}
 	return retval;
+}
+
+bool changePassword(const char *username, const char *oldPass, const char *newPass){
+	//first make sure that the user has provided the correct old password
+	if(!authenticateUser(username, oldPass)){
+		return false;
+	}
+	
+	char *qry, *cleanUser, *cleanPassword;
+	
+	cleanUser = (char *) calloc((2 * strlen(username)) + 1, sizeof(char));
+	cleanPassword = (char *) calloc((2 * strlen(newPass)) + 1, sizeof(char));
+	
+	mysql_real_escape_string(&mysql, cleanUser, username, strlen(username));
+	mysql_real_escape_string(&mysql, cleanPassword, newPass, strlen(newPass));
+	
+	char *q1 = "UPDATE users SET password=\'";
+	char *q2 = "\' WHERE username=\'";
+	char *q3 = "\'";
+	
+	int size = 1;
+	size += strlen(q1) + strlen(q2) + strlen(q3);
+	size += strlen(cleanUser) + strlen(cleanPassword);
+	
+	qry = (char *) calloc(size, sizeof(char));
+	
+	strcpy(qry, q1); strcat(qry, cleanPassword);
+	strcat(qry, q2); strcat(qry, cleanUser); strcat(qry, q3);
+	
+	// deallocate temp strings
+	free(cleanUser);
+	free(cleanPassword);
+
+	// issue the query statement to the server
+	if(mysql_query(&mysql, qry) != 0){
+		free(qry);
+		return false;
+	}
+	
+	free(qry);
+	
+	if(mysql_store_result(&mysql) == 0 &&
+	 mysql_field_count(&mysql) == 0 &&
+	 (unsigned long) mysql_affected_rows(&mysql) == 1){
+		return true;
+	}
+	
+	return false;
 }
 
 // authenticates admin credentials provided by user
