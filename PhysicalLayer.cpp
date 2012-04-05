@@ -15,7 +15,8 @@
 
 
 #include "did.h"
-#include "PhysicalLayer.h"
+
+using namespace std;
 
 
 // Constructor called by client. It connects to the well-known port of the server,
@@ -34,25 +35,25 @@ PhysicalLayer::PhysicalLayer(const char *hostname) {
 	sprintf(portString, "%d", WELL_KNOWN_PORT);
 
 	if(getaddrinfo(hostname, portString, &hints, &resolved)){
-		std::cerr << "Couldn't resolve host.\n";
+		cerr << "Couldn't resolve host." << endl;
 		exit(EXIT_FAILURE);
 	}
 	if(resolved == NULL){
-		std::cerr << "Couldn't resolve host.\n";
+		cerr << "Couldn't resolve host." << endl;
 		exit(EXIT_FAILURE);
 	}
 
 	// Creates the socket with which to connect to the server
 	// Note ai_family, ai_socktype will be the same as those in hints
 	if ( (sockfd = socket(resolved->ai_family, resolved->ai_socktype, resolved->ai_protocol)) < 0 ) {
-		std::cerr << "Client: Error creating socket.\n";
+		cerr << "Client: Error creating socket." << endl;
 		exit(EXIT_FAILURE);
 	}
 
 	// Connects to the server
 	// ai_addr is the resolved IP address of the host
 	if ( connect(sockfd, resolved->ai_addr, resolved->ai_addrlen ) < 0 ) {
-		std::cerr << "Couldn't connect() to host.\n";
+		cerr << "Couldn't connect() to host." << endl;
 		exit(EXIT_FAILURE);
 	}
 
@@ -77,7 +78,7 @@ void PhysicalLayer::run(){
 	send(sockfd, &i, 4, 0);
 	i = 2;
 	recv(sockfd, &i, 4, 0);
-	printf("Frame received! i=%i\n", i);
+	cout << "Frame received! i=" << i << endl;
 }
 
 PhysicalLayer::~PhysicalLayer() {
