@@ -256,7 +256,7 @@ void DataLink::DisableNetworkLayer(void) {
 }
 
 
-unsigned char* DataLink::itoa(unsigned short n) {
+/*unsigned char* DataLink::itoa(unsigned short n) {
 	char val = 0;
 	unsigned char* num = (unsigned char*) calloc(5, sizeof(unsigned char));
 	if(n > 9999) {
@@ -288,4 +288,4 @@ unsigned char* DataLink::itoa(unsigned short n) {
 	} else num[4] = 0x30;
 	
 	return num;
-}
+}*/

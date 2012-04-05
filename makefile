@@ -20,13 +20,13 @@ server.o: server.cpp did.h
 db.o: db.cpp did.h
 	g++ -c -I /usr/local/mysql-current/include db.cpp
 
-did: did.h Frame.h Packet.h DataLink.h PhysicalLayer.h
+did: did.h Frame.h Packet.h DataLink.h PhysicalLayer.h Utils.h
 
 PhysicalLayer.o: PhysicalLayer.cpp did.h
 	g++ -c PhysicalLayer.cpp -Wall
 	
-DLTest: DataLink.h DataLink.cpp Frame.cpp Frame.h Packet.h Packet.cpp main.cpp
-	g++ main.cpp DataLink.cpp Frame.cpp Packet.cpp -o dltest -g
+DLTest: DataLink.cpp Frame.cpp Packet.cpp main.cpp did
+	g++ main.cpp DataLink.cpp Frame.cpp Packet.cpp Utils.cpp -o dltest -g
 
 clean:
 	rm *.o -f

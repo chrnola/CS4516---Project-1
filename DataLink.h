@@ -37,6 +37,7 @@ public:
 	void EnableNetworkLayer(void);
 	void DisableNetworkLayer(void);
 	
+
 	//void HandleTimeout(int sig);
 	
 	// testing variables
