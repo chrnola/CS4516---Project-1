@@ -1,7 +1,7 @@
 // message.C
 // Author: Chris Pinola
 
-#include "message.h"
+#include "Message.h"
 #include <iostream>
 
 using namespace std;

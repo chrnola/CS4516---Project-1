@@ -11,7 +11,7 @@ int main(){
 	if (connected){
 		cout << "Connected!" << endl;
 		//int rws = getRowCountPublic();
-		//createMissing("Bob", "Smith", "Worcester, MA");
+		cout << createMissing("Bob", "Smith", "Worcester, MA") << endl;
 	} else{
 		cout << "Connection error!" << endl;
 	}
