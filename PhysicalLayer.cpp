@@ -95,7 +95,7 @@ char* FoldSerializedFrame(char* sFrame){
 		}
 	}
 
-	sFrame = realloc(sFrame, len + 1 + 2); // + 1 for null termination, + 2 for folded bytes
+	sFrame = (char *) realloc(sFrame, len + 1 + 2); // + 1 for null termination, + 2 for folded bytes
 	*(sFrame + len) = foldByteA;
 	*(sFrame + len + 1) = foldByteB;
 	*(sFrame + len + 2) = 0;

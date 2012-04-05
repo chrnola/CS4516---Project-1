@@ -21,7 +21,7 @@ class Message{
 		char *getContent();
 		unsigned char *getContentRaw();
 		unsigned char *serialize();
-		void Message Unserialize(unsigned char* pkt);
+		static Message Unserialize(unsigned char* pkt);
 };
 
 #endif
