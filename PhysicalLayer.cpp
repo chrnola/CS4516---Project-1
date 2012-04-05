@@ -84,7 +84,7 @@ void PhysicalLayer::run(){
 // NB: sFrame may no longer be valid!
 // Use XOR folding to generate a 2-byte error-checking field at the end of
 // serialized frame sFrame.
-char* FoldSerializedFrame(char* sFrame){
+char* PhysicalLayer::FoldSerializedFrame(char* sFrame){
 	int len = strlen(sFrame);
 	unsigned char foldByteA = 0;
 	unsigned char foldByteB = 0;

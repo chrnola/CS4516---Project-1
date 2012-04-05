@@ -31,8 +31,8 @@ ray: DataLink.cpp Frame.cpp Packet.cpp Message.cpp ray.cpp did
 chris: DataLink.cpp Frame.cpp Packet.cpp Message.cpp chris.cpp did
 	g++ chris.cpp DataLink.cpp Frame.cpp Packet.cpp Message.cpp Utils.cpp -o test -g
 	
-aaron: DataLink.cpp Frame.cpp Packet.cpp Message.cpp aaron.cpp did
-	g++ aaron.cpp DataLink.cpp Frame.cpp Packet.cpp Message.cpp Utils.cpp -o aaron -g
+aaron: aaron.cpp PhysicalLayer.o did
+	g++ aaron.cpp PhysicalLayer.o -o aaron -g
 
 clean:
 	rm *.o *~ *.h.gch -f
