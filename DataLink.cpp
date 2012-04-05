@@ -9,6 +9,14 @@
 
 using namespace std;
 
+volatile bool pktTimeout;
+
+void HandleTimeout(int sig) {
+	cout << "Got timeout.\n";
+	pktTimeout = true;
+	signal(sig, HandleTimeout);
+}
+
 DataLink::DataLink() {
 	window = (Frame*) calloc(1, sizeof(Frame)); // 1-sliding window
 	//window = (Frame*) calloc(4, sizeof(Frame)); // 4-sliding window
@@ -35,6 +43,8 @@ DataLink::DataLink() {
 	
 	s_packets[0] = *p;
 	networkReady = true;
+	pktTimeout = false;
+	signal(SIGALRM, HandleTimeout);
 	
 	// make a dummy network layer thread that will make and send packets to the DLL
 }
@@ -49,17 +59,16 @@ DataLink::~DataLink() {
 void DataLink::GoBack1() {
 	Frame* r = new Frame(), * s = new Frame();
 	Packet* buffer = (Packet*) calloc(1, sizeof(Packet));
-	Event event;
+	Event event = none;
 	
 	buffer = FromNetworkLayer(buffer);
 	MakeFrames(buffer);
-	//cout << "Curr ready is " << currReady+0 << " and num ready is " << numReady+0;
+	cout << "Curr ready is " << currReady+0 << " and num ready is " << numReady+0;
 	ToPhysicalLayer(&(ready[currReady]));
 	StartTimer(0);
-	event = arrival;
 	r->type = ack;
 	while(true) {
-		//WaitForEvent(&event);
+		WaitForEvent(&event);
 		if(event == arrival) {
 			FromPhysicalLayer(r);
 			if(r->type == ack) {
@@ -90,7 +99,6 @@ void DataLink::GoBackN() {
 
 	while (true) {
 		WaitForEvent(&event);
-
 		switch (event) {
 		case network_ready:
 			FromNetworkLayer(&buffer[nextSend]);
@@ -137,6 +145,7 @@ void DataLink::MakeFrames(Packet* p) {
 		f1->payload = (unsigned char*) calloc(strlen(currPacket) + 1, sizeof(unsigned char));
 		strcpy((char*) f1->payload, currPacket);
 		f1->seq = nextSend;
+		f1->end = true;
 		inc(nextSend);
 		ready[numReady] = *f1;
 		numReady++;
@@ -145,11 +154,13 @@ void DataLink::MakeFrames(Packet* p) {
 		f2->payload = (unsigned char*) calloc(strlen(currPacket) - MAX_FRAME, sizeof(unsigned char*));
 		strncpy((char*) f1->payload, currPacket, MAX_FRAME);
 		f1->seq = nextSend;
+		f1->end = false;
 		inc(nextSend);
 		ready[numReady] = *f1;
 		numReady++;
 		strcpy((char*) f2->payload, currPacket + MAX_FRAME - 8);
 		f2->seq = nextSend;
+		f2->end = true;
 		inc(nextSend);
 		ready[numReady] = *f2;
 		numReady++;
@@ -161,7 +172,11 @@ void DataLink::SendData(unsigned int frame_num, unsigned int frame_expect, Packe
 }
 
 void DataLink::WaitForEvent(Event* e) {
-	exit(0);
+	while(*e == none) {
+		if(pktTimeout) {
+			*e = timeout;
+		}
+	}
 }
 
 Packet* DataLink::FromNetworkLayer(Packet* p) {
@@ -189,11 +204,26 @@ void DataLink::ToPhysicalLayer(Frame* s) {
 }
 
 void DataLink::StartTimer(unsigned short k) {
-
+	struct timeval* tval = (struct timeval*) calloc(1, sizeof(struct timeval));
+	struct timeval* zero = (struct timeval*) calloc(1, sizeof(struct timeval));
+	tval->tv_usec = 500000;
+	tval->tv_sec = 0;
+	zero->tv_usec = 0;
+	zero->tv_sec = 0;
+	struct itimerval* timerval = (struct itimerval*) calloc(1, sizeof(struct itimerval));
+	timerval->it_value = *tval;
+	timerval->it_interval = *zero;
+	setitimer(ITIMER_REAL, timerval, NULL);
 }
 
 void DataLink::StopTimer(unsigned short k) {
-
+	struct timeval* zero = (struct timeval*) calloc(1, sizeof(struct timeval));
+	zero->tv_usec = 0;
+	zero->tv_sec = 0;
+	struct itimerval* timerval = (struct itimerval*) calloc(1, sizeof(struct itimerval));
+	timerval->it_value = *zero;
+	timerval->it_interval = *zero;
+	setitimer(ITIMER_REAL, timerval, NULL);
 }
 
 void DataLink::EnableNetworkLayer(void) {

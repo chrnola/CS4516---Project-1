@@ -16,7 +16,7 @@
 #define MAX_FRAME 150
 #define MAX_READY 20
 
-enum Event{arrival, error, timeout, network_ready};
+enum Event{arrival, error, timeout, network_ready, none};
 
 class DataLink {
 public:
@@ -43,6 +43,9 @@ public:
 	static unsigned char* itoa(unsigned short n);
 	
 	bool networkReady;
+	//bool pktTimeout;
+	
+	//void HandleTimeout(int sig);
 	
 	// testing variables
 	Packet* s_packets;

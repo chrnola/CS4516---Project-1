@@ -6,6 +6,8 @@
 #include <string>
 #include <iostream>
 #include <stdlib.h>
+#include <signal.h>
+#include <sys/time.h>
 
 #include "Frame.h"
 #include "Packet.h"
