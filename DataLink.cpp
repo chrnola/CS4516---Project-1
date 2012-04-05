@@ -28,8 +28,8 @@ DataLink::DataLink() {
 	p->type = data;
 	p->seq = 30;
 	p->end = true;
-	p->payload = (unsigned char*) calloc(90, sizeof(unsigned char));
-	string s = "Yay it works through layers n stuff. This is quite long to test some stuff\n";
+	p->payload = (unsigned char*) calloc(200, sizeof(unsigned char));
+	string s = "Yay it works through layers n stuff. This is quite long to test some stuffYay it works through layers n stuff. This is quite long to test some stuffYay it works through layers n stuff.\n";
 	char* str = const_cast<char*>(s.c_str());
 	p->payload = (unsigned char*) strcpy((char*)p->payload, str);
 	
@@ -53,17 +53,16 @@ void DataLink::GoBack1() {
 	
 	buffer = FromNetworkLayer(buffer);
 	MakeFrames(buffer);
-	cout << "Curr ready is " << currReady+0 << " and num ready is " << numReady+0;
+	//cout << "Curr ready is " << currReady+0 << " and num ready is " << numReady+0;
 	ToPhysicalLayer(&(ready[currReady]));
-	if(currReady < MAX_READY) currReady++; else currReady = 0;
 	StartTimer(0);
-	
+	event = arrival;
+	r->type = ack;
 	while(true) {
-		WaitForEvent(&event);
+		//WaitForEvent(&event);
 		if(event == arrival) {
 			FromPhysicalLayer(r);
 			if(r->type == ack) {
-				free(&ready[currReady]);
 				if(currReady < MAX_READY) currReady++; else currReady = 0;
 				numReady--;
 			} else if(r->seq == frameExpect) {
@@ -75,8 +74,10 @@ void DataLink::GoBack1() {
 			FromNetworkLayer(buffer);
 			MakeFrames(buffer);
 		}
+		//cout << "Curr ready is " << currReady+0 << " and num ready is " << numReady+0;
 		ToPhysicalLayer(&ready[currReady]);
 		StartTimer(0);
+		exit(0);
 	}
 }
 
@@ -132,20 +133,22 @@ void DataLink::MakeFrames(Packet* p) {
 	Frame* f1 = new Frame(), * f2 = new Frame();
 	
 	currPacket = (char*) DataLink::Serialize(p);
-	if(sizeof(currPacket) <= MAX_FRAME) {
-		f1->payload = (unsigned char*) calloc(sizeof(currPacket) + 1, sizeof(unsigned char));
+	if(strlen(currPacket) <= MAX_FRAME) {
+		f1->payload = (unsigned char*) calloc(strlen(currPacket) + 1, sizeof(unsigned char));
 		strcpy((char*) f1->payload, currPacket);
 		f1->seq = nextSend;
 		inc(nextSend);
 		ready[numReady] = *f1;
 		numReady++;
 	} else {
+		f1->payload = (unsigned char*) calloc(MAX_FRAME, sizeof(unsigned char));
+		f2->payload = (unsigned char*) calloc(strlen(currPacket) - MAX_FRAME, sizeof(unsigned char*));
 		strncpy((char*) f1->payload, currPacket, MAX_FRAME);
 		f1->seq = nextSend;
 		inc(nextSend);
 		ready[numReady] = *f1;
 		numReady++;
-		strcpy((char*) f2->payload, currPacket+MAX_FRAME);
+		strcpy((char*) f2->payload, currPacket + MAX_FRAME - 8);
 		f2->seq = nextSend;
 		inc(nextSend);
 		ready[numReady] = *f2;
@@ -177,13 +180,12 @@ void DataLink::FromPhysicalLayer(Frame* r) {
 }
 
 void DataLink::ToPhysicalLayer(Frame* s) {
-	cout << "\nFrame payload is: " << s->payload;
 	Packet* p = DataLink::UnserializeP((char*) s->payload);
 	bool p1type = (p->type+0 == data);
-	cout << "\nPacket is data: " << p1type;
+	/*cout << "\nPacket is data: " << p1type;
 	cout << "\nPacket sequence number: " << p->seq;
 	cout << "\nPacket is end: " << p->end;
-	cout << "\nPacket message: " << p->payload << "\n";
+	cout << "\nPacket message: " << p->payload << "\n";*/
 }
 
 void DataLink::StartTimer(unsigned short k) {
@@ -206,7 +208,7 @@ void DataLink::DisableNetworkLayer(void) {
 //}
 
 unsigned char* DataLink::Serialize(Packet* p) {
-	unsigned char* data = (unsigned char*) calloc(sizeof(p->payload) + PACKET_HEAD + 1, sizeof(unsigned char));
+	unsigned char* data = (unsigned char*) calloc(strlen((char*) p->payload) + PACKET_HEAD + 1, sizeof(unsigned char));
 	p->type == ack ? strcat((char*) data, "1") : strcat((char*) data, "0");
 	strcat((char*) data, (char*) DataLink::itoa(p->seq));
 	p->end ? strcat((char*) data, "1") : strcat((char*) data, "0");
@@ -219,35 +221,12 @@ unsigned char* DataLink::Serialize(Packet* p) {
 //}
 
 Packet* DataLink::UnserializeP(char* d) {
-	cout << "-0In unserializep:  " << d << " length is " << strlen(d);
-	cout << "\nElement 30 of d is: " << d[30] << "dhsd";
-	char* d2 = (char*) malloc(strlen(d) * sizeof(char));
-	cout << "\nElement 30 of d is: " << d[30] << "dhsd";
-	cout << "\nLength of d2 is: " << strlen(d2) << " and it is: " << d2;
-	strncpy(d2, d, 44);
-	cout << "\nLength of d2 is now: " << strlen(d2);
-	cout << "\nElement 30 of d is: " << d[30] << "dhsd";
-	cout << "\n0In unserializep:  " << d2 << " length is " << strlen(d);
-	int i;
-	
-	char* temp2 =  (char*) calloc(strlen(d) - 7, sizeof(char));
-	cout << "\n4In unserializep:  " << d << " length is " << strlen(d);
-	for(i = 7;i < strlen(d);i++) {
-		temp2[i-7] = d[i];
-	}
-	char* temp =  (char*) malloc(6 * sizeof(char));
-	cout << "\n-2In unserializep:  " << d << " length is " << strlen(d);
-
-	cout << "\n2In unserializep:  " << d << " length is " << strlen(d);
-	for(i = 1;i < 6;i++) {
-		temp[i-1] = d[i];
-	}
-	
 	Packet* p = new Packet();
 	d[0] == 0 ? p->type = ack : p->type = data;
-	p->seq = (unsigned short) atoi(temp);
+	string str(d);
+	p->seq = (unsigned short) atoi(str.substr(1,5).c_str());
 	d[6] == 0 ? p->end = false : p-> end = true;
-	p->payload = (unsigned char*) temp2;
+	p->payload = (unsigned char*) str.substr(7,str.size()).c_str();
 	return p;
 }
 
