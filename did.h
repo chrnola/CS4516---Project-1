@@ -37,15 +37,26 @@ int getRowCountAdmin();
 //adds a new row to the 'public' table, if there's room
 //on success: returns person's new id
 //on success: returns negative number
-long createMissing(const char *first, const char *last, const char *location);
+unsigned long createMissing(const char *first, const char *last, const char *location);
 
 //checks the users table to see if we should grant admin rights to user
 //true = valid credentials
-//TODO: compare MD5 hash instead?
 bool authenticateUser(const char *username, const char *password);
 
 bool queryAdmin(const char *first, const char *last);
 
 char *locationsWithMissing();
+
+bool createMissingAdmin(const char *id, const char *location, const char *firstName, const char *lastName);
+
+bool positiveID(const char *id, const char *firstName, const char *lastName);
+
+bool removeFromPublic(const char *id);
+
+bool removeFromAdmin(const char *id);
+
+bool newUser(const char *username, const char *password);
+
+bool changePassword(const char *username, const char *oldPass, const char *newPass);
 
 #endif

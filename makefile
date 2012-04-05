@@ -11,8 +11,8 @@ client.o: client.cpp did.h
 initClient.o: initClient.cpp did.h
 	g++ -c initClient.cpp
 
-server: server.o PhysicalLayer.o did.h
-	g++ -o server server.o PhysicalLayer.o did.h PhysicalLayer.h -Wall
+server: server.o PhysicalLayer.o db.o
+	g++ -o server server.o PhysicalLayer.o db.o -Wall -L /usr/local/mysql-current/lib/mysql -lmysqlclient -ldl
 
 server.o: server.cpp did.h
 	g++ -c server.cpp
