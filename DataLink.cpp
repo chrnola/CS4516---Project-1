@@ -91,6 +91,7 @@ void DataLink::GoBack1() {
 			if(r->type == ack) {
 				if(currReady < MAX_READY) currReady++; else currReady = 0;
 				numReady--;
+				if(numReady < MAX_READY - 2) EnableNetworkLayer();
 			} else if(r->seq == frameExpect) {
 				ToNetworkLayer(r->payload);
 				inc(frameExpect);
@@ -182,6 +183,7 @@ void DataLink::MakeFrames(Packet* p) {
 		ready[numReady] = *f2;
 		numReady++;
 	}
+	if(numReady > MAX_READY - 2) DisableNetworkLayer();
 }
 
 void DataLink::SendData(unsigned int frame_num, unsigned int frame_expect, Packet buffer[]) {
