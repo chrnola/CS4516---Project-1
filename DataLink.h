@@ -37,14 +37,6 @@ public:
 	void EnableNetworkLayer(void);
 	void DisableNetworkLayer(void);
 	
-	//static unsigned char* Serialize(Msg* m);
-	static unsigned char* Serialize(Packet* p);
-	static unsigned char* Serialize(Frame* f);
-	//static Msg* UnserializeM(unsigned char d[]);
-	static Packet* UnserializeP(char* d);
-	static Frame* UnserializeF(char* d);
-	static unsigned char* itoa(unsigned short n);
-	
 	//void HandleTimeout(int sig);
 	
 	// testing variables

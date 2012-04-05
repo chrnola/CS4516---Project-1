@@ -255,50 +255,6 @@ void DataLink::DisableNetworkLayer(void) {
 
 }
 
-//static unsigned char* DataLink::Serialize(Msg* m) {
-//}
-
-unsigned char* DataLink::Serialize(Packet* p) {
-	unsigned char* data = (unsigned char*) calloc(strlen((char*) p->payload) + PACKET_HEAD + 1, sizeof(unsigned char));
-	p->type == ack ? strcat((char*) data, "1") : strcat((char*) data, "0");
-	strcat((char*) data, (char*) DataLink::itoa(p->seq));
-	p->end ? strcat((char*) data, "1") : strcat((char*) data, "0");
-	strcat((char*) data, (char*) p->payload);
-	return data;
-}
-
-unsigned char* DataLink::Serialize(Frame* f) {
-	unsigned char* data = (unsigned char*) calloc(strlen((char*) f->payload) + FRAME_HEAD + 1, sizeof(unsigned char));
-	f->type == ack ? strcat((char*) data, "1") : strcat((char*) data, "0");
-	strcat((char*) data, (char*) DataLink::itoa(f->seq));
-	f->end ? strcat((char*) data, "1") : strcat((char*) data, "0");
-	strcat((char*) data, (char*) f->payload);
-	return data;
-}
-
-//static Msg* DataLink::UnserializeM(unsigned char d[]) {
-
-//}
-
-Packet* DataLink::UnserializeP(char* d) {
-	Packet* p = new Packet();
-	d[0] == 0 ? p->type = ack : p->type = data;
-	string str(d);
-	p->seq = (unsigned short) atoi(str.substr(1,5).c_str());
-	d[6] == 0 ? p->end = false : p-> end = true;
-	p->payload = (unsigned char*) str.substr(7,str.size()).c_str();
-	return p;
-}
-
-Frame* DataLink::UnserializeF(char* d) {
-	Frame* f = new Frame();
-	d[0] == 0 ? f->type = ack : f->type = data;
-	string str(d);
-	f->seq = (unsigned short) atoi(str.substr(1,5).c_str());
-	d[6] == 0 ? f->end = false : f-> end = true;
-	f->payload = (unsigned char*) str.substr(7,str.size()).c_str();
-	return f;
-}
 
 unsigned char* DataLink::itoa(unsigned short n) {
 	char val = 0;

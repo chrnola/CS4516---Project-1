@@ -17,6 +17,8 @@ public:
 	
 	Packet();
 	virtual ~Packet();
+	unsigned char *Serialize();
+	static Unserialize(char* d);
 };
 
 #endif /* PACKET_H_ */

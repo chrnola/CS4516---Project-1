@@ -14,10 +14,11 @@ public:
 	unsigned short seq;
 	bool end;
 	unsigned char* payload;
-	unsigned short err;
 
 	Frame();
 	virtual ~Frame();
+	unsigned char* Serialize();
+	static Frame* Unserialize(char* d);
 };
 
 #endif /* FRAME_H_ */
