@@ -18,7 +18,7 @@ int main(void) {
 	//cout << "\nPacket sequence number: " << p1->seq;
 	//cout << "\nPacket is end: " << p1->end;
 	//cout << "\nPacket message: " << p1->payload << "\n";
-	cout << "Some signals are: " << SIGABRT << ";" << SIGALRM << ";" << SIGBUS << ";" << SIGCHLD << ";" << SIGCONT << ";" << SIGFPE << ";" << SIGHUP << ";" << SIGILL << ";" << SIGINT << ";" << SIGKILL << ";" << SIGPIPE << ";" << SIGQUIT << ";" << SIGSEGV << ";" << SIGSTOP << ";" << SIGTERM << ";" << SIGTSTP << ";" << SIGTTIN << ";" << SIGTTOU << ";" << SIGUSR1 << ";" << SIGUSR2 << ";" << SIGPOLL << ";" << SIGPROF << ";" << SIGSYS << ";" << SIGTRAP << ";" << SIGURG << ";" << SIGVTALRM << ";" << SIGXCPU << ";" << SIGXFSZ;
+	//cout << "Some signals are: " << SIGABRT << ";" << SIGALRM << ";" << SIGBUS << ";" << SIGCHLD << ";" << SIGCONT << ";" << SIGFPE << ";" << SIGHUP << ";" << SIGILL << ";" << SIGINT << ";" << SIGKILL << ";" << SIGPIPE << ";" << SIGQUIT << ";" << SIGSEGV << ";" << SIGSTOP << ";" << SIGTERM << ";" << SIGTSTP << ";" << SIGTTIN << ";" << SIGTTOU << ";" << SIGUSR1 << ";" << SIGUSR2 << ";" << SIGPOLL << ";" << SIGPROF << ";" << SIGSYS << ";" << SIGTRAP << ";" << SIGURG << ";" << SIGVTALRM << ";" << SIGXCPU << ";" << SIGXFSZ;
 	
 	DataLink* d = new DataLink();
 	d->GoBack1();

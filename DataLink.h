@@ -39,7 +39,7 @@ public:
 	void SendData(unsigned int frame_num, unsigned int frame_expect, Packet buffer[]);
 	void WaitForEvent(Event* e);
 	Packet* FromNetworkLayer(Packet* p);
-	void ToNetworkLayer(unsigned char p[]);
+	void ToNetworkLayer(unsigned char* p);
 	void FromPhysicalLayer(Frame* r);
 	void ToPhysicalLayer(Frame* s);
 	void StartTimer(unsigned short k);
@@ -58,7 +58,7 @@ public:
 private:
 	Frame* window;
 	Frame* ready;
-	char numReady, currReady;
+	char numReady, currReady, numWindow, currWindow;
 	unsigned short nextSend, frameExpect;
 };
 

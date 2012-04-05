@@ -18,26 +18,31 @@ void HandleFrameTimeout(int sig) {
 }
 
 void HandleFrameArrival(int sig) {
+	cout << "Frame arrive.\n";
 	frmArrive = true;
 	signal(sig, HandleFrameArrival);
 }
 
 void HandlePacketArrival(int sig) {
+	cout << "Packet arrive.\n";
 	pktArrive = true;
 	signal(sig, HandlePacketArrival);
 }
 
 void HandleFrameSend(int sig) {
+	cout << "Frame send.\n";
 	frmSend = true;
 	signal(sig, HandleFrameSend);
 }
 
 void HandlePacketSend(int sig) {
+	cout << "Packet send.\n";
 	pktSend = true;
 	signal(sig, HandlePacketSend);
 }
 
 void HandleFrameError(int sig) {
+	cout << "Frame error.\n";
 	frmError = true;
 	signal(sig, HandleFrameError);
 }
@@ -46,6 +51,8 @@ DataLink::DataLink() {
 	window = (Frame*) calloc(1, sizeof(Frame)); // 1-sliding window
 	//window = (Frame*) calloc(4, sizeof(Frame)); // 4-sliding window
 	ready = (Frame*) calloc(MAX_READY, sizeof(Frame)); // for frames ready to send
+	numWindow = 0;
+	currWindow = 0;
 	numReady = 0;
 	currReady = 0;
 	nextSend = 0;
@@ -75,6 +82,11 @@ DataLink::DataLink() {
 	pktSend = true;
 	frmError = false;
 	signal(SIGALRM, HandleFrameTimeout);
+	signal(SIGFRCV, HandleFrameArrival);
+	signal(SIGPRCV, HandlePacketArrival);
+	signal(SIGFSND, HandleFrameArrival);
+	signal(SIGPSND, HandlePacketArrival);
+	signal(SIGFERR, HandleFrameError);
 	
 	// make a dummy network layer thread that will make and send packets to the DLL
 }
@@ -93,12 +105,15 @@ void DataLink::GoBack1() {
 	
 	buffer = FromNetworkLayer(buffer);
 	MakeFrames(buffer);
-	cout << "Curr ready is " << currReady+0 << " and num ready is " << numReady+0;
+	//cout << "Curr ready is " << currReady+0 << " and num ready is " << numReady+0;
 	fflush(stdout);
 	ToPhysicalLayer(&(ready[currReady]));
 	StartTimer(0);
 	r->type = ack;
 	while(true) {
+		// for testing
+		numWindow--;
+		// end for testing
 		WaitForEvent(&event);
 		if(event == arrival) {
 			FromPhysicalLayer(r);
@@ -226,16 +241,25 @@ Packet* DataLink::FromNetworkLayer(Packet* p) {
 	return p;
 }
 
-void DataLink::ToNetworkLayer(unsigned char p[]) {
-
+void DataLink::ToNetworkLayer(unsigned char* p) {
+	if(pktArrive) return;
+	Packet* pkt = Packet::Unserialize((char*) p);
+	r_packets[0] = *pkt;
+	pktArrive = true;
+	raise(SIGPRCV);
 }
 
 void DataLink::FromPhysicalLayer(Frame* r) {
-
+	if(!frmArrive) return;
 }
 
 void DataLink::ToPhysicalLayer(Frame* s) {
+	if(numWindow == 1) return; // 1-sliding window
+	//if(numWindow == 4) return; // 4-sliding window
+	window[0] = *s;
 	Packet* p = Packet::Unserialize((char*) s->payload);
+	numWindow++;
+	raise(SIGFSND);
 	/*bool p1type = (p->type+0 == data);
 	cout << "\nPacket is data: " << p1type;
 	cout << "\nPacket sequence number: " << p->seq;
