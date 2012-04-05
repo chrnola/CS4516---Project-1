@@ -2,7 +2,6 @@
 // Author: Chris Pinola
 
 #include "Message.h"
-#include <iostream>
 
 using namespace std;
 

@@ -6,7 +6,6 @@
  */
 
 #include "Packet.h"
-#include "did.h"
 
 Packet::Packet() {
 	// TODO Auto-generated constructor stub
@@ -18,15 +17,15 @@ Packet::~Packet() {
 }
 
 unsigned char* Packet::Serialize(){
-	unsigned char* data = (unsigned char*) calloc(strlen((char*) this.payload) + PACKET_HEAD + 1, sizeof(unsigned char));
-	this.type == ack ? strcat((char*) data, "1") : strcat((char*) data, "0");
-	strcat((char*) data, (char*) Utils::itoa(this.seq));
-	this.end ? strcat((char*) data, "1") : strcat((char*) data, "0");
-	strcat((char*) data, (char*) this.payload);
+	unsigned char* data = (unsigned char*) calloc(strlen((char*) this->payload) + PACKET_HEAD + 1, sizeof(unsigned char));
+	this->type == ack ? strcat((char*) data, "1") : strcat((char*) data, "0");
+	strcat((char*) data, (char*) Utils::itoa(this->seq));
+	this->end ? strcat((char*) data, "1") : strcat((char*) data, "0");
+	strcat((char*) data, (char*) this->payload);
 	return data;
 }
 
-Packet* Packet::UnserializeP(char* d) {
+Packet* Packet::Unserialize(char* d) {
 	Packet* p = new Packet();
 	d[0] == 0 ? p->type = ack : p->type = data;
 	string str(d);

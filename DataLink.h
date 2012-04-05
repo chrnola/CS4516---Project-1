@@ -8,6 +8,9 @@
 #ifndef DATALINK_H_
 #define DATALINK_H_
 
+class Frame;
+class Packet;
+
 #include "did.h"
 
 #define MAX_SEQ 65535

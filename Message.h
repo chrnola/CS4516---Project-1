@@ -4,8 +4,7 @@
 #ifndef ___MESSAGE_H___
 #define ___MESSAGE_H___
 
-#include <string.h>
-#include <stdlib.h>
+#include "did.h"
 
 class Message{
 	private:

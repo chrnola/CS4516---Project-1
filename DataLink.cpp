@@ -159,7 +159,7 @@ void DataLink::MakeFrames(Packet* p) {
 	char* currPacket;
 	Frame* f1 = new Frame(), * f2 = new Frame();
 	
-	currPacket = (char*) DataLink::Serialize(p);
+	currPacket = (char*) p->Serialize();
 	if(strlen(currPacket) <= MAX_FRAME) {
 		f1->payload = (unsigned char*) calloc(strlen(currPacket) + 1, sizeof(unsigned char));
 		strcpy((char*) f1->payload, currPacket);
@@ -222,7 +222,7 @@ void DataLink::FromPhysicalLayer(Frame* r) {
 }
 
 void DataLink::ToPhysicalLayer(Frame* s) {
-	Packet* p = DataLink::UnserializeP((char*) s->payload);
+	Packet* p = Packet::Unserialize((char*) s->payload);
 	bool p1type = (p->type+0 == data);
 	/*cout << "\nPacket is data: " << p1type;
 	cout << "\nPacket sequence number: " << p->seq;

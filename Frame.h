@@ -8,6 +8,8 @@
 #ifndef FRAME_H_
 #define FRAME_H_
 
+#include "did.h"
+
 class Frame {
 public:
 	unsigned char type;
