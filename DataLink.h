@@ -14,6 +14,7 @@
 #define inc(k) if (k < MAX_SEQ) k++; else k = 0;
 #define PACKET_HEAD 4
 #define MAX_FRAME 150
+#define MAX_READY 20
 
 enum Event{arrival, error, timeout, network_ready};
 
@@ -23,9 +24,10 @@ public:
 	virtual ~DataLink();
 	void GoBack1(void);
 	void GoBackN(void);
+	void MakeFrames(Packet* p);
 	void SendData(unsigned int frame_num, unsigned int frame_expect, Packet buffer[]);
 	void WaitForEvent(Event* e);
-	void FromNetworkLayer(Packet* p);
+	Packet* FromNetworkLayer(Packet* p);
 	void ToNetworkLayer(unsigned char p[]);
 	void FromPhysicalLayer(Frame* r);
 	void ToPhysicalLayer(Frame* s);
@@ -37,8 +39,10 @@ public:
 	//static unsigned char* Serialize(Msg* m);
 	static unsigned char* Serialize(Packet* p);
 	//static Msg* UnserializeM(unsigned char d[]);
-	static Packet* UnserializeP(const unsigned char* d);
+	static Packet* UnserializeP(char* d);
 	static unsigned char* itoa(unsigned short n);
+	
+	bool networkReady;
 	
 	// testing variables
 	Packet* s_packets;
@@ -48,6 +52,8 @@ public:
 private:
 	Frame* window;
 	Frame* ready;
+	char numReady, currReady;
+	unsigned short nextSend, frameExpect;
 };
 
 #endif /* DATALINK_H_ */
