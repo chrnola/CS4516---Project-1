@@ -25,11 +25,15 @@ did: did.h Frame.h Packet.h DataLink.h PhysicalLayer.h Message.h Utils.h
 PhysicalLayer.o: PhysicalLayer.cpp did.h
 	g++ -c PhysicalLayer.cpp -Wall
 	
-DLTest: DataLink.cpp Frame.cpp Packet.cpp Message.cpp main.cpp did
-	g++ main.cpp DataLink.cpp Frame.cpp Packet.cpp Message.cpp Utils.cpp -o dltest -g
+ray: DataLink.cpp Frame.cpp Packet.cpp Message.cpp ray.cpp did
+	g++ ray.cpp DataLink.cpp Frame.cpp Packet.cpp Message.cpp Utils.cpp -o test -g
+	
+chris: DataLink.cpp Frame.cpp Packet.cpp Message.cpp chris.cpp did
+	g++ chris.cpp DataLink.cpp Frame.cpp Packet.cpp Message.cpp Utils.cpp -o test -g
+	
+aaron: DataLink.cpp Frame.cpp Packet.cpp Message.cpp aaron.cpp did
+	g++ aaron.cpp DataLink.cpp Frame.cpp Packet.cpp Message.cpp Utils.cpp -o test -g
 
 clean:
-	rm *.o -f
-	rm *~ -f
-	rm *.h.gch -f
-	rm client server -f
+	rm *.o *~ *.h.gch -f
+	rm client server test -f
