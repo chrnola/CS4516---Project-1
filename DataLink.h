@@ -20,7 +20,14 @@ class Packet;
 #define MAX_FRAME 150
 #define MAX_READY 20
 
-enum Event{arrival, error, timeout, network_ready, none};
+// make some of my own signals
+#define SIGPSND 40
+#define SIGFSND 41
+#define SIGFRCV 42
+#define SIGPRCV 43
+#define SIGFERR 44
+
+enum Event{arrival, error, timeout, pktReady, none};
 
 class DataLink {
 public:
@@ -32,7 +39,7 @@ public:
 	void SendData(unsigned int frame_num, unsigned int frame_expect, Packet buffer[]);
 	void WaitForEvent(Event* e);
 	Packet* FromNetworkLayer(Packet* p);
-	void ToNetworkLayer(unsigned char p[]);
+	void ToNetworkLayer(unsigned char* p);
 	void FromPhysicalLayer(Frame* r);
 	void ToPhysicalLayer(Frame* s);
 	void StartTimer(unsigned short k);
@@ -51,7 +58,7 @@ public:
 private:
 	Frame* window;
 	Frame* ready;
-	char numReady, currReady;
+	char numReady, currReady, numWindow, currWindow;
 	unsigned short nextSend, frameExpect;
 };
 
