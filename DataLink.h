@@ -15,7 +15,7 @@
 #define PACKET_HEAD 4
 #define MAX_FRAME 150
 
-typedef enum Event{arrival, error, timeout, network_ready};
+enum Event{arrival, error, timeout, network_ready};
 
 class DataLink {
 public:

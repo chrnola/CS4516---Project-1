@@ -7,7 +7,15 @@
 
 using namespace std;
 
+void testPL();
+
 int main() {
-	cout << "Calling client init code..." << endl;
-	startClient();
+	// cout << "Calling client init code..." << endl;
+	// startClient();
+	testPL();
+
+}
+
+void testPL(){
+	PhysicalLayer pl = PhysicalLayer("localhost");
 }

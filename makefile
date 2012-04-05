@@ -2,26 +2,28 @@
 
 all: client server
 
-client: client.o initClient.o
-	g++ client.o initClient.o -o client
+client: client.o initClient.o PhysicalLayer.o
+	g++ client.o initClient.o PhysicalLayer.o -o client
 
-client.o: client.C did.h
+client.o: client.C did
 	g++ -c client.C
 
-initClient.o: initClient.C did.h
+initClient.o: initClient.C did
 	g++ -c initClient.C
 
-server: server.o db.o
-	g++ -o server server.o db.o -L /usr/local/mysql-current/lib/mysql -lmysqlclient -ldl
+server: server.o PhysicalLayer.o did
+	g++ -o server server.o PhysicalLayer.o did.h PhysicalLayer.h -Wall
 
-server.o: server.C did.h
+server.o: server.C did
 	g++ -c server.C
 
-db.o: db.C did.h
+did: did.h Frame.h Packet.h DataLink.h PhysicalLayer.h
+
+db.o: db.C did
 	g++ -c -I /usr/local/mysql-current/include db.C
 
-PhysicalLayer.o: PhysicalLayer.cpp PhysicalLayer.h
-	g++ -c PhysicalLayer.cpp PhysicalLayer.h
+PhysicalLayer.o: PhysicalLayer.cpp did
+	g++ -c PhysicalLayer.cpp -Wall
 	
 DLTest: DataLink.h DataLink.cpp Frame.cpp Frame.h Packet.h Packet.cpp main.cpp
 	g++ main.cpp DataLink.cpp Frame.cpp Packet.cpp -o test -g
@@ -29,3 +31,5 @@ DLTest: DataLink.h DataLink.cpp Frame.cpp Frame.h Packet.h Packet.cpp main.cpp
 clean:
 	rm *.o -f
 	rm *~ -f
+	rm *.h.gch -f
+	rm client server -f
