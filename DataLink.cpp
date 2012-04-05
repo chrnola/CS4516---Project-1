@@ -9,27 +9,37 @@
 
 using namespace std;
 
-volatile bool pktTimeout, pktArrive, pktError, networkReady;
+volatile bool frmTimeout, frmArrive, pktArrive, frmSend, pktSend, frmError;
 
-void HandleNetworkReady(int sig) {
-	networkReady = true;
-	signal(sig, HandleNetworkReady);
-}
-
-void HandleError(int sig) {
-	pktError = true;
-	signal(sig, HandleError);
-}
-
-void HandleArrival(int sig) {
-	pktArrive = true;
-	signal(sig, HandleArrival);
-}
-
-void HandleTimeout(int sig) {
+void HandleFrameTimeout(int sig) {
 	cout << "Got timeout.\n";
-	pktTimeout = true;
-	signal(sig, HandleTimeout);
+	frmTimeout = true;
+	signal(sig, HandleFrameTimeout);
+}
+
+void HandleFrameArrival(int sig) {
+	frmArrive = true;
+	signal(sig, HandleFrameArrival);
+}
+
+void HandlePacketArrival(int sig) {
+	pktArrive = true;
+	signal(sig, HandlePacketArrival);
+}
+
+void HandleFrameSend(int sig) {
+	frmSend = true;
+	signal(sig, HandleFrameSend);
+}
+
+void HandlePacketSend(int sig) {
+	pktSend = true;
+	signal(sig, HandlePacketSend);
+}
+
+void HandleFrameError(int sig) {
+	frmError = true;
+	signal(sig, HandleFrameError);
 }
 
 DataLink::DataLink() {
@@ -58,11 +68,13 @@ DataLink::DataLink() {
 	p->payload = (unsigned char*) strcpy((char*)p->payload, str);
 	
 	s_packets[0] = *p;
-	networkReady = true;
+	frmTimeout = false;
+	frmArrive = false;
 	pktArrive = false;
-	pktError = false;
-	pktTimeout = false;
-	signal(SIGALRM, HandleTimeout);
+	frmSend = false;
+	pktSend = true;
+	frmError = false;
+	signal(SIGALRM, HandleFrameTimeout);
 	
 	// make a dummy network layer thread that will make and send packets to the DLL
 }
@@ -82,6 +94,7 @@ void DataLink::GoBack1() {
 	buffer = FromNetworkLayer(buffer);
 	MakeFrames(buffer);
 	cout << "Curr ready is " << currReady+0 << " and num ready is " << numReady+0;
+	fflush(stdout);
 	ToPhysicalLayer(&(ready[currReady]));
 	StartTimer(0);
 	r->type = ack;
@@ -98,7 +111,7 @@ void DataLink::GoBack1() {
 				inc(frameExpect);
 			}
 		}
-		if(numReady < MAX_READY - 2 && networkReady) {
+		if(numReady < MAX_READY - 2 && pktSend) {
 			FromNetworkLayer(buffer);
 			MakeFrames(buffer);
 		}
@@ -119,7 +132,7 @@ void DataLink::GoBackN() {
 	while (true) {
 		WaitForEvent(&event);
 		switch (event) {
-		case network_ready:
+		case pktReady:
 			FromNetworkLayer(&buffer[nextSend]);
 			numBuff++;
 			SendData(nextSend, frameExpect, buffer);
@@ -193,23 +206,23 @@ void DataLink::SendData(unsigned int frame_num, unsigned int frame_expect, Packe
 
 void DataLink::WaitForEvent(Event* e) {
 	while(*e == none) {
-		if(pktTimeout) {
+		if(frmTimeout) {
 			*e = timeout;
-			pktTimeout = false;
-		} else if(pktError) {
+			frmTimeout = false;
+		} else if(frmError) {
 			*e = error;
-			pktError = false;
-		} else if(pktArrive) {
+			frmError = false;
+		} else if(frmArrive) {
 			*e = arrival;
-			pktArrive = false;
+			frmArrive = false;
 		}
 	}
 }
 
 Packet* DataLink::FromNetworkLayer(Packet* p) {
-	if(!networkReady) return NULL;
+	if(!pktSend) return NULL;
 	p = &s_packets[0];
-	networkReady = false;
+	pktSend = false;
 	return p;
 }
 
@@ -223,8 +236,8 @@ void DataLink::FromPhysicalLayer(Frame* r) {
 
 void DataLink::ToPhysicalLayer(Frame* s) {
 	Packet* p = Packet::Unserialize((char*) s->payload);
-	bool p1type = (p->type+0 == data);
-	/*cout << "\nPacket is data: " << p1type;
+	/*bool p1type = (p->type+0 == data);
+	cout << "\nPacket is data: " << p1type;
 	cout << "\nPacket sequence number: " << p->seq;
 	cout << "\nPacket is end: " << p->end;
 	cout << "\nPacket message: " << p->payload << "\n";*/
@@ -233,7 +246,8 @@ void DataLink::ToPhysicalLayer(Frame* s) {
 void DataLink::StartTimer(unsigned short k) {
 	struct timeval* tval = (struct timeval*) calloc(1, sizeof(struct timeval));
 	struct timeval* zero = (struct timeval*) calloc(1, sizeof(struct timeval));
-	tval->tv_usec = 500000;
+	// 1 second timeout
+	tval->tv_usec = 50;
 	tval->tv_sec = 0;
 	zero->tv_usec = 0;
 	zero->tv_sec = 0;
