@@ -42,10 +42,11 @@ DataLink::DataLink() {
 	frameExpect = 0;
 	
 	// should only send 1 packet for testing
-	s_packets = (Packet*) calloc(1, sizeof(Packet)); 
+	s_packets = (Packet*) calloc(1, sizeof(Packet));
 	// should only ever receive 1 packet
-	r_packets = (Packet*) calloc(1, sizeof(Packet)); 
-	r_frames = (Frame*) calloc(1, sizeof(Frame)); // receive only one frame
+	r_packets = (Packet*) calloc(1, sizeof(Packet));
+	// receive only one frame
+	r_frames = (Frame*) calloc(1, sizeof(Frame));
 	
 	Packet* p = new Packet();
 	p->type = data;
@@ -194,10 +195,13 @@ void DataLink::WaitForEvent(Event* e) {
 	while(*e == none) {
 		if(pktTimeout) {
 			*e = timeout;
+			pktTimeout = false;
 		} else if(pktError) {
 			*e = error;
+			pktError = false;
 		} else if(pktArrive) {
 			*e = arrival;
+			pktArrive = false;
 		}
 	}
 }
