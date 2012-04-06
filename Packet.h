@@ -15,6 +15,7 @@ public:
 	unsigned char type;
 	unsigned short seq;
 	bool end;
+	unsigned short payloadLength;
 	unsigned char* payload;
 	
 	Packet();

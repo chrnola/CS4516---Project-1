@@ -17,20 +17,23 @@ Packet::~Packet() {
 }
 
 unsigned char* Packet::Serialize(){
-	unsigned char* data = (unsigned char*) calloc(strlen((char*) this->payload) + PACKET_HEAD + 1, sizeof(unsigned char));
-	this->type == ack ? strcat((char*) data, "1") : strcat((char*) data, "0");
-	strcat((char*) data, (char*) Utils::itoa(this->seq));
-	this->end ? strcat((char*) data, "1") : strcat((char*) data, "0");
-	strcat((char*) data, (char*) this->payload);
+	unsigned char* data = (unsigned char*) calloc(this->payloadLength + PACKET_HEAD, sizeof(unsigned char));
+	this->type == ack ? memcpy(data, "1", 1) : memcpy(data, "0", 1);
+	memcpy(data + 1, Utils::itoa(this->seq), 5);
+	this->end ? memcpy(data + 6, "1", 1) : memcpy(data + 6, "0", 1);
+	memcpy(data + 7, Utils::itoa(this->payloadLength), 5);
+	memcpy(data + 12, this->payload, this->payloadLength);
 	return data;
 }
 
 Packet* Packet::Unserialize(char* d) {
+	cout << "Got a string to unserialize: " << d;
 	Packet* p = new Packet();
 	d[0] == 0 ? p->type = ack : p->type = data;
 	string str(d);
 	p->seq = (unsigned short) atoi(str.substr(1,5).c_str());
 	d[6] == 0 ? p->end = false : p-> end = true;
-	p->payload = (unsigned char*) str.substr(7,str.size()).c_str();
+	p->payloadLength = (unsigned short) atoi(str.substr(7,5).c_str());
+	p->payload = (unsigned char*) str.substr(12,str.size()).c_str();
 	return p;
 }
