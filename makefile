@@ -17,7 +17,7 @@ server: server.o PhysicalLayer.o db.o
 server.o: server.cpp did.h
 	g++ -c server.cpp
 
-db.o: db.cpp did.h
+db.o: db.cpp did
 	g++ -c -I /usr/local/mysql-current/include db.cpp
 
 did: did.h Frame.h Packet.h DataLink.h PhysicalLayer.h Message.h Utils.h
@@ -28,8 +28,14 @@ PhysicalLayer.o: PhysicalLayer.cpp did.h
 ray: DataLink.cpp Frame.cpp Packet.cpp Message.cpp ray.cpp did
 	g++ ray.cpp DataLink.cpp Frame.cpp Packet.cpp Message.cpp Utils.cpp -o test -g
 	
-chris: DataLink.cpp Frame.cpp Packet.cpp Message.cpp chris.cpp did
-	g++ chris.cpp DataLink.cpp Frame.cpp Packet.cpp Message.cpp Utils.cpp -o test -g
+chris: db.o Message.o chris.o did
+	g++ chris.o db.o Message.o Utils.cpp -o chris -g -L /usr/local/mysql-current/lib/mysql -lmysqlclient -ldl
+	
+chris.o: chris.cpp
+	g++ -c chris.cpp
+	
+Message.o: Message.cpp did
+	g++ -c Message.cpp
 	
 aaron: DataLink.cpp Frame.cpp Packet.cpp Message.cpp aaron.cpp did
 	g++ aaron.cpp DataLink.cpp Frame.cpp Packet.cpp Message.cpp Utils.cpp -o test -g

@@ -9,8 +9,10 @@
 // don't want to expose them to everyone else
 int getRowCountTbl(const char*);
 bool removeFromTableWhereCol(const char *table, const char *col, const char *id);
+char *getPhoto(const char *id, unsigned long *fsize, const char *q1);
+bool addPhoto(const char *id, char *file, long fileSize, const char *q1, const char *q2);
 
-//the global MySQL connection object that will be used for all
+// the global MySQL connection object that will be used for all
 // transactions. decided to keep it here so the server code won't
 // have to worry about maintaining the connection object!
 MYSQL mysql;
@@ -677,4 +679,109 @@ bool queryAdmin(const char *first, const char *last){
 	}
 	mysql_free_result(res);
 	return false; //error
+}
+
+char *getPhotoPublic(const char *id, unsigned long *fsize){
+	return getPhoto(id, fsize, "SELECT photo FROM public WHERE id =\'");
+}
+
+char *getPhotoAdmin(const char *id, unsigned long *fsize){
+	return getPhoto(id, fsize, "SELECT photo FROM admin WHERE personID =\'");
+}
+
+char *getPhoto(const char *id, unsigned long *fsize, const char *q1){
+	// ensures the connection to the server is still active, attempts to
+	// reconnect if its not
+	if(mysql_ping(&mysql)){
+		return "Error"; //connection couldn't be re-established
+	}
+	
+	char *qry, *cleanID;
+	char *q2 = "\'";
+	
+	cleanID = (char *) calloc((2 * strlen(id)) + 1, sizeof(char));
+	mysql_real_escape_string(&mysql, cleanID, id, strlen(id));
+	
+	int size = 1;
+	size += strlen(q1) + strlen(cleanID) + strlen(q2);
+	
+	qry = (char *) calloc(size, sizeof(char));
+	
+	strcpy(qry, q1); strcat(qry, cleanID); strcat(qry, q2);
+	
+	free(cleanID);
+	
+	// issue the query statement to the server
+	if(mysql_query(&mysql, qry) != 0){
+		free(qry);
+		cerr << mysql_error(&mysql) << endl;
+		return false;
+	}
+	
+	free(qry);
+	
+	MYSQL_RES *result = mysql_store_result(&mysql);
+	MYSQL_ROW row = mysql_fetch_row(result);
+	unsigned long *lengths = mysql_fetch_lengths(result);
+	
+	mysql_free_result(result);
+	
+	*fsize = lengths[0];
+	return row[0];
+	
+	return "error";
+}
+
+bool addPhotoPublic(const char *id, char *file, long fileSize){
+	return addPhoto(id, file, fileSize, "UPDATE public SET photo=\'", "\' WHERE id=\'");
+}
+
+bool addPhotoAdmin(const char *id, char *file, long fileSize){
+	return addPhoto(id, file, fileSize, "UPDATE admin SET photo=\'", "\' WHERE personID=\'");
+}
+
+bool addPhoto(const char *id, char *file, long fileSize, const char *q1, const char *q2){
+	// ensures the connection to the server is still active, attempts to
+	// reconnect if its not
+	if(mysql_ping(&mysql)){
+		return false; //connection couldn't be re-established
+	}
+	
+	char *qry, *cleanId, *cleanImg;
+	
+	char *q3 = "\'";
+	
+	cleanId = (char *) calloc((2 * strlen(id)) + 1, sizeof(char));
+	cleanImg = (char *) calloc((2 * fileSize) + 1, sizeof(char));
+	
+	mysql_real_escape_string(&mysql, cleanImg, file, fileSize);
+	mysql_real_escape_string(&mysql, cleanId, id, strlen(id));
+	
+	int size = 1;
+	size += strlen(q1) + strlen(q2) + strlen(q3);
+	size += strlen(cleanId) + strlen(cleanImg);
+	
+	qry = (char *) calloc(size, sizeof(char));
+	
+	strcpy(qry, q1); strcat(qry, cleanImg); strcat(qry, q2);
+	strcat(qry, cleanId); strcat(qry, q3);
+	
+	free(cleanId); free(cleanImg);
+	
+	// issue the query statement to the server
+	if(mysql_real_query(&mysql, qry, strlen(qry)) != 0){
+		free(qry);
+		cerr << mysql_error(&mysql) << endl;
+		return false;
+	}
+	
+	free(qry);
+	
+	if(mysql_store_result(&mysql) == 0 &&
+	 mysql_field_count(&mysql) == 0 &&
+	 (unsigned long) mysql_affected_rows(&mysql) == 1){
+		return true;
+	}
+	cerr << "default" << endl;
+	return false;
 }

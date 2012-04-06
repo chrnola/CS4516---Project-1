@@ -26,6 +26,16 @@ void Message::setContent(char *_content){
 	content = reinterpret_cast<unsigned char*>(_content);
 }
 
+void Message::setImg(char *img, long size){
+	content = (unsigned char*) calloc(size, sizeof(unsigned char));
+	memcpy(content, reinterpret_cast<unsigned char*>(img), size);
+	this->contentSize = size;
+}
+
+long Message::getContentSize(){
+	return this->contentSize;
+}
+
 //Returns cmd converted back to a regular char*
 char *Message::getCmd(){
 	return reinterpret_cast<char*>(cmd);
@@ -44,6 +54,16 @@ unsigned char *Message::getCmdRaw(){
 //Same thing, but for content
 unsigned char *Message::getContentRaw(){
 	return content;
+}
+
+unsigned char *Message::serialize(){
+	unsigned char *data = (unsigned char*) calloc(strlen((char *) this), sizeof(unsigned char));
+	strcat((char *) data, (char *) this);
+	return data;
+}
+
+Message* Message::unserialize(unsigned char *pkt){
+	return (Message *) pkt;
 }
 
 Message::~Message(){

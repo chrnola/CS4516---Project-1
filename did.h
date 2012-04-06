@@ -61,4 +61,12 @@ bool newUser(const char *username, const char *password);
 
 bool changePassword(const char *username, const char *oldPass, const char *newPass);
 
+bool addPhotoPublic(const char *id, char *file, long fileSize);
+
+bool addPhotoAdmin(const char *id, char *file, long fileSize);
+
+char *getPhotoAdmin(const char *id, unsigned long *fsize);
+
+char *getPhotoPublic(const char *id, unsigned long *fsize);
+
 #endif

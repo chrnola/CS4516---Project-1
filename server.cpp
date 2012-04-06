@@ -1,4 +1,4 @@
-//server.C
+//server.cpp
 
 #include <iostream>
 #include <netinet/in.h>		// For sockadd_in
