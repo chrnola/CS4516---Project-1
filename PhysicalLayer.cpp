@@ -71,10 +71,15 @@ PhysicalLayer::PhysicalLayer(int sockfd) {
 // Should send out any frames received from DL, and pass up any frames received.
 // Placeholder tester code for now.
 void PhysicalLayer::run(){
-	for(int i = 0; i < 5; i++){
-		cout << "Thread B!" << endl;
-		sleep(1);
+	while(true){
+		if(!pthread_mutex_trylock(&mutSF)){
+			if(!sendFrames.empty()){
+				SendAFrame();
+			}
+		}
+		ReceiveFrames();
 	}
+
 	/*
 	int i = 3;
 	sleep(1);
@@ -82,6 +87,37 @@ void PhysicalLayer::run(){
 	i = 2;
 	recv(sockfd, &i, 4, 0);
 	cout << "Frame received! i=" << i << endl; /**/
+}
+
+// Assumes it has a mutex on mutSF.
+// Sends 1 frame from sendFrames out on the wire.
+void PhysicalLayer::SendAFrame(){
+	Frame *theFrame = sendFrames.front;
+	sendFrames.pop();
+	pthread_mutex_unlock(mutSF);
+
+	char *cereal = theFrame->Serialize();
+	int len = theFrame->payloadLength + FRAME_HEAD;
+	cereal = FoldSerializedFrame(cereal, len);
+	len += 2;
+
+	if(send(sockfd, cereal, len, 0) != len){
+		cout << "Crap! Couldn't send the whole frame" << endl;
+	}
+}
+
+
+// Checks if a frame is waiting on the wire. Validates it and sends it on up.
+void ReceiveFrames(){
+	int len = MAX_FRAME + FRAME_HEAD + FRAME_TAIL;
+	char *incoming = (char *) malloc(len);
+	int recvd = recv(sockfd, (void*)incoming, len, 0);
+	if(FrameValid(incoming, recvd)){
+		Frame *result = Unserialize(incoming);
+		pthread_mutex_lock(&mutRF);
+		recvFrames.push(result);
+		pthread_mutex_unlock(&mutRF);
+	}
 }
 
 // NB: sFrame may no longer be valid!

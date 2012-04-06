@@ -12,6 +12,9 @@ using namespace std;
 volatile bool frmTimeout, frmArrive, pktArrive, frmSend, pktSend, frmError;
 pthread_mutex_t mutTime, mutFArv, mutPArv, mutFSnd, mutPSnd, mutFErr;
 
+/*
+ * Author: Ray Short
+ */
 void HandleFrameTimeout(int sig) {
 	cout << "Got timeout.\n";
 	pthread_mutex_lock(&mutTime);
@@ -20,6 +23,9 @@ void HandleFrameTimeout(int sig) {
 	signal(sig, HandleFrameTimeout);
 }
 
+/*
+ * Author: Ray Short
+ */
 void HandleFrameArrival(int sig) {
 	cout << "Frame arrive.\n";
 	pthread_mutex_lock(&mutFArv);
@@ -28,6 +34,9 @@ void HandleFrameArrival(int sig) {
 	signal(sig, HandleFrameArrival);
 }
 
+/*
+ * Author: Ray Short
+ */
 void HandlePacketArrival(int sig) {
 	cout << "Packet arrive.\n";
 	pthread_mutex_lock(&mutPArv);
@@ -36,6 +45,9 @@ void HandlePacketArrival(int sig) {
 	signal(sig, HandlePacketArrival);
 }
 
+/*
+ * Author: Ray Short
+ */
 void HandleFrameSend(int sig) {
 	cout << "Frame send.\n";
 	pthread_mutex_lock(&mutFSnd);
@@ -44,6 +56,9 @@ void HandleFrameSend(int sig) {
 	signal(sig, HandleFrameSend);
 }
 
+/*
+ * Author: Ray Short
+ */
 void HandlePacketSend(int sig) {
 	cout << "Packet send.\n";
 	pthread_mutex_lock(&mutPSnd);
@@ -52,6 +67,9 @@ void HandlePacketSend(int sig) {
 	signal(sig, HandlePacketSend);
 }
 
+/*
+ * Author: Ray Short
+ */
 void HandleFrameError(int sig) {
 	cout << "Frame error.\n";
 	pthread_mutex_lock(&mutFErr);
@@ -60,6 +78,9 @@ void HandleFrameError(int sig) {
 	signal(sig, HandleFrameError);
 }
 
+/*
+ * Author: Ray Short
+ */
 DataLink::DataLink() {
 	window = (Frame**) calloc(1, sizeof(Frame*)); // 1-sliding window
 	//window = (Frame**) calloc(4, sizeof(Frame*)); // 4-sliding window
@@ -108,11 +129,17 @@ DataLink::DataLink() {
 	// make a dummy network layer thread that will make and send packets to the DLL
 }
 
+/*
+ * Author: Ray Short
+ */
 DataLink::~DataLink() {
 	free(window);
 	free(ready);
 }
 
+/*
+ * Author: Ray Short
+ */
 void DataLink::GoBack1() {
 	Frame* r = new Frame(), * s = new Frame();
 	Packet* buffer = (Packet*) calloc(1, sizeof(Packet));
@@ -140,7 +167,7 @@ void DataLink::GoBack1() {
 			if(r->type == ack) {
 				if(currReady < MAX_READY) currReady++; else currReady = 0;
 				numReady--;
-				if(numReady < MAX_READY - 2) EnableNetworkLayer();
+				//if(numReady < MAX_READY - 2) EnableNetworkLayer();
 				pthread_mutex_lock(&mutRF);
 				Frame* f = recvFrames.front();
 				recvFrames.pop();
@@ -170,6 +197,9 @@ void DataLink::GoBack1() {
 	}
 }
 
+/*
+ * Author: Ray Short
+ */
 void DataLink::GoBackN() {
   /*unsigned short ackExpect = 0;
 	Frame r;
@@ -215,6 +245,9 @@ void DataLink::GoBackN() {
 	}*/
 }
 
+/*
+ * Author: Ray Short
+ */
 void DataLink::MakeFrames(Packet* p) {
 	if(p == NULL) return;
 	unsigned char* currPacket;
@@ -252,13 +285,19 @@ void DataLink::MakeFrames(Packet* p) {
 		ready[numReady] = f2;
 		numReady++;
 	}
-	if(numReady > MAX_READY - 2) DisableNetworkLayer();
+	//if(numReady > MAX_READY - 2) DisableNetworkLayer();
 }
 
+/*
+ * Author: Ray Short
+ */
 void DataLink::SendData(unsigned int frame_num, unsigned int frame_expect, Packet buffer[]) {
 
 }
 
+/*
+ * Author: Ray Short
+ */
 Event* DataLink::WaitForEvent(Event* e) {
 	while(*e == none) {
 		if(frmTimeout) {
@@ -274,6 +313,9 @@ Event* DataLink::WaitForEvent(Event* e) {
 	return e;
 }
 
+/*
+ * Author: Ray Short
+ */
 Packet* DataLink::FromNetworkLayer(Packet* p) {
 	if(!pktSend) return NULL;
 	pthread_mutex_lock(&mutSP);
@@ -284,6 +326,9 @@ Packet* DataLink::FromNetworkLayer(Packet* p) {
 	return p;
 }
 
+/*
+ * Author: Ray Short
+ */
 void DataLink::ToNetworkLayer() {
 	if(pktArrive) return;
 	Packet* pkt = (Packet*) calloc(1, sizeof(Packet));
@@ -313,6 +358,9 @@ void DataLink::ToNetworkLayer() {
 	raise(SIGPRCV);
 }
 
+/*
+ * Author: Ray Short
+ */
 Frame* DataLink::FromPhysicalLayer(Frame* r) {
 	if(!frmArrive) return NULL;
 	pthread_mutex_lock(&mutRF);
@@ -322,6 +370,9 @@ Frame* DataLink::FromPhysicalLayer(Frame* r) {
 	return r;
 }
 
+/*
+ * Author: Ray Short
+ */
 void DataLink::ToPhysicalLayer(Frame* s) {
 	if(numWindow == 1) return; // 1-sliding window
 	//if(numWindow == 4) return; // 4-sliding window
@@ -341,6 +392,9 @@ void DataLink::ToPhysicalLayer(Frame* s) {
 	cout << "\nPacket message: " << p->payload << "\n";*/
 }
 
+/*
+ * Author: Ray Short
+ */
 void DataLink::StartTimer(unsigned short k) {
 	struct timeval* tval = (struct timeval*) calloc(1, sizeof(struct timeval));
 	struct timeval* zero = (struct timeval*) calloc(1, sizeof(struct timeval));
@@ -355,6 +409,9 @@ void DataLink::StartTimer(unsigned short k) {
 	setitimer(ITIMER_REAL, timerval, NULL);
 }
 
+/*
+ * Author: Ray Short
+ */
 void DataLink::StopTimer(unsigned short k) {
 	struct timeval* zero = (struct timeval*) calloc(1, sizeof(struct timeval));
 	zero->tv_usec = 0;
@@ -363,12 +420,4 @@ void DataLink::StopTimer(unsigned short k) {
 	timerval->it_value = *zero;
 	timerval->it_interval = *zero;
 	setitimer(ITIMER_REAL, timerval, NULL);
-}
-
-void DataLink::EnableNetworkLayer(void) {
-
-}
-
-void DataLink::DisableNetworkLayer(void) {
-
 }

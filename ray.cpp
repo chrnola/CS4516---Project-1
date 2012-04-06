@@ -4,6 +4,9 @@ queue<Packet*> sendPackets, recvPackets;
 queue<Frame*> sendFrames, recvFrames;
 pthread_mutex_t mutSP, mutRP, mutSF, mutRF;
 
+/*
+ * Author: Ray Short
+ */
 int main(void) {
 	Packet* p = new Packet();
 	p->type = data;
