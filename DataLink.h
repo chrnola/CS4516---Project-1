@@ -32,7 +32,7 @@ public:
 	void SendData(unsigned int frame_num, unsigned int frame_expect, Packet buffer[]);
 	void WaitForEvent(Event* e);
 	Packet* FromNetworkLayer(Packet* p);
-	void ToNetworkLayer(unsigned char* p);
+	void ToNetworkLayer(void);
 	void FromPhysicalLayer(Frame* r);
 	void ToPhysicalLayer(Frame* s);
 	void StartTimer(unsigned short k);
@@ -40,17 +40,14 @@ public:
 	void EnableNetworkLayer(void);
 	void DisableNetworkLayer(void);
 	
-
-	//void HandleTimeout(int sig);
-	
 	// testing variables
-	Packet* s_packets;
-	Packet* r_packets;
-	Frame* r_frames;
+	Packet** s_packets;
+	Packet** r_packets;
+	Frame** r_frames;
 	
 private:
-	Frame* window;
-	Frame* ready;
+	Frame** window;
+	Frame** ready;
 	char numReady, currReady, numWindow, currWindow;
 	unsigned short nextSend, frameExpect;
 };
