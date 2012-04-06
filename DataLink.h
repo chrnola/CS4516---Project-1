@@ -13,6 +13,8 @@ class Packet;
 
 #include "did.h"
 
+#define MAX_READY 20
+
 // make some of my own signals
 #define SIGPSND 40
 #define SIGFSND 41
