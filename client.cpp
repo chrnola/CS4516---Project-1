@@ -3,6 +3,7 @@
  */
 
 #include "did.h"
+#include <unistd.h>
 
 using namespace std;
 
@@ -23,8 +24,12 @@ void testPL();
 struct timeval* start, * end;
 
 int main(int argc, char **argv) {
+<<<<<<< HEAD
+	//testPL();
+=======
 	gettimeofday(start, NULL);
 	// testPL();
+>>>>>>> eac6d30e3f80fddbe2d356983bb99e58e0e64a8a
 	
 	// init lower leves, spawn threads, etc
 	// once connected on well known port...	
