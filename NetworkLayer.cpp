@@ -46,18 +46,19 @@ void NetworkLayer::FromApplicationLayer(Message *m){
 		p->payloadLength = (unsigned short) leftover;
 	}
 	
-	//p.payloadLength
 }
 
 void NetworkLayer::ToApplicationLayer(unsigned char *message){
-	
+	Message *m = unserialize(message);
+	//to app layer?
 }
 
 void NetworkLayer::ToDataLinkLayer(Packet *p){
 	//to DL shared buffer
 }
 
-void NetworkLayer::FromDataLinkLayer(unsigned char *p){
+void NetworkLayer::FromDataLinkLayer(Packet *p){
 	//get from shared buffer
+	//reconstruct
 }
 
