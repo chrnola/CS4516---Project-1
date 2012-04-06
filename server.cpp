@@ -91,6 +91,9 @@ void handlePacket(Message *m){
 				m->setCmd((char *) newID);
 			}
 			nl -> FromApplicationLayer(m);
+		} else if(strcmp(argvNew[0], "login") == 0){
+			m->setCmd();
+			nl -> FromApplicationLayer(m);
 		} else{
 			cerr << "Server received unrecognized command?" << endl;
 		}
