@@ -20,8 +20,10 @@ void quit();
 
 void testPL();
 
+struct timeval* start, * end;
 
 int main(int argc, char **argv) {
+	gettimeofday(start, NULL);
 	// testPL();
 	
 	// init lower leves, spawn threads, etc
