@@ -113,7 +113,25 @@ void startPrompt(){
 		
 		argvNew[i] = NULL;
 		
-		if(strcmp(argvNew[0], "quit") == 0){
+		if(strcmp(argvNew[0], "help") == 0){
+			cout << "*addbodyphoto" << endl;
+			cout << "addphoto" << endl;
+			cout << "*adduser" << endl;
+			cout << "*createbody" << endl;
+			cout << "createmissing" << endl;
+			cout << "*dlmissingphoto" << endl;
+			cout << "help" << endl;
+			cout << "*id" << endl;
+			cout << "locations" << endl;
+			cout << "login" << endl;
+			cout << "*password" << endl;
+			cout << "*removebody" << endl;
+			cout << "*removemissing" << endl;
+			cout << "query" << endl;
+			cout << "quit" << endl;
+			cout << endl;
+			cout << "* commands require login first" << endl;
+		} else if(strcmp(argvNew[0], "quit") == 0){
 			cout << "Bye!" << endl;
 			quit();
 		} else if(strcmp(argvNew[0], "locations") == 0){
