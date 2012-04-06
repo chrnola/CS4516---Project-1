@@ -28,7 +28,6 @@ int main(int argc, char **argv) {
 	start = (struct timeval*) calloc(1, sizeof(struct timeval));
 	end = (struct timeval*) calloc(1, sizeof(struct timeval));
 	gettimeofday(start, NULL);
-
 	
 	// init lower leves, spawn threads, etc
 	// once connected on well known port...	
@@ -139,6 +138,8 @@ void startPrompt(){
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
 					//TODO: wait for response, display it
+					
+					free(cmd);
 				}
 			} else{
 				cout << "Error: createmissing expects firstName lastName lastKnownLocation" << endl;
@@ -156,6 +157,8 @@ void startPrompt(){
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
 					//TODO: wait for response, display it
+					
+					free(cmd);
 				}
 			} else{
 				cout << "Error: login expects username password" << endl;
@@ -174,6 +177,8 @@ void startPrompt(){
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
 					//TODO: wait for response, display it
+					
+					free(cmd);
 				}
 			} else{
 				cout << "Error: query expects firstName lastName" << endl;
@@ -192,6 +197,8 @@ void startPrompt(){
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
 					//TODO: wait for response, display it
+					
+					free(cmd);
 				}
 			 } else{
 				cout << "Error: adduser expects username password" << endl;
@@ -212,6 +219,8 @@ void startPrompt(){
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
 					//TODO: wait for response, display it
+					
+					free(cmd);
 				}
 			} else{
 				cout << "Error: id expects id firstName lastName" << endl;
@@ -230,6 +239,8 @@ void startPrompt(){
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
 					//TODO: wait for response, display it
+					
+					free(cmd);
 				}
 			} else{
 				cout << "Error: password expects oldPassword newPassword" << endl;
@@ -245,6 +256,8 @@ void startPrompt(){
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
 					//TODO: wait for response, display it
+					
+					free(cmd);
 				}
 			} else{
 				cout << "Error: removemissing expects id" << endl;
@@ -260,6 +273,8 @@ void startPrompt(){
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
 					//TODO: wait for response, display it
+					
+					free(cmd);
 				}
 			} else{
 				cout << "Error: removebody expects id" << endl;
@@ -281,6 +296,8 @@ void startPrompt(){
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
 					//TODO: wait for response, display it
+					
+					free(cmd);
 				}
 			} else if((argvNew[1] != NULL) && (argvNew[2] != NULL)){
 				if(checkLength(argvNew[1], MAX_ID) && checkLength(argvNew[2], MAX_LOCATION)) {
@@ -294,6 +311,8 @@ void startPrompt(){
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
 					//TODO: wait for response, display it
+					
+					free(cmd);
 				}
 			} else{
 				cout << "Error: createbody expects id location [firstName lastName]" << endl;
@@ -327,6 +346,7 @@ void startPrompt(){
 					} else{
 						cout << "Unable to load file!" << endl;
 					}
+					free(cmd);
 				}
 			} else{
 				if(strcmp(argvNew[0], "addphoto") == 0){
@@ -346,6 +366,7 @@ void startPrompt(){
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
 					//TODO: wait for response, display it
+					free(cmd);
 					Message *resp = new Message(); //fromLower
 					long newSize = resp->getContentSize();
 					char *newImg = (char *) calloc(newSize, sizeof(char));
