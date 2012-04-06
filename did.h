@@ -18,6 +18,14 @@
 #include "Message.h"
 
 #define WELL_KNOWN_PORT 2777 //Why not?
+#define PACKET_HEAD 4
+#define FRAME_HEAD 4
+#define MAX_FRAME 150
+#define MAX_PACKET 256
+#define MAX_READY 20
+#define MAX_SEQ 65535
+
+#define inc(k) if (k < MAX_SEQ) k++; else k = 0;
 
 enum Type{data, ack};
 

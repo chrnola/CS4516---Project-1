@@ -8,9 +8,11 @@ class NetworkLayer {
 		NetworkLayer();
 		virtual ~NetworkLayer();
 		
-		static unsigned char *Serialize(Message *m);
-		static Message *Unserialize(const unsigned char *d);
+		//static unsigned char *Serialize(Message *m);
+		//static Message *Unserialize(const unsigned char *d);
 		void ToDataLinkLayer(Packet *p);
 		void FromDataLinkLayer(unsigned char *p);
+		void FromApplicationLayer(Message *m);
+		void ToApplicationLayer(unsigned char *message);
 		//void ToApplicationLayer(
 };
