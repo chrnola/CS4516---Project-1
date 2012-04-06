@@ -71,7 +71,7 @@ DataLink::DataLink() {
 	nextSend = 0;
 	frameExpect = 0;
 		
-	Packet* p = new Packet();
+	/*Packet* p = new Packet();
 	p->type = data;
 	p->seq = 30;
 	p->end = true;
@@ -84,7 +84,7 @@ DataLink::DataLink() {
 	pthread_mutex_lock(&mutSP);
 	sendPackets.push(p);
 	//sendPackets.front()->Print();
-	pthread_mutex_unlock(&mutSP);
+	pthread_mutex_unlock(&mutSP);*/
 	frmTimeout = false;
 	frmArrive = false;
 	pktArrive = false;
@@ -163,7 +163,7 @@ void DataLink::GoBack1() {
 		}
 		//cout << "Curr ready is " << currReady+0 << " and num ready is " << numReady+0;
 		numReady--;
-		if(numReady == 0) exit(0);
+		if(numReady == 0) return;
 		currReady++;
 		ToPhysicalLayer(ready[currReady]);
 		StartTimer(0);
@@ -308,7 +308,7 @@ void DataLink::ToNetworkLayer() {
 	pthread_mutex_lock(&mutRP);
 	recvPackets.push(pkt);
 	pthread_mutex_unlock(&mutRP);
-	pkt->Print();
+	//pkt->Print();
 	pktArrive = true;
 	raise(SIGPRCV);
 }
