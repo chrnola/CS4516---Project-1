@@ -8,12 +8,17 @@
 #include "Frame.h"
 
 Frame::Frame() {
-	// TODO Auto-generated constructor stub
-
 }
 
 Frame::~Frame() {
-	// TODO Auto-generated destructor stub
+}
+
+void Frame::Print() {
+	cout << "\nFrame is data: " << (this->type+0 == data);
+	cout << "\nFrame sequence number: " << this->seq;
+	cout << "\nFrame is end: " << this->end;
+	cout << "\nFrame payload length is: " << this->payloadLength;
+	cout << "\nFrame message: " << this->payload << "\n";
 }
 
 unsigned char* Frame::Serialize() {

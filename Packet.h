@@ -20,7 +20,8 @@ public:
 	
 	Packet();
 	virtual ~Packet();
-	unsigned char *Serialize();
+	void Print(void);
+	unsigned char *Serialize(void);
 	static Packet* Unserialize(char* d);
 };
 

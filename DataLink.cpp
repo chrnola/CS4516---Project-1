@@ -126,11 +126,12 @@ void DataLink::GoBack1() {
 	
 	buffer = FromNetworkLayer(buffer);
 	MakeFrames(buffer);
-	cout << "Curr ready is " << currReady+0 << " and num ready is " << numReady+0;
-	fflush(stdout);
+	//cout << "Curr ready is " << currReady+0 << " and num ready is " << numReady+0;
+	//fflush(stdout);
 	ToPhysicalLayer(ready[currReady]);
 	StartTimer(0);
 	r->type = ack;
+	event = arrival;
 	while(true) {
 		// for testing
 		numWindow--;
@@ -138,23 +139,31 @@ void DataLink::GoBack1() {
 		WaitForEvent(&event);
 		if(event == arrival) {
 			FromPhysicalLayer(r);
-			if(r->type == ack) {
+			cout << "Frame seq:expected " << r->seq << ":" << frameExpect << ", " << (r->seq == frameExpect);
+			if(r->type+0 == ack) {
+				cout << "This is an ack somehow";
+				r->Print();
 				if(currReady < MAX_READY) currReady++; else currReady = 0;
 				numReady--;
 				if(numReady < MAX_READY - 2) EnableNetworkLayer();
 				Frame* f = r_frames[0];
 				r_frames[0] = NULL;
+				StopTimer(0);
 				free(f);
 			} else if(r->seq == frameExpect) {
+				cout << "Past logical test\n";
 				if(r->end == false) {
+					cout << "First frame of 2\n";
 					*(r_frames[1]) = *(r_frames[0]);
 					r_frames[0] = NULL;
 				} else {
+					cout << "Have frames\n";
 					ToNetworkLayer();
 				}
 				inc(frameExpect);
 			}
 		}
+		event = none;
 		if(numReady < MAX_READY - 2 && pktSend) {
 			FromNetworkLayer(buffer);
 			MakeFrames(buffer);
@@ -221,6 +230,7 @@ void DataLink::MakeFrames(Packet* p) {
 	if(pktLen <= MAX_FRAME) {
 		f1->payload = (unsigned char*) calloc(pktLen, sizeof(unsigned char));
 		memcpy(f1->payload, currPacket, pktLen);
+		f1->type = data;
 		f1->seq = nextSend;
 		f1->payloadLength = pktLen;
 		f1->end = true;
@@ -231,6 +241,7 @@ void DataLink::MakeFrames(Packet* p) {
 		f1->payload = (unsigned char*) calloc(MAX_FRAME, sizeof(unsigned char));
 		f2->payload = (unsigned char*) calloc(pktLen - MAX_FRAME, sizeof(unsigned char));
 		memcpy(f1->payload, currPacket, MAX_FRAME);
+		f1->type = data;
 		f1->seq = nextSend;
 		f1->payloadLength = MAX_FRAME;
 		f1->end = false;
@@ -238,6 +249,7 @@ void DataLink::MakeFrames(Packet* p) {
 		ready[numReady] = f1;
 		numReady++;
 		memcpy(f2->payload, currPacket + MAX_FRAME, pktLen - MAX_FRAME + 8);
+		f2->type = data;
 		f2->seq = nextSend;
 		f2->payloadLength = pktLen - MAX_FRAME;
 		f2->end = true;
@@ -262,7 +274,6 @@ void DataLink::WaitForEvent(Event* e) {
 			frmError = false;
 		} else if(frmArrive) {
 			*e = arrival;
-			frmArrive = false;
 		}
 	}
 }
@@ -304,13 +315,16 @@ void DataLink::ToPhysicalLayer(Frame* s) {
 	if(numWindow == 1) return; // 1-sliding window
 	//if(numWindow == 4) return; // 4-sliding window
 	window[0] = s;
-	Packet* p = Packet::Unserialize((char*) s->payload);
 	numWindow++;
 	raise(SIGFSND);
-	/*bool p1type = (p->type+0 == data);
+	r_frames[0] = s;
+	raise(SIGFRCV);
+	/*Packet* p = Packet::Unserialize((char*) s->payload);
+	bool p1type = (p->type+0 == data);
 	cout << "\nPacket is data: " << p1type;
 	cout << "\nPacket sequence number: " << p->seq;
 	cout << "\nPacket is end: " << p->end;
+	cout << "\nPacket payload length is: " << p->payloadLength;
 	cout << "\nPacket message: " << p->payload << "\n";*/
 }
 

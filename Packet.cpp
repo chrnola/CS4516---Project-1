@@ -8,12 +8,17 @@
 #include "Packet.h"
 
 Packet::Packet() {
-	// TODO Auto-generated constructor stub
-
 }
 
 Packet::~Packet() {
-	// TODO Auto-generated destructor stub
+}
+
+void Packet::Print() {
+	cout << "\nPacket is data: " << (this->type+0 == data);
+	cout << "\nPacket sequence number: " << this->seq;
+	cout << "\nPacket is end: " << this->end;
+	cout << "\nPacket payload length is: " << this->payloadLength;
+	cout << "\nPacket message: " << this->payload << "\n";
 }
 
 unsigned char* Packet::Serialize(){
