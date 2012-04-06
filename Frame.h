@@ -15,11 +15,13 @@ public:
 	unsigned char type;
 	unsigned short seq;
 	bool end;
+	unsigned short payloadLength;
 	unsigned char* payload;
 
 	Frame();
 	virtual ~Frame();
-	unsigned char* Serialize();
+	void Print(void);
+	unsigned char* Serialize(void);
 	static Frame* Unserialize(char* d);
 };
 
