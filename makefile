@@ -24,7 +24,7 @@ Utils.o: Utils.cpp did
 	g++ -c Utils.cpp
 
 server: server.o PhysicalLayer.o db.o
-	g++ -o server server.o PhysicalLayer.o db.o -Wall -L /usr/local/mysql-current/lib/mysql -lmysqlclient -ldl
+	g++ -o server server.o PhysicalLayer.o db.o -Wall -pthread -L /usr/local/mysql-current/lib/mysql -lmysqlclient -ldl
 
 server.o: server.cpp did.h
 	g++ -c server.cpp

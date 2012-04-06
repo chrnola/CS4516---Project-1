@@ -19,6 +19,7 @@
 
 using namespace std;
 
+extern Packet **sendPackets;
 
 // Constructor called by client. It connects to the well-known port of the server,
 // then passes control to the general physical layer code.
@@ -57,29 +58,32 @@ PhysicalLayer::PhysicalLayer(const char *hostname) {
 		cerr << "Couldn't connect() to host." << endl;
 		exit(EXIT_FAILURE);
 	}
-
-	// sockfd is set and valid, so pass control to the main code
-	run();
-
 }
+
 
 // Constructor called by server. sockfd is already connected with the client,
 // so just passes control to the general physical layer code.
 PhysicalLayer::PhysicalLayer(int sockfd) {
 	PhysicalLayer::sockfd = sockfd;
-	run();
 }
+
+
 
 // Generic physical layer code
 // Should send out any frames received from DL, and pass up any frames received.
 // Placeholder tester code for now.
 void PhysicalLayer::run(){
+	for(int i = 0; i < 5; i++){
+		cout << "Thread B!" << endl;
+		sleep(1);
+	}
+	/*
 	int i = 3;
 	sleep(1);
 	send(sockfd, &i, 4, 0);
 	i = 2;
 	recv(sockfd, &i, 4, 0);
-	cout << "Frame received! i=" << i << endl;
+	cout << "Frame received! i=" << i << endl; /**/
 }
 
 // NB: sFrame may no longer be valid!

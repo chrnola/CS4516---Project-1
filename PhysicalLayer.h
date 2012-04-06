@@ -13,8 +13,9 @@
 class PhysicalLayer {
 private:
 	int sockfd;
-	void run();
 public:
+	void start(pthread_t *PL_thread);
+	void run();
 	static char* FoldSerializedFrame(char* sFrame, int len);  //Note, sFrame may no longer be a valid pointer
 	static bool FrameValid(char* sFrame, int length);
 	PhysicalLayer(const char *hostname);
