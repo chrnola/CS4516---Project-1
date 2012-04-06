@@ -13,6 +13,9 @@ Frame::Frame() {
 Frame::~Frame() {
 }
 
+/*
+ * Author: Ray Short
+ */
 void Frame::Print() {
 	cout << "\nFrame is data: " << (this->type+0 == data);
 	cout << "\nFrame sequence number: " << this->seq;
@@ -21,6 +24,9 @@ void Frame::Print() {
 	cout << "\nFrame message: " << this->payload << "\n";
 }
 
+/*
+ * Author: Ray Short
+ */
 unsigned char* Frame::Serialize() {
 	unsigned char* data = (unsigned char*) calloc(this->payloadLength + FRAME_HEAD, sizeof(unsigned char));
 	this->type == ack ? memcpy(data, "1", 1) : memcpy(data, "0", 1);
@@ -31,6 +37,9 @@ unsigned char* Frame::Serialize() {
 	return data;
 }
 
+/*
+ * Author: Ray Short
+ */
 Frame* Frame::Unserialize(char* d) {
 	Frame* f = new Frame();
 	d[0] == 0 ? f->type = ack : f->type = data;

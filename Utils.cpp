@@ -1,5 +1,8 @@
 #include "Utils.h"
 
+/*
+ * Author: Ray Short
+ */
 unsigned char* Utils::itoa(unsigned short n) {
 	char val = 0;
 	unsigned char* num = (unsigned char*) calloc(5, sizeof(unsigned char));
