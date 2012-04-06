@@ -10,40 +10,53 @@
 using namespace std;
 
 volatile bool frmTimeout, frmArrive, pktArrive, frmSend, pktSend, frmError;
+pthread_mutex_t mutTime, mutFArv, mutPArv, mutFSnd, mutPSnd, mutFErr;
 
 void HandleFrameTimeout(int sig) {
 	cout << "Got timeout.\n";
+	pthread_mutex_lock(&mutTime);
 	frmTimeout = true;
+	pthread_mutex_unlock(&mutTime);
 	signal(sig, HandleFrameTimeout);
 }
 
 void HandleFrameArrival(int sig) {
 	cout << "Frame arrive.\n";
+	pthread_mutex_lock(&mutFArv);
 	frmArrive = true;
+	pthread_mutex_unlock(&mutFArv);
 	signal(sig, HandleFrameArrival);
 }
 
 void HandlePacketArrival(int sig) {
 	cout << "Packet arrive.\n";
+	pthread_mutex_lock(&mutPArv);
 	pktArrive = true;
+	pthread_mutex_unlock(&mutPArv);
 	signal(sig, HandlePacketArrival);
 }
 
 void HandleFrameSend(int sig) {
 	cout << "Frame send.\n";
+	pthread_mutex_lock(&mutFSnd);
 	frmSend = true;
+	pthread_mutex_unlock(&mutFSnd);
 	signal(sig, HandleFrameSend);
 }
 
 void HandlePacketSend(int sig) {
 	cout << "Packet send.\n";
+	pthread_mutex_lock(&mutPSnd);
 	pktSend = true;
+	pthread_mutex_unlock(&mutPSnd);
 	signal(sig, HandlePacketSend);
 }
 
 void HandleFrameError(int sig) {
 	cout << "Frame error.\n";
+	pthread_mutex_lock(&mutFErr);
 	frmError = true;
+	pthread_mutex_unlock(&mutFErr);
 	signal(sig, HandleFrameError);
 }
 
@@ -87,6 +100,13 @@ DataLink::DataLink() {
 	signal(SIGFSND, HandleFrameArrival);
 	signal(SIGPSND, HandlePacketArrival);
 	signal(SIGFERR, HandleFrameError);
+	
+	pthread_mutex_init(&mutTime, NULL);
+	pthread_mutex_init(&mutFArv, NULL);
+	pthread_mutex_init(&mutPArv, NULL);
+	pthread_mutex_init(&mutFSnd, NULL);
+	pthread_mutex_init(&mutPSnd, NULL);
+	pthread_mutex_init(&mutFErr, NULL);
 	
 	// make a dummy network layer thread that will make and send packets to the DLL
 }
@@ -251,6 +271,9 @@ void DataLink::ToNetworkLayer(unsigned char* p) {
 
 void DataLink::FromPhysicalLayer(Frame* r) {
 	if(!frmArrive) return;
+	r = &(r_frames[0]);
+	frmArrive = false;
+	return;
 }
 
 void DataLink::ToPhysicalLayer(Frame* s) {
