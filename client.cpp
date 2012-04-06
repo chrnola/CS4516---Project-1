@@ -24,12 +24,9 @@ void testPL();
 struct timeval* start, * end;
 
 int main(int argc, char **argv) {
-<<<<<<< HEAD
 	//testPL();
-=======
 	gettimeofday(start, NULL);
-	// testPL();
->>>>>>> eac6d30e3f80fddbe2d356983bb99e58e0e64a8a
+
 	
 	// init lower leves, spawn threads, etc
 	// once connected on well known port...	
@@ -50,6 +47,15 @@ int main(int argc, char **argv) {
 void quit(){
 	//close connection, disconnet
 	cout << endl;
+	gettimeofday(end, NULL);
+	unsigned long secs = end->tv_sec - start->tv_sec;
+	unsigned long usecs = end->tv_usec - start->tv_sec;
+	unsigned int mins = secs / 60;
+	cout << "Session ended. Time taken: ";
+	if(mins > 0) {
+		cout << mins << " minute(s), ";
+	}
+	cout << secs << " seconds and " << usecs << " microseconds.\n";
 	exit(0);
 }
 
