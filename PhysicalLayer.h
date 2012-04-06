@@ -8,7 +8,10 @@
 
 #ifndef PHYSICAL_H_
 #define PHYSICAL_H_
+
 #include "did.h"
+
+using namespace std;
 
 extern queue<Frame*> sendFrames, recvFrames;
 extern pthread_mutex_t mutSF, mutRF;
