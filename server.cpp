@@ -46,7 +46,12 @@ int main(){
 void *RunPLThread(void* ptr){
 	PhysicalLayer *pl = (PhysicalLayer*) ptr;
 	pl->run();
-	
+}
+
+void handlePacket(Message *m){
+	char *cmd = m->getCmd();
+	char *tmp;
+	char *argvNew[8];
 }
 
 
