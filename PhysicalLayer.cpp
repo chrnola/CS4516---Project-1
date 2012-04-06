@@ -19,8 +19,6 @@
 
 using namespace std;
 
-extern Packet **sendPackets;
-
 // Constructor called by client. It connects to the well-known port of the server,
 // then passes control to the general physical layer code.
 PhysicalLayer::PhysicalLayer(const char *hostname) {
