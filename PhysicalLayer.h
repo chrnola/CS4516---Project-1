@@ -14,6 +14,8 @@ private:
 	int sockfd;
 	void run();
 public:
+	static char* FoldSerializedFrame(char* sFrame);  //Note, sFrame may no longer be a valid pointer
+	static bool FrameValid(char* sFrame, int length);
 	PhysicalLayer(const char *hostname);
 	PhysicalLayer(int sockfd);
 	virtual ~PhysicalLayer();

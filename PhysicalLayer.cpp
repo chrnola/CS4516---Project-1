@@ -81,9 +81,10 @@ void PhysicalLayer::run(){
 	cout << "Frame received! i=" << i << endl;
 }
 
-//
-char* FoldSerializedFrame(char* sFrame){
-	int len = strlen(sFrame);
+// NB: sFrame may no longer be valid!
+// Use XOR folding to generate a 2-byte error-checking field at the end of
+// serialized frame sFrame.
+char* PhysicalLayer::FoldSerializedFrame(char* sFrame, int len){
 	unsigned char foldByteA = 0;
 	unsigned char foldByteB = 0;
 	for(int i = 0; i < len; i++){
@@ -95,13 +96,28 @@ char* FoldSerializedFrame(char* sFrame){
 		}
 	}
 
-	sFrame = (char *) realloc(sFrame, len + 1 + 2); // + 1 for null termination, + 2 for folded bytes
+	sFrame = (char *) realloc(sFrame, len + 2); // + 1 for null termination, + 2 for folded bytes
 	*(sFrame + len) = foldByteA;
 	*(sFrame + len + 1) = foldByteB;
-	*(sFrame + len + 2) = 0;
 
 	return sFrame;
 	
+}
+
+bool PhysicalLayer::FrameValid(char* sFrame, int length){
+	int len = length - 2;		// Ignore the two error-checking bytes at the end
+	unsigned char foldByteA = 0;
+	unsigned char foldByteB = 0;
+	for(int i = 0; i < len; i++){
+		if(i % 2 == 0){
+			foldByteA = foldByteA ^ *(sFrame + i);
+		}
+		else{
+			foldByteB = foldByteB ^ *(sFrame + i);
+		}
+	}
+
+	return *(sFrame + len) == foldByteA && *(sFrame + len + 1) == foldByteB;
 }
 
 PhysicalLayer::~PhysicalLayer() {

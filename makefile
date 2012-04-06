@@ -37,9 +37,9 @@ chris.o: chris.cpp
 Message.o: Message.cpp did
 	g++ -c Message.cpp
 	
-aaron: DataLink.cpp Frame.cpp Packet.cpp Message.cpp aaron.cpp did
-	g++ aaron.cpp DataLink.cpp Frame.cpp Packet.cpp Message.cpp Utils.cpp -o test -g
+aaron: aaron.cpp PhysicalLayer.o did
+	g++ aaron.cpp PhysicalLayer.o -o aaron -g
 
 clean:
 	rm *.o *~ *.h.gch -f
-	rm client server test -f
+	rm client server test aaron -f
