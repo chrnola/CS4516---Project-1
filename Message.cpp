@@ -6,10 +6,14 @@
 using namespace std;
 
 Message::Message(){
+	this->contentSize = 0;
+	setCmd("");
+	setCmd("");
 }
 
 //Constructor that simply inits both fields from the given parameters
 Message::Message(char *_cmd, char *_content){
+	this->contentSize = 0;
 	setCmd(_cmd);
 	setContent(_content);
 }

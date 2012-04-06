@@ -13,13 +13,6 @@ class Packet;
 
 #include "did.h"
 
-#define MAX_SEQ 65535
-#define inc(k) if (k < MAX_SEQ) k++; else k = 0;
-#define PACKET_HEAD 6
-#define FRAME_HEAD 6
-#define MAX_FRAME 150
-#define MAX_READY 20
-
 // make some of my own signals
 #define SIGPSND 40
 #define SIGFSND 41
