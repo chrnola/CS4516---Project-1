@@ -1,7 +1,13 @@
 // NetworkLayer.h
 // Author: Chris Pinola
 
-#include "Message.h"
+#ifndef __MESSAGE_H__
+#define __MESSAGE_H__
+
+class Message;
+class Packet;
+
+#include "did.h"
 
 class NetworkLayer {
 	public:
@@ -14,5 +20,6 @@ class NetworkLayer {
 		void FromDataLinkLayer(unsigned char *p);
 		void FromApplicationLayer(Message *m);
 		void ToApplicationLayer(unsigned char *message);
-		//void ToApplicationLayer(
 };
+
+#endif

@@ -16,6 +16,7 @@
 #include "PhysicalLayer.h"
 #include "Utils.h"
 #include "Message.h"
+#include "NetworkLayer.h"
 
 #define WELL_KNOWN_PORT 2777 //Why not?
 #define PACKET_HEAD 4

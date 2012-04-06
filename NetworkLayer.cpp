@@ -3,13 +3,15 @@
 
 #include "NetworkLayer.h"
 
-NetworkLayer::NetworkLayer(){}
+NetworkLayer::NetworkLayer(){
+}
 
-NetworkLayer::~NetworkLayer(){}
+NetworkLayer::~NetworkLayer(){
+}
 
 void NetworkLayer::FromApplicationLayer(Message *m){
 	unsigned char *mess = m -> serialize();
-	short mLength = m -> getContentLength();
+	short mLength = m -> getContentSize();
 	mLength += strlen(m -> getCmd());
 	
 	//make packets (and be greedy about it)!
@@ -19,9 +21,9 @@ void NetworkLayer::FromApplicationLayer(Message *m){
 	int s = MAX_SEQ;
 	//make whole packets
 	for (int i = 1; i <= pToMake; i++){
-		Packet p = new Packet();
+		Packet *p = new Packet();
 		p->type = data;
-		s = inc(s);
+		inc(s);
 		p->seq = s;
 		if((i == pToMake) && (leftover == 0)){
 			p->end = true;
@@ -30,16 +32,18 @@ void NetworkLayer::FromApplicationLayer(Message *m){
 		}
 		memcpy(p->payload, mess, MAX_PACKET);
 		mess += MAX_PACKET;
-		
+		p->payloadLength = (unsigned short) MAX_PACKET;
 	}
 	
 	//make partial packet
 	if(leftover > 0){
-		Packet p = new Packet();
+		Packet *p = new Packet();
+		p->type = data;
 		p->end = true;
-		s = inc(s);
+		inc(s);
 		p->seq = s;
 		memcpy(p->payload, mess, leftover);
+		p->payloadLength = (unsigned short) leftover;
 	}
 	
 	//p.payloadLength

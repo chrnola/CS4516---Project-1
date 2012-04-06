@@ -6,10 +6,10 @@
 
 using namespace std;
 
+NetworkLayer *nl;
+
 void startPrompt();
 void testPL();
-
-NetworkLayer nl;
 
 int main(int argc, char **argv) {
 	// testPL();
@@ -61,8 +61,7 @@ void startPrompt(){
 			exit(0);
 		} else if(strcmp(argvNew[0], "locations") == 0){
 			Message *m = new Message();
-			m->setCmd();
-			
+			m->setCmd("locations");
 			
 		} else{
 			cout << "Bad command! Try 'help'." << endl;
