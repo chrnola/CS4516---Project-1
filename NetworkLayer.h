@@ -9,6 +9,9 @@ class Packet;
 
 #include "did.h"
 
+extern queue<Packet*> sendPackets, recvPackets;
+extern pthread_mutex_t mutSP, mutRP;
+
 class NetworkLayer {
 	public:
 		NetworkLayer();

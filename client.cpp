@@ -7,6 +7,12 @@
 using namespace std;
 
 NetworkLayer *nl;
+DataLink* dl;
+PhysicalLayer* pl;
+
+queue<Packet*> sendPackets, recvPackets;
+queue<Frame*> sendFrames, recvFrames;
+pthread_mutex_t mutSP, mutRP, mutSF, mutRF;
 
 void startPrompt();
 bool checkLength(char *field, int max);
@@ -20,6 +26,15 @@ int main(int argc, char **argv) {
 	// init lower leves, spawn threads, etc
 	// once connected on well known port...	
 	nl = new NetworkLayer();
+	//dl = new DataLink();
+	//pl = new PhysicalLayer();
+	
+	pthread_mutex_init(&mutSP, NULL);
+	pthread_mutex_init(&mutRP, NULL);
+	pthread_mutex_init(&mutSF, NULL);
+	pthread_mutex_init(&mutRF, NULL);
+
+	
 	startPrompt();
 
 }
