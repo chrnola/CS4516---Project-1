@@ -781,7 +781,9 @@ bool addPhoto(const char *id, char *file, long fileSize, const char *q1, const c
 	 mysql_field_count(&mysql) == 0 &&
 	 (unsigned long) mysql_affected_rows(&mysql) == 1){
 		return true;
-	}
-	cerr << "default" << endl;
+	 } else{
+		 //just a duplicate photo
+		 return true;
+	 }
 	return false;
 }

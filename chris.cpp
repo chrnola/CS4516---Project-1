@@ -20,6 +20,8 @@ int main(){
 		pic.seekg(0, ios::beg);
 		pic.read(img, size);
 		pic.close();
+	} else{
+		return -1;
 	}
 	
 	Message *m = new Message();
@@ -45,7 +47,9 @@ int main(){
 	//fwrite(newImg, sizeof(char), newSize, tmpFile);
 	
 	if(connectToDB()){
-		cout << addPhotoPublic("1", newImg, newSize) << endl;
+		if(addPhotoPublic("2", newImg, newSize)){
+			cout << "added" << endl;
+		}
 		unsigned long fsize = 0;
 		char *newImg = getPhotoPublic("1", &fsize);
 		ofstream newPic;
