@@ -49,7 +49,7 @@ void NetworkLayer::FromApplicationLayer(Message *m){
 }
 
 void NetworkLayer::ToApplicationLayer(unsigned char *message){
-	Message *m = unserialize(message);
+	Message *m = Message::unserialize(message);
 	//to app layer?
 }
 

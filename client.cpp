@@ -9,7 +9,10 @@ using namespace std;
 NetworkLayer *nl;
 
 void startPrompt();
+bool checkLength(char *field, int max);
+
 void testPL();
+
 
 int main(int argc, char **argv) {
 	// testPL();
@@ -69,59 +72,148 @@ void startPrompt(){
 			if((argvNew[1] != NULL) && 
 			 (argvNew[2] != NULL) &&
 			 (argvNew[3] != NULL)){
-				Message *m = new Message();
-				int size = strlen(argvNew[0]) + strlen(argvNew[1]) + 
-						strlen(argvNew[2]) + strlen(argvNew[3]);
-				char *cmd = (char *) calloc(size, sizeof(char));
-				strcpy(cmd, argvNew[0]);
-				strcat(cmd, argvNew[1]);
-				strcat(cmd, argvNew[2]);
-				strcat(cmd, argvNew[3]);
-				m->setCmd(cmd);
-				nl -> FromApplicationLayer(m);
-				//TODO: wait for response, display it
+				if(checkLength(argvNew[1], MAX_FIRST) && checkLength(argvNew[2], MAX_LAST) && checkLength(argvNew[3], MAX_LOCATION)){
+					Message *m = new Message();
+					int size = strlen(argvNew[0]) + strlen(argvNew[1]) + 
+							strlen(argvNew[2]) + strlen(argvNew[3]);
+					char *cmd = (char *) calloc(size, sizeof(char));
+					strcpy(cmd, argvNew[0]);
+					strcat(cmd, argvNew[1]);
+					strcat(cmd, argvNew[2]);
+					strcat(cmd, argvNew[3]);
+					m->setCmd(cmd);
+					nl -> FromApplicationLayer(m);
+					//TODO: wait for response, display it
+				}
 			} else{
 				cout << "Error: createmissing expects firstName lastName lastKnownLocation" << endl;
 			}
 		} else if(strcmp(argvNew[0], "login") == 0){
 			if((argvNew[1] != NULL) && 
 			 (argvNew[2] != NULL)){
-				Message *m = new Message();
-				int size = strlen(argvNew[0]) + strlen(argvNew[1]) + 
-						strlen(argvNew[2]);
-				char *cmd = (char *) calloc(size, sizeof(char));
-				strcpy(cmd, argvNew[0]);
-				strcat(cmd, argvNew[1]);
-				strcat(cmd, argvNew[2]);
-				m->setCmd(cmd);
-				nl -> FromApplicationLayer(m);
-				//TODO: wait for response, display it
+				if(checkLength(argvNew[1], MAX_USER) && checkLength(argvNew[2], MAX_USER)){
+					Message *m = new Message();
+					int size = strlen(argvNew[0]) + strlen(argvNew[1]) + 
+							strlen(argvNew[2]);
+					char *cmd = (char *) calloc(size, sizeof(char));
+					strcpy(cmd, argvNew[0]);
+					strcat(cmd, argvNew[1]);
+					strcat(cmd, argvNew[2]);
+					m->setCmd(cmd);
+					nl -> FromApplicationLayer(m);
+					//TODO: wait for response, display it
+				}
 			} else{
 				cout << "Error: login expects username password" << endl;
 			}
 		} else if(strcmp(argvNew[0], "query") == 0){
 			if((argvNew[1] != NULL) && 
 			 (argvNew[2] != NULL)){
-				Message *m = new Message();
-				int size = strlen(argvNew[0]) + strlen(argvNew[1]) + 
-						strlen(argvNew[2];
-				char *cmd = (char *) calloc(size, sizeof(char));
-				strcpy(cmd, argvNew[0]);
-				strcat(cmd, argvNew[1]);
-				strcat(cmd, argvNew[2]);
-				m->setCmd(cmd);
-				nl -> FromApplicationLayer(m);
-				//TODO: wait for response, display it
+				if(checkLength(argvNew[1], MAX_FIRST) && checkLength(argvNew[2], MAX_LAST)) {
+					Message *m = new Message();
+					int size = strlen(argvNew[0]) + strlen(argvNew[1]) + 
+							strlen(argvNew[2]);
+					char *cmd = (char *) calloc(size, sizeof(char));
+					strcpy(cmd, argvNew[0]);
+					strcat(cmd, argvNew[1]);
+					strcat(cmd, argvNew[2]);
+					m->setCmd(cmd);
+					nl -> FromApplicationLayer(m);
+					//TODO: wait for response, display it
+				}
 			} else{
 				cout << "Error: query expects firstName lastName" << endl;
 			}
+		} else if(strcmp(argvNew[0], "adduser") == 0){
+			if((argvNew[1] != NULL) && 
+			 (argvNew[2] != NULL)){
+				if(checkLength(argvNew[1], MAX_USER) && checkLength(argvNew[2], MAX_USER)) {
+					Message *m = new Message();
+					int size = strlen(argvNew[0]) + strlen(argvNew[1]) + 
+							strlen(argvNew[2]);
+					char *cmd = (char *) calloc(size, sizeof(char));
+					strcpy(cmd, argvNew[0]);
+					strcat(cmd, argvNew[1]);
+					strcat(cmd, argvNew[2]);
+					m->setCmd(cmd);
+					nl -> FromApplicationLayer(m);
+					//TODO: wait for response, display it
+				}
+			 } else{
+				cout << "Error: adduser expects username password" << endl;
+				}
+		} else if(strcmp(argvNew[0], "id") == 0){
+			if((argvNew[1] != NULL) && 
+			 (argvNew[2] != NULL) &&
+			 (argvNew[3] != NULL)){
+				if(checkLength(argvNew[1], MAX_ID) && checkLength(argvNew[2], MAX_FIRST) && checkLength(argvNew[3], MAX_LAST)) {
+					Message *m = new Message();
+					int size = strlen(argvNew[0]) + strlen(argvNew[1]) + 
+							strlen(argvNew[2]) + strlen(argvNew[3]);
+					char *cmd = (char *) calloc(size, sizeof(char));
+					strcpy(cmd, argvNew[0]);
+					strcat(cmd, argvNew[1]);
+					strcat(cmd, argvNew[2]);
+					strcat(cmd, argvNew[3]);
+					m->setCmd(cmd);
+					nl -> FromApplicationLayer(m);
+					//TODO: wait for response, display it
+				}
+			} else{
+				cout << "Error: id expects id firstName lastName" << endl;
+			}
+		} else if(strcmp(argvNew[0], "password") == 0){
+			if((argvNew[1] != NULL) && 
+			 (argvNew[2] != NULL)){
+				if(checkLength(argvNew[1], MAX_USER) && checkLength(argvNew[2], MAX_USER)) {
+					Message *m = new Message();
+					int size = strlen(argvNew[0]) + strlen(argvNew[1]) + 
+							strlen(argvNew[2]);
+					char *cmd = (char *) calloc(size, sizeof(char));
+					strcpy(cmd, argvNew[0]);
+					strcat(cmd, argvNew[1]);
+					strcat(cmd, argvNew[2]);
+					m->setCmd(cmd);
+					nl -> FromApplicationLayer(m);
+					//TODO: wait for response, display it
+				}
+			} else{
+				cout << "Error: password expects oldPassword newPassword" << endl;
+			}
 		} else{
-			cout << "Bad command! Try 'help'." << endl;
+			cout << "Bad command!" << endl;
 		}
 		
 		startPrompt();
 	}
 	
+}
+
+//returns true if the string is of valid length
+bool checkLength(char *field, int max){
+	if(strlen(field) > max){
+		switch(max){
+			case MAX_FIRST:
+				cout << "First names must not exceed " << MAX_FIRST << " characters!" << endl;
+				break;
+			
+			case MAX_LAST:
+				cout << "Last names, usernames, and passwords must not exceed " << MAX_LAST << " characters!"  << endl;
+				break;
+				
+			case MAX_ID:
+				cout << "IDs must not exceed " << MAX_ID << " characters!" << endl;
+				break;
+				
+			case MAX_LOCATION:
+				cout << "Locations must not exceed " << MAX_LOCATION << " characters!" << endl;
+				
+			default:
+				cout << "Parameter too long!" << endl;
+		}
+		return false;
+	}
+	return true;
 }
 
 void testPL(){
