@@ -9,6 +9,8 @@ class Packet;
 
 #include "did.h"
 
+using namespace std;
+
 extern queue<Packet*> sendPackets, recvPackets;
 extern pthread_mutex_t mutSP, mutRP;
 
