@@ -10,9 +10,8 @@ NetworkLayer *nl;
 DataLink* dl;
 PhysicalLayer* pl;
 
-Packet** sendPackets, ** recvPackets;
-Frame** sendFrames, ** recvFrames;
-char sPNum, sPCur, rPNum, rPCur, sFNum, sFCur, rFNum, rFCur;
+queue<Packet*> sendPackets, recvPackets;
+queue<Frame*> sendFrames, recvFrames;
 pthread_mutex_t mutSP, mutRP, mutSF, mutRF;
 
 void startPrompt();
@@ -29,16 +28,6 @@ int main(int argc, char **argv) {
 	nl = new NetworkLayer();
 	//dl = new DataLink();
 	//pl = new PhysicalLayer();
-	
-	sendPackets = (Packet**) calloc(MAX_SEND_PACKET, sizeof(Packet*));
-	recvPackets = (Packet**) calloc(MAX_RECV_PACKET, sizeof(Packet*));
-	sendFrames = (Frame**) calloc(MAX_SEND_FRAME, sizeof(Frame*));
-	recvFrames = (Frame**) calloc(MAX_RECV_FRAME, sizeof(Frame*));
-
-	sPNum = 0; sPCur = 0;
-	rPNum = 0; rPCur = 0;
-	sFNum = 0; sFCur = 0;
-	rFNum = 0; rFCur = 0;
 	
 	pthread_mutex_init(&mutSP, NULL);
 	pthread_mutex_init(&mutRP, NULL);

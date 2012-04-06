@@ -10,8 +10,7 @@
 #define PHYSICAL_H_
 #include "did.h"
 
-extern Frame** sendFrames, ** recvFrames;
-extern char sFNum, sFCur, rFNum, rFCur;
+extern queue<Frame*> sendFrames, recvFrames;
 extern pthread_mutex_t mutSF, mutRF;
 
 class PhysicalLayer {

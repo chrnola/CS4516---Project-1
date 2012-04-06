@@ -7,8 +7,6 @@
 
 #include "DataLink.h"
 
-using namespace std;
-
 volatile bool frmTimeout, frmArrive, pktArrive, frmSend, pktSend, frmError;
 pthread_mutex_t mutTime, mutFArv, mutPArv, mutFSnd, mutPSnd, mutFErr;
 

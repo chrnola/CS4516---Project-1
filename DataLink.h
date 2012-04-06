@@ -13,9 +13,10 @@ class Packet;
 
 #include "did.h"
 
-extern Packet** sendPackets, ** recvPackets;
-extern Frame** sendFrames, ** recvFrames;
-extern char sPNum, sPCur, rPNum, rPCur, sFNum, sFCur, rFNum, rFCur;
+using namespace std;
+
+extern queue<Packet*> sendPackets, recvPackets;
+extern queue<Frame*> sendFrames, recvFrames;
 extern pthread_mutex_t mutSP, mutRP, mutSF, mutRF;
 
 #define MAX_READY 20
