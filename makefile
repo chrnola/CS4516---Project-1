@@ -23,7 +23,7 @@ PhysicalLayer.o: PhysicalLayer.cpp did.h
 	g++ -c PhysicalLayer.cpp -Wall
 	
 ray: DataLink.cpp Frame.cpp Packet.cpp Message.cpp ray.cpp did
-	g++ ray.cpp DataLink.cpp Frame.cpp Packet.cpp Message.cpp Utils.cpp -o test -g
+	g++ ray.cpp DataLink.cpp Frame.cpp Packet.cpp Message.cpp Utils.cpp -o test -g -pthread
 	
 chris: db.o Message.o chris.o did
 	g++ chris.o db.o Message.o Utils.cpp -o chris -g -L /usr/local/mysql-current/lib/mysql -lmysqlclient -ldl

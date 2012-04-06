@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <sys/time.h>
+#include <pthread.h>
 
 #include "Frame.h"
 #include "Packet.h"
