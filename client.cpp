@@ -24,18 +24,40 @@ void testPL();
 struct timeval* start, * end;
 
 int main(int argc, char **argv) {
+	//testPL();
+	start = (struct timeval*) calloc(1, sizeof(struct timeval));
+	end = (struct timeval*) calloc(1, sizeof(struct timeval));
 	gettimeofday(start, NULL);
 	
 	// init lower leves, spawn threads, etc
 	// once connected on well known port...	
 	nl = new NetworkLayer();
-	//dl = new DataLink();
+	dl = new DataLink();
 	//pl = new PhysicalLayer();
 	
 	pthread_mutex_init(&mutSP, NULL);
 	pthread_mutex_init(&mutRP, NULL);
 	pthread_mutex_init(&mutSF, NULL);
 	pthread_mutex_init(&mutRF, NULL);
+	
+	Packet* p = new Packet();
+	p->type = data;
+	p->seq = 30;
+	p->end = true;
+	p->payloadLength = 186;
+	p->payload = (unsigned char*) calloc(200, sizeof(unsigned char));
+	string s = "Yay it works through layers n stuff. This is quite long to test some stuffYay it works through layers n stuff. This is quite long to test some stuffYay it works through layers n stuff.\n";
+	char* str = const_cast<char*>(s.c_str());
+	p->payload = (unsigned char*) strcpy((char*)p->payload, str);
+	
+	pthread_mutex_lock(&mutSP);
+	sendPackets.push(p);
+	//sendPackets.front()->Print();
+	pthread_mutex_unlock(&mutSP);
+	
+	dl->GoBack1();
+	recvPackets.front()->Print();
+	
 
 	
 	startPrompt();
@@ -46,9 +68,11 @@ void quit(){
 	//close connection, disconnet
 	cout << endl;
 	gettimeofday(end, NULL);
-	unsigned long secs = end->tv_sec - start->tv_sec;
-	unsigned long usecs = end->tv_usec - start->tv_sec;
-	unsigned int mins = secs / 60;
+	long usecs = (end->tv_usec + (((long) end->tv_sec) * 1000000)) - (start->tv_usec + (((long) start->tv_sec) * 1000000));
+	long secs = usecs / 1000000;
+	usecs -= secs * 1000000;
+	int mins = (int) secs / 60;
+	secs -= mins * 60;
 	cout << "Session ended. Time taken: ";
 	if(mins > 0) {
 		cout << mins << " minute(s), ";
