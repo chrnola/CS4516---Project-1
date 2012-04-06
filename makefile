@@ -44,7 +44,7 @@ chris.o: chris.cpp
 	g++ -c chris.cpp
 	
 aaron: aaron.cpp PhysicalLayer.o did
-	g++ aaron.cpp PhysicalLayer.o -o aaron -g
+	g++ aaron.cpp PhysicalLayer.o -o aaron -pthread
 
 clean:
 	rm *.o *~ *.h.gch -f

@@ -12,6 +12,7 @@
 #include <sys/types.h>		// Required for getaddrinfo
 #include <netdb.h>
 #include <string.h>		// Required for memset()
+#include <pthread.h>
 
 
 #include "did.h"
