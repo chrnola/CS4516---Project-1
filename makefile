@@ -39,4 +39,4 @@ aaron: aaron.cpp PhysicalLayer.o did
 
 clean:
 	rm *.o *~ *.h.gch -f
-	rm client server test aaron -f
+	rm client server test aaron chris -f
