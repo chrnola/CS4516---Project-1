@@ -81,7 +81,9 @@ DataLink::DataLink() {
 	char* str = const_cast<char*>(s.c_str());
 	p->payload = (unsigned char*) strcpy((char*)p->payload, str);
 	
+	pthread_mutex_lock(&mutSP);
 	sendPackets[0] = p;
+	pthread_mutex_unlock(&mutSP);
 	frmTimeout = false;
 	frmArrive = false;
 	pktArrive = false;
@@ -136,14 +138,18 @@ void DataLink::GoBack1() {
 				if(currReady < MAX_READY) currReady++; else currReady = 0;
 				numReady--;
 				if(numReady < MAX_READY - 2) EnableNetworkLayer();
+				pthread_mutex_lock(&mutRF);
 				Frame* f = recvFrames[0];
 				recvFrames[0] = NULL;
+				pthread_mutex_unlock(&mutRF);
 				StopTimer(0);
 				free(f);
 			} else if(r->seq == frameExpect) {
 				if(r->end == false) {
+					pthread_mutex_lock(&mutRF);
 					recvFrames[1] = recvFrames[0];
 					recvFrames[0] = NULL;
+					pthread_mutex_unlock(&mutRF);
 				} else {
 					ToNetworkLayer();
 				}
@@ -270,7 +276,9 @@ Event* DataLink::WaitForEvent(Event* e) {
 
 Packet* DataLink::FromNetworkLayer(Packet* p) {
 	if(!pktSend) return NULL;
+	pthread_mutex_lock(&mutSP);
 	p = sendPackets[0];
+	pthread_mutex_unlock(&mutSP);
 	pktSend = false;
 	return p;
 }
@@ -278,6 +286,7 @@ Packet* DataLink::FromNetworkLayer(Packet* p) {
 void DataLink::ToNetworkLayer() {
 	if(pktArrive) return;
 	Packet* pkt = (Packet*) calloc(1, sizeof(Packet));
+	pthread_mutex_lock(&mutRF);
 	if(recvFrames[1] != NULL) {
 		unsigned char* f1 = recvFrames[1]->payload;
 		unsigned char* f2 = recvFrames[0]->payload;
@@ -290,7 +299,10 @@ void DataLink::ToNetworkLayer() {
 	}
 	recvFrames[0] = NULL;
 	recvFrames[1] = NULL;
+	pthread_mutex_unlock(&mutRF);
+	pthread_mutex_lock(&mutRP);
 	recvPackets[0] = pkt;
+	pthread_mutex_unlock(&mutRP);
 	pkt->Print();
 	pktArrive = true;
 	raise(SIGPRCV);
@@ -298,7 +310,9 @@ void DataLink::ToNetworkLayer() {
 
 Frame* DataLink::FromPhysicalLayer(Frame* r) {
 	if(!frmArrive) return NULL;
+	pthread_mutex_lock(&mutRF);
 	r = recvFrames[0];
+	pthread_mutex_unlock(&mutRF);
 	frmArrive = false;
 	return r;
 }
@@ -309,7 +323,9 @@ void DataLink::ToPhysicalLayer(Frame* s) {
 	window[0] = s;
 	numWindow++;
 	raise(SIGFSND);
+	pthread_mutex_lock(&mutRF);
 	recvFrames[0] = s;
+	pthread_mutex_unlock(&mutRF);
 	raise(SIGFRCV);
 	/*Packet* p = Packet::Unserialize((char*) s->payload);
 	bool p1type = (p->type+0 == data);
