@@ -23,6 +23,7 @@
 #define WELL_KNOWN_PORT 2777 //Why not?
 #define PACKET_HEAD 6
 #define FRAME_HEAD 6
+#define FRAME_TAIL 2
 #define MAX_FRAME 150
 #define MAX_PACKET 256
 #define MAX_SEQ 65535

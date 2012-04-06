@@ -16,36 +16,40 @@ using namespace std;
 void handlePacket(Message *m);
 void testPL();
 
-Packet **sendPackets, **recvPackets;
-Frame **sendFrames, **recvFrames;
 
+queue<Frame*> sendFrames, recvFrames;
+pthread_mutex_t mutSF, mutRF;
 
 int AcceptConn();
 void *RunPLThread(void* ptr);
 
 int main(){
 
-	sendPackets = (Packet**) calloc(MAX_SEND_PACKET, sizeof(Packet*));
-	recvPackets = (Packet**) calloc(MAX_RECV_PACKET, sizeof(Packet*));
-	sendFrames = (Frame**) calloc(MAX_SEND_FRAME, sizeof(Frame*));
-	recvFrames = (Frame**) calloc(MAX_RECV_FRAME, sizeof(Frame*));
+	pthread_mutex_init(&mutSF, NULL);
+	pthread_mutex_init(&mutRF, NULL);
 
-	//int sockfd = AcceptConn();
+	int sockfd = AcceptConn();  /* Parent never leaves this call
+	here. Past here, we're a child with a valid, connected socket file descriptor. */
 
 	PhysicalLayer *pl = new PhysicalLayer(0);
 	pthread_t PL_thread, NL_thread, DL_thread;
-	cout << "Creating thread.." << endl;
 	pthread_create(&PL_thread, NULL, RunPLThread, pl);
-	for(int i = 0; i <5; i++){
-		cout << "Thread A!" << endl;
-		sleep(1);
-	}
+
 	return 0;
 }
 
 void *RunPLThread(void* ptr){
 	PhysicalLayer *pl = (PhysicalLayer*) ptr;
 	pl->run();
+}
+
+void *RunNLThread(void* ptr){
+
+}
+
+void *RunDLThread(void* ptr){
+
+
 }
 
 void handlePacket(Message *m){
