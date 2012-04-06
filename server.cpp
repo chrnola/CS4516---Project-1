@@ -22,6 +22,10 @@ int main(){
 }
 
 void handlePacket(Message *m){
+	char *cmd = m->getCmd();
+	char *tmp;
+	char *argvNew[8];
+
 	
 }
 

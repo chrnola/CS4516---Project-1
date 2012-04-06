@@ -16,6 +16,7 @@ pthread_mutex_t mutSP, mutRP, mutSF, mutRF;
 
 void startPrompt();
 bool checkLength(char *field, int max);
+void quit();
 
 void testPL();
 
@@ -39,6 +40,12 @@ int main(int argc, char **argv) {
 
 }
 
+void quit(){
+	//close connection, disconnet
+	cout << endl;
+	exit(0);
+}
+
 void startPrompt(){
 	char input[128];
 	char *tmp;
@@ -49,9 +56,7 @@ void startPrompt(){
 	cin.getline(input, 128);
 	
 	if (cin.eof() != 0){
-		//closeAndDisconnect()
-		cout << endl;
-		exit(-1);
+		quit();
 	}
 	
 	if(strlen(input) == 0){
@@ -75,8 +80,7 @@ void startPrompt(){
 		
 		if(strcmp(argvNew[0], "quit") == 0){
 			cout << "Bye!" << endl;
-			//disconnect
-			exit(0);
+			quit();
 		} else if(strcmp(argvNew[0], "locations") == 0){
 			Message *m = new Message();
 			m->setCmd("locations");
