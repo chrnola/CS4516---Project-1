@@ -7,6 +7,8 @@
 class Message;
 class Packet;
 
+extern Packet** sendPackets, ** recvPackets;
+
 #include "did.h"
 
 class NetworkLayer {
