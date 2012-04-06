@@ -8,6 +8,7 @@
 
 #ifndef PHYSICAL_H_
 #define PHYSICAL_H_
+#include <pthread.h>
 
 class PhysicalLayer {
 private:
