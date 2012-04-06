@@ -122,7 +122,8 @@ DataLink::~DataLink() {
 void DataLink::GoBack1() {
 	Frame* r = new Frame(), * s = new Frame();
 	Packet* buffer = (Packet*) calloc(1, sizeof(Packet));
-	Event event = none;
+	Event* event;
+	*event = none;
 	
 	buffer = FromNetworkLayer(buffer);
 	MakeFrames(buffer);
@@ -131,18 +132,16 @@ void DataLink::GoBack1() {
 	ToPhysicalLayer(ready[currReady]);
 	StartTimer(0);
 	r->type = ack;
-	event = arrival;
+	*event = arrival;
 	while(true) {
 		// for testing
-		numWindow--;
+		numWindow = 0;
 		// end for testing
-		WaitForEvent(&event);
-		if(event == arrival) {
-			FromPhysicalLayer(r);
-			cout << "Frame seq:expected " << r->seq << ":" << frameExpect << ", " << (r->seq == frameExpect);
-			if(r->type+0 == ack) {
-				cout << "This is an ack somehow";
-				r->Print();
+		event = WaitForEvent(event);
+		if(*event == arrival) {
+			r = FromPhysicalLayer(r);
+			//cout << (r->seq == frameExpect) << " seq:expect " << r->seq << ":" << frameExpect;
+			if(r->type == ack) {
 				if(currReady < MAX_READY) currReady++; else currReady = 0;
 				numReady--;
 				if(numReady < MAX_READY - 2) EnableNetworkLayer();
@@ -151,27 +150,26 @@ void DataLink::GoBack1() {
 				StopTimer(0);
 				free(f);
 			} else if(r->seq == frameExpect) {
-				cout << "Past logical test\n";
 				if(r->end == false) {
-					cout << "First frame of 2\n";
-					*(r_frames[1]) = *(r_frames[0]);
+					r_frames[1] = r_frames[0];
 					r_frames[0] = NULL;
 				} else {
-					cout << "Have frames\n";
 					ToNetworkLayer();
 				}
 				inc(frameExpect);
 			}
 		}
-		event = none;
+		*event = none;
 		if(numReady < MAX_READY - 2 && pktSend) {
 			FromNetworkLayer(buffer);
 			MakeFrames(buffer);
 		}
 		//cout << "Curr ready is " << currReady+0 << " and num ready is " << numReady+0;
+		numReady--;
+		if(numReady == 0) exit(0);
+		currReady++;
 		ToPhysicalLayer(ready[currReady]);
 		StartTimer(0);
-		exit(0);
 	}
 }
 
@@ -264,7 +262,7 @@ void DataLink::SendData(unsigned int frame_num, unsigned int frame_expect, Packe
 
 }
 
-void DataLink::WaitForEvent(Event* e) {
+Event* DataLink::WaitForEvent(Event* e) {
 	while(*e == none) {
 		if(frmTimeout) {
 			*e = timeout;
@@ -276,6 +274,7 @@ void DataLink::WaitForEvent(Event* e) {
 			*e = arrival;
 		}
 	}
+	return e;
 }
 
 Packet* DataLink::FromNetworkLayer(Packet* p) {
@@ -287,28 +286,30 @@ Packet* DataLink::FromNetworkLayer(Packet* p) {
 
 void DataLink::ToNetworkLayer() {
 	if(pktArrive) return;
-	Packet* pkt;
+	Packet* pkt = (Packet*) calloc(1, sizeof(Packet));
 	if(r_frames[1] != NULL) {
 		unsigned char* f1 = r_frames[1]->payload;
 		unsigned char* f2 = r_frames[0]->payload;
-		char* pload = (char*) calloc(r_frames[0]->payloadLength + r_frames[1]->payloadLength + 1, sizeof(char));
+		char* pload = (char*) calloc(r_frames[0]->payloadLength + r_frames[1]->payloadLength + 8, sizeof(char));
 		memcpy(pload, f1, r_frames[1]->payloadLength);
-		memcpy(pload + r_frames[1]->payloadLength, f2, r_frames[0]->payloadLength);
+		memcpy(pload + r_frames[1]->payloadLength, f2, r_frames[0]->payloadLength + 8);
+		pkt = Packet:: Unserialize((char*) pload);
 	} else {
 		pkt = Packet::Unserialize((char*) r_frames[0]->payload);
 	}
 	r_frames[0] = NULL;
 	r_frames[1] = NULL;
 	r_packets[0] = pkt;
+	pkt->Print();
 	pktArrive = true;
 	raise(SIGPRCV);
 }
 
-void DataLink::FromPhysicalLayer(Frame* r) {
-	if(!frmArrive) return;
+Frame* DataLink::FromPhysicalLayer(Frame* r) {
+	if(!frmArrive) return NULL;
 	r = r_frames[0];
 	frmArrive = false;
-	return;
+	return r;
 }
 
 void DataLink::ToPhysicalLayer(Frame* s) {

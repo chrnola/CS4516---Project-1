@@ -30,10 +30,10 @@ public:
 	void GoBackN(void);
 	void MakeFrames(Packet* p);
 	void SendData(unsigned int frame_num, unsigned int frame_expect, Packet buffer[]);
-	void WaitForEvent(Event* e);
+	Event* WaitForEvent(Event* e);
 	Packet* FromNetworkLayer(Packet* p);
 	void ToNetworkLayer(void);
-	void FromPhysicalLayer(Frame* r);
+	Frame* FromPhysicalLayer(Frame* r);
 	void ToPhysicalLayer(Frame* s);
 	void StartTimer(unsigned short k);
 	void StopTimer(unsigned short k);
