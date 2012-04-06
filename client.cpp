@@ -16,11 +16,12 @@ pthread_mutex_t mutSP, mutRP, mutSF, mutRF;
 
 void startPrompt();
 bool checkLength(char *field, int max);
-
 void testPL();
 
+struct timeval* start, * end;
 
 int main(int argc, char **argv) {
+	gettimeofday(start, NULL);
 	// testPL();
 	
 	// init lower leves, spawn threads, etc
