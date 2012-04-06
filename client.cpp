@@ -25,19 +25,39 @@ struct timeval* start, * end;
 
 int main(int argc, char **argv) {
 	//testPL();
+	start = (struct timeval*) calloc(1, sizeof(struct timeval));
+	end = (struct timeval*) calloc(1, sizeof(struct timeval));
 	gettimeofday(start, NULL);
-
 	
 	// init lower leves, spawn threads, etc
 	// once connected on well known port...	
 	nl = new NetworkLayer();
-	//dl = new DataLink();
+	dl = new DataLink();
 	//pl = new PhysicalLayer();
 	
 	pthread_mutex_init(&mutSP, NULL);
 	pthread_mutex_init(&mutRP, NULL);
 	pthread_mutex_init(&mutSF, NULL);
 	pthread_mutex_init(&mutRF, NULL);
+	
+	Packet* p = new Packet();
+	p->type = data;
+	p->seq = 30;
+	p->end = true;
+	p->payloadLength = 186;
+	p->payload = (unsigned char*) calloc(200, sizeof(unsigned char));
+	string s = "Yay it works through layers n stuff. This is quite long to test some stuffYay it works through layers n stuff. This is quite long to test some stuffYay it works through layers n stuff.\n";
+	char* str = const_cast<char*>(s.c_str());
+	p->payload = (unsigned char*) strcpy((char*)p->payload, str);
+	
+	pthread_mutex_lock(&mutSP);
+	sendPackets.push(p);
+	//sendPackets.front()->Print();
+	pthread_mutex_unlock(&mutSP);
+	
+	dl->GoBack1();
+	recvPackets.front()->Print();
+	
 
 	
 	startPrompt();
@@ -48,9 +68,11 @@ void quit(){
 	//close connection, disconnet
 	cout << endl;
 	gettimeofday(end, NULL);
-	unsigned long secs = end->tv_sec - start->tv_sec;
-	unsigned long usecs = end->tv_usec - start->tv_sec;
-	unsigned int mins = secs / 60;
+	long usecs = (end->tv_usec + (((long) end->tv_sec) * 1000000)) - (start->tv_usec + (((long) start->tv_sec) * 1000000));
+	long secs = usecs / 1000000;
+	usecs -= secs * 1000000;
+	int mins = (int) secs / 60;
+	secs -= mins * 60;
 	cout << "Session ended. Time taken: ";
 	if(mins > 0) {
 		cout << mins << " minute(s), ";
@@ -91,7 +113,25 @@ void startPrompt(){
 		
 		argvNew[i] = NULL;
 		
-		if(strcmp(argvNew[0], "quit") == 0){
+		if(strcmp(argvNew[0], "help") == 0){
+			cout << "*addbodyphoto" << endl;
+			cout << "addphoto" << endl;
+			cout << "*adduser" << endl;
+			cout << "*createbody" << endl;
+			cout << "createmissing" << endl;
+			cout << "*dlmissingphoto" << endl;
+			cout << "help" << endl;
+			cout << "*id" << endl;
+			cout << "locations" << endl;
+			cout << "login" << endl;
+			cout << "*password" << endl;
+			cout << "*removebody" << endl;
+			cout << "*removemissing" << endl;
+			cout << "query" << endl;
+			cout << "quit" << endl;
+			cout << endl;
+			cout << "* commands require login first" << endl;
+		} else if(strcmp(argvNew[0], "quit") == 0){
 			cout << "Bye!" << endl;
 			quit();
 		} else if(strcmp(argvNew[0], "locations") == 0){
@@ -116,6 +156,8 @@ void startPrompt(){
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
 					//TODO: wait for response, display it
+					
+					free(cmd);
 				}
 			} else{
 				cout << "Error: createmissing expects firstName lastName lastKnownLocation" << endl;
@@ -133,6 +175,8 @@ void startPrompt(){
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
 					//TODO: wait for response, display it
+					
+					free(cmd);
 				}
 			} else{
 				cout << "Error: login expects username password" << endl;
@@ -151,6 +195,8 @@ void startPrompt(){
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
 					//TODO: wait for response, display it
+					
+					free(cmd);
 				}
 			} else{
 				cout << "Error: query expects firstName lastName" << endl;
@@ -169,6 +215,8 @@ void startPrompt(){
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
 					//TODO: wait for response, display it
+					
+					free(cmd);
 				}
 			 } else{
 				cout << "Error: adduser expects username password" << endl;
@@ -189,6 +237,8 @@ void startPrompt(){
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
 					//TODO: wait for response, display it
+					
+					free(cmd);
 				}
 			} else{
 				cout << "Error: id expects id firstName lastName" << endl;
@@ -207,6 +257,8 @@ void startPrompt(){
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
 					//TODO: wait for response, display it
+					
+					free(cmd);
 				}
 			} else{
 				cout << "Error: password expects oldPassword newPassword" << endl;
@@ -222,6 +274,8 @@ void startPrompt(){
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
 					//TODO: wait for response, display it
+					
+					free(cmd);
 				}
 			} else{
 				cout << "Error: removemissing expects id" << endl;
@@ -237,6 +291,8 @@ void startPrompt(){
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
 					//TODO: wait for response, display it
+					
+					free(cmd);
 				}
 			} else{
 				cout << "Error: removebody expects id" << endl;
@@ -258,6 +314,8 @@ void startPrompt(){
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
 					//TODO: wait for response, display it
+					
+					free(cmd);
 				}
 			} else if((argvNew[1] != NULL) && (argvNew[2] != NULL)){
 				if(checkLength(argvNew[1], MAX_ID) && checkLength(argvNew[2], MAX_LOCATION)) {
@@ -271,6 +329,8 @@ void startPrompt(){
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
 					//TODO: wait for response, display it
+					
+					free(cmd);
 				}
 			} else{
 				cout << "Error: createbody expects id location [firstName lastName]" << endl;
@@ -304,6 +364,7 @@ void startPrompt(){
 					} else{
 						cout << "Unable to load file!" << endl;
 					}
+					free(cmd);
 				}
 			} else{
 				if(strcmp(argvNew[0], "addphoto") == 0){
@@ -323,6 +384,7 @@ void startPrompt(){
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
 					//TODO: wait for response, display it
+					free(cmd);
 					Message *resp = new Message(); //fromLower
 					long newSize = resp->getContentSize();
 					char *newImg = (char *) calloc(newSize, sizeof(char));

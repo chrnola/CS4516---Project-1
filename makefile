@@ -6,7 +6,7 @@ client: client.cpp PhysicalLayer.cpp NetworkLayer.cpp Message.cpp Utils.cpp Pack
 	g++ client.cpp PhysicalLayer.cpp NetworkLayer.cpp Message.cpp Packet.cpp Utils.cpp DataLink.cpp Frame.cpp -o client -g
 
 server: server.cpp PhysicalLayer.cpp db.cpp
-	g++ -o server -g server.cpp PhysicalLayer.cpp db.cpp -Wall -L /usr/local/mysql-current/lib/mysql -lmysqlclient -ldl
+	g++ -I/usr/local/mysql-current/include -o server -g server.cpp PhysicalLayer.cpp db.cpp Message.cpp -Wall -L /usr/local/mysql-current/lib/mysql -lmysqlclient -ldl
 
 did: did.h Frame.h Packet.h DataLink.h NetworkLayer.h PhysicalLayer.h Message.h Utils.h
 	

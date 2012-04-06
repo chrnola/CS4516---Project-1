@@ -13,6 +13,9 @@ Packet::Packet() {
 Packet::~Packet() {
 }
 
+/*
+ * Author: Ray Short
+ */
 void Packet::Print() {
 	cout << "\nPacket is data: " << (this->type+0 == data);
 	cout << "\nPacket sequence number: " << this->seq;
@@ -21,6 +24,9 @@ void Packet::Print() {
 	cout << "\nPacket message: " << this->payload << "\n";
 }
 
+/*
+ * Author: Ray Short
+ */
 unsigned char* Packet::Serialize(){
 	unsigned char* data = (unsigned char*) calloc(this->payloadLength + PACKET_HEAD, sizeof(unsigned char));
 	this->type == ack ? memcpy(data, "1", 1) : memcpy(data, "0", 1);
@@ -31,6 +37,9 @@ unsigned char* Packet::Serialize(){
 	return data;
 }
 
+/*
+ * Author: Ray Short
+ */
 Packet* Packet::Unserialize(char* d) {
 	Packet* p = new Packet();
 	d[0] == 0 ? p->type = ack : p->type = data;
@@ -38,6 +47,6 @@ Packet* Packet::Unserialize(char* d) {
 	p->seq = (unsigned short) atoi(str.substr(1,5).c_str());
 	d[6] == 0 ? p->end = false : p-> end = true;
 	p->payloadLength = (unsigned short) atoi(str.substr(7,5).c_str());
-	p->payload = (unsigned char*) str.substr(12,str.size()).c_str();
+	p->payload = (unsigned char*) str.substr(12,p->payloadLength).c_str();
 	return p;
 }

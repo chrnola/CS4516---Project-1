@@ -20,6 +20,12 @@ void testPL();
 queue<Frame*> sendFrames, recvFrames;
 pthread_mutex_t mutSF, mutRF;
 
+bool auth = false;
+char *user;
+
+NetworkLayer *nl;
+char *err = "The server encountered an error while processing your request.";
+
 int AcceptConn();
 void *RunPLThread(void* ptr);
 
@@ -28,13 +34,21 @@ int main(){
 	pthread_mutex_init(&mutSF, NULL);
 	pthread_mutex_init(&mutRF, NULL);
 
+
 	int sockfd = AcceptConn();  /* Parent never leaves this call
 	here. Past here, we're a child with a valid, connected socket file descriptor. */
 
+	
+	bool connected = connectToDB(); //true if connected
+	nl = new NetworkLayer();
+	
 	PhysicalLayer *pl = new PhysicalLayer(0);
 	pthread_t PL_thread, NL_thread, DL_thread;
 	pthread_create(&PL_thread, NULL, RunPLThread, pl);
 
+	
+	disconnectFromDB();
+	
 	return 0;
 }
 
@@ -56,6 +70,42 @@ void handlePacket(Message *m){
 	char *cmd = m->getCmd();
 	char *tmp;
 	char *argvNew[8];
+	int i = 1;
+	Message *m = new Message();
+	
+	if((tmp = strtok(cmd, " ")) != NULL){
+		argvNew[0] = tmp;
+		
+		while ((tmp = strtok(NULL, " ")) != NULL){
+			if(i < 7){
+				argvNew[i] = tmp;
+				i++;
+			} else{
+				break;
+			}
+		}
+		
+		argvNew[i] = NULL;
+		
+		if(strcmp(argvNew[0], "locations") == 0){
+			m->setCmd(locationsWithMissing());
+			nl -> FromApplicationLayer(m);
+		} else if(strcmp(argvNew[0], "createmissing") == 0){
+			long newID;
+			if((newID = createMissing(argvNew[1], argvNew[2], argvNew[3])) <= 0){
+				m->setCmd(err);
+			} else{
+				m->setCmd((char *) newID);
+			}
+			nl -> FromApplicationLayer(m);
+		} else if(strcmp(argvNew[0], "login") == 0){
+			m->setCmd();
+			nl -> FromApplicationLayer(m);
+		} else{
+			cerr << "Server received unrecognized command?" << endl;
+		}
+		
+	}
 }
 
 
