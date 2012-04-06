@@ -45,8 +45,6 @@ public:
 	void ToPhysicalLayer(Frame* s);
 	void StartTimer(unsigned short k);
 	void StopTimer(unsigned short k);
-	void EnableNetworkLayer(void);
-	void DisableNetworkLayer(void);
 	
 private:
 	Frame** window;

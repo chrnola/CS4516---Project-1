@@ -47,6 +47,6 @@ Frame* Frame::Unserialize(char* d) {
 	f->seq = (unsigned short) atoi(str.substr(1, 5).c_str());
 	d[6] == 0 ? f->end = false : f-> end = true;
 	f->payloadLength = (unsigned short) atoi(str.substr(7, 5).c_str());
-	f->payload = (unsigned char*) str.substr(12, str.size()).c_str();
+	f->payload = (unsigned char*) str.substr(12, f->payloadLength).c_str();
 	return f;
 }

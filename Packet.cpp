@@ -47,6 +47,6 @@ Packet* Packet::Unserialize(char* d) {
 	p->seq = (unsigned short) atoi(str.substr(1,5).c_str());
 	d[6] == 0 ? p->end = false : p-> end = true;
 	p->payloadLength = (unsigned short) atoi(str.substr(7,5).c_str());
-	p->payload = (unsigned char*) str.substr(12,str.size()).c_str();
+	p->payload = (unsigned char*) str.substr(12,p->payloadLength).c_str();
 	return p;
 }

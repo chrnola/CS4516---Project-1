@@ -167,7 +167,7 @@ void DataLink::GoBack1() {
 			if(r->type == ack) {
 				if(currReady < MAX_READY) currReady++; else currReady = 0;
 				numReady--;
-				if(numReady < MAX_READY - 2) EnableNetworkLayer();
+				//if(numReady < MAX_READY - 2) EnableNetworkLayer();
 				pthread_mutex_lock(&mutRF);
 				Frame* f = recvFrames.front();
 				recvFrames.pop();
@@ -285,7 +285,7 @@ void DataLink::MakeFrames(Packet* p) {
 		ready[numReady] = f2;
 		numReady++;
 	}
-	if(numReady > MAX_READY - 2) DisableNetworkLayer();
+	//if(numReady > MAX_READY - 2) DisableNetworkLayer();
 }
 
 /*
