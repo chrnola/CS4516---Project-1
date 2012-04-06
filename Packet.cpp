@@ -27,7 +27,6 @@ unsigned char* Packet::Serialize(){
 }
 
 Packet* Packet::Unserialize(char* d) {
-	cout << "Got a string to unserialize: " << d;
 	Packet* p = new Packet();
 	d[0] == 0 ? p->type = ack : p->type = data;
 	string str(d);

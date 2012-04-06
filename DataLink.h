@@ -47,9 +47,6 @@ public:
 	void EnableNetworkLayer(void);
 	void DisableNetworkLayer(void);
 	
-
-	//void HandleTimeout(int sig);
-	
 	// testing variables
 	Packet** s_packets;
 	Packet** r_packets;

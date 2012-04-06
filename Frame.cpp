@@ -17,11 +17,12 @@ Frame::~Frame() {
 }
 
 unsigned char* Frame::Serialize() {
-	unsigned char* data = (unsigned char*) calloc(strlen((char*) this->payload) + FRAME_HEAD + 1, sizeof(unsigned char));
-	this->type == ack ? strcat((char*) data, "1") : strcat((char*) data, "0");
-	strcat((char*) data, (char*) Utils::itoa(this->seq));
-	this->end ? strcat((char*) data, "1") : strcat((char*) data, "0");
-	strcat((char*) data, (char*) this->payload);
+	unsigned char* data = (unsigned char*) calloc(this->payloadLength + FRAME_HEAD, sizeof(unsigned char));
+	this->type == ack ? memcpy(data, "1", 1) : memcpy(data, "0", 1);
+	memcpy(data + 1, Utils::itoa(this->seq), 5);
+	this->end ? memcpy(data + 6, "1", 1) : memcpy(data + 6, "0", 1);
+	memcpy(data + 7, Utils::itoa(this->payloadLength), 5);
+	memcpy(data + 12, this->payload, this->payloadLength);
 	return data;
 }
 
@@ -29,8 +30,9 @@ Frame* Frame::Unserialize(char* d) {
 	Frame* f = new Frame();
 	d[0] == 0 ? f->type = ack : f->type = data;
 	string str(d);
-	f->seq = (unsigned short) atoi(str.substr(1,5).c_str());
+	f->seq = (unsigned short) atoi(str.substr(1, 5).c_str());
 	d[6] == 0 ? f->end = false : f-> end = true;
-	f->payload = (unsigned char*) str.substr(7,str.size()).c_str();
+	f->payloadLength = (unsigned short) atoi(str.substr(7, 5).c_str());
+	f->payload = (unsigned char*) str.substr(12, str.size()).c_str();
 	return f;
 }
