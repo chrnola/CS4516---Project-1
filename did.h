@@ -9,6 +9,7 @@
 #include <signal.h>
 #include <sys/time.h>
 #include <pthread.h>
+#include <fstream>
 #include <queue>
 
 #include "Frame.h"
