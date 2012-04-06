@@ -24,6 +24,7 @@ char *user;
 
 NetworkLayer *nl;
 char *err = "The server encountered an error while processing your request.";
+char *nauth = "You are not authorized to execute this command, please login first.";
 
 int AcceptConn();
 void *RunPLThread(void* ptr);
@@ -91,8 +92,44 @@ void handlePacket(Message *m){
 				m->setCmd((char *) newID);
 			}
 			nl -> FromApplicationLayer(m);
+		} else if(strcmp(argvNew[0], "query") == 0){
+			if(queryAdmin(argvNew[1], argvNew[2])){
+				m->setCmd("That person has been found!");
+			} else{
+				m->setCmd("That person has not been found");
+			}
+			nl -> FromApplicationLayer(m);
 		} else if(strcmp(argvNew[0], "login") == 0){
-			m->setCmd();
+			if(auth){
+				//already signed in
+				m->setCmd("You're already signed in");
+			} else{
+				if(authenticateUser(argvNew[1], argvNew[2])){
+					auth = true;
+					user = argvNew[1];
+					m->setCmd("You have successfully signed in!");
+				} else{
+					m->setCmd("Invalid credentials");
+				}
+			}
+			nl -> FromApplicationLayer(m);
+		} else if(strcmp(argvNew[0], "adduser") == 0){
+			if(auth){
+				if(newUser(argvNew[1], argvNew[2])){
+					m->setCmd("Successfully added new user");
+				} else{
+					m->setCmd(err);
+				}
+			} else{
+				m->setCmd(nauth);
+			}
+			nl -> FromApplicationLayer(m);
+		} else if(strcmp(argvNew[0], "id") == 0){
+			if(auth){
+				//bookmark
+			} else{
+				m->setCmd(nauth);
+			}
 			nl -> FromApplicationLayer(m);
 		} else{
 			cerr << "Server received unrecognized command?" << endl;
