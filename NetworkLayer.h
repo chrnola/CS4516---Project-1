@@ -7,11 +7,11 @@
 class Message;
 class Packet;
 
+#include "did.h"
+
 extern Packet** sendPackets, ** recvPackets;
 extern char sPNum, sPCur, rPNum, rPCur;
 extern pthread_mutex_t mutSP, mutRP;
-
-#include "did.h"
 
 class NetworkLayer {
 	public:

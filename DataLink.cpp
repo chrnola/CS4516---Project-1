@@ -70,14 +70,7 @@ DataLink::DataLink() {
 	currReady = 0;
 	nextSend = 0;
 	frameExpect = 0;
-	
-	// should only send 1 packet for testing
-	s_packets = (Packet**) calloc(1, sizeof(Packet*));
-	// should only ever receive 1 packet
-	r_packets = (Packet**) calloc(1, sizeof(Packet*));
-	// receive up to 2 frames
-	r_frames = (Frame**) calloc(2, sizeof(Frame*));
-	
+		
 	Packet* p = new Packet();
 	p->type = data;
 	p->seq = 30;
@@ -88,7 +81,7 @@ DataLink::DataLink() {
 	char* str = const_cast<char*>(s.c_str());
 	p->payload = (unsigned char*) strcpy((char*)p->payload, str);
 	
-	s_packets[0] = p;
+	sendPackets[0] = p;
 	frmTimeout = false;
 	frmArrive = false;
 	pktArrive = false;
@@ -115,8 +108,6 @@ DataLink::DataLink() {
 DataLink::~DataLink() {
 	free(window);
 	free(ready);
-	free(s_packets);
-	free(r_packets);
 }
 
 void DataLink::GoBack1() {
@@ -145,14 +136,14 @@ void DataLink::GoBack1() {
 				if(currReady < MAX_READY) currReady++; else currReady = 0;
 				numReady--;
 				if(numReady < MAX_READY - 2) EnableNetworkLayer();
-				Frame* f = r_frames[0];
-				r_frames[0] = NULL;
+				Frame* f = recvFrames[0];
+				recvFrames[0] = NULL;
 				StopTimer(0);
 				free(f);
 			} else if(r->seq == frameExpect) {
 				if(r->end == false) {
-					r_frames[1] = r_frames[0];
-					r_frames[0] = NULL;
+					recvFrames[1] = recvFrames[0];
+					recvFrames[0] = NULL;
 				} else {
 					ToNetworkLayer();
 				}
@@ -279,7 +270,7 @@ Event* DataLink::WaitForEvent(Event* e) {
 
 Packet* DataLink::FromNetworkLayer(Packet* p) {
 	if(!pktSend) return NULL;
-	p = s_packets[0];
+	p = sendPackets[0];
 	pktSend = false;
 	return p;
 }
@@ -287,19 +278,19 @@ Packet* DataLink::FromNetworkLayer(Packet* p) {
 void DataLink::ToNetworkLayer() {
 	if(pktArrive) return;
 	Packet* pkt = (Packet*) calloc(1, sizeof(Packet));
-	if(r_frames[1] != NULL) {
-		unsigned char* f1 = r_frames[1]->payload;
-		unsigned char* f2 = r_frames[0]->payload;
-		char* pload = (char*) calloc(r_frames[0]->payloadLength + r_frames[1]->payloadLength + 8, sizeof(char));
-		memcpy(pload, f1, r_frames[1]->payloadLength);
-		memcpy(pload + r_frames[1]->payloadLength, f2, r_frames[0]->payloadLength + 8);
+	if(recvFrames[1] != NULL) {
+		unsigned char* f1 = recvFrames[1]->payload;
+		unsigned char* f2 = recvFrames[0]->payload;
+		char* pload = (char*) calloc(recvFrames[0]->payloadLength + recvFrames[1]->payloadLength + 8, sizeof(char));
+		memcpy(pload, f1, recvFrames[1]->payloadLength);
+		memcpy(pload + recvFrames[1]->payloadLength, f2, recvFrames[0]->payloadLength + 8);
 		pkt = Packet:: Unserialize((char*) pload);
 	} else {
-		pkt = Packet::Unserialize((char*) r_frames[0]->payload);
+		pkt = Packet::Unserialize((char*) recvFrames[0]->payload);
 	}
-	r_frames[0] = NULL;
-	r_frames[1] = NULL;
-	r_packets[0] = pkt;
+	recvFrames[0] = NULL;
+	recvFrames[1] = NULL;
+	recvPackets[0] = pkt;
 	pkt->Print();
 	pktArrive = true;
 	raise(SIGPRCV);
@@ -307,7 +298,7 @@ void DataLink::ToNetworkLayer() {
 
 Frame* DataLink::FromPhysicalLayer(Frame* r) {
 	if(!frmArrive) return NULL;
-	r = r_frames[0];
+	r = recvFrames[0];
 	frmArrive = false;
 	return r;
 }
@@ -318,7 +309,7 @@ void DataLink::ToPhysicalLayer(Frame* s) {
 	window[0] = s;
 	numWindow++;
 	raise(SIGFSND);
-	r_frames[0] = s;
+	recvFrames[0] = s;
 	raise(SIGFRCV);
 	/*Packet* p = Packet::Unserialize((char*) s->payload);
 	bool p1type = (p->type+0 == data);

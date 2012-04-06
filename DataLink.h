@@ -11,12 +11,12 @@
 class Frame;
 class Packet;
 
+#include "did.h"
+
 extern Packet** sendPackets, ** recvPackets;
 extern Frame** sendFrames, ** recvFrames;
 extern char sPNum, sPCur, rPNum, rPCur, sFNum, sFCur, rFNum, rFCur;
 extern pthread_mutex_t mutSP, mutRP, mutSF, mutRF;
-
-#include "did.h"
 
 #define MAX_READY 20
 
@@ -46,11 +46,6 @@ public:
 	void StopTimer(unsigned short k);
 	void EnableNetworkLayer(void);
 	void DisableNetworkLayer(void);
-	
-	// testing variables
-	Packet** s_packets;
-	Packet** r_packets;
-	Frame** r_frames;
 	
 private:
 	Frame** window;

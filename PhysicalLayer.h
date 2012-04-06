@@ -8,7 +8,7 @@
 
 #ifndef PHYSICAL_H_
 #define PHYSICAL_H_
-#include <pthread.h>
+#include "did.h"
 
 extern Frame** sendFrames, ** recvFrames;
 extern char sFNum, sFCur, rFNum, rFCur;
