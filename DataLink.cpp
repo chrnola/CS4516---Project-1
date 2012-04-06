@@ -83,6 +83,7 @@ DataLink::DataLink() {
 	
 	pthread_mutex_lock(&mutSP);
 	sendPackets.push(p);
+	//sendPackets.front()->Print();
 	pthread_mutex_unlock(&mutSP);
 	frmTimeout = false;
 	frmArrive = false;
@@ -115,7 +116,7 @@ DataLink::~DataLink() {
 void DataLink::GoBack1() {
 	Frame* r = new Frame(), * s = new Frame();
 	Packet* buffer = (Packet*) calloc(1, sizeof(Packet));
-	Event* event;
+	Event* event = (Event*) calloc(1, sizeof(Event));
 	*event = none;
 	
 	buffer = FromNetworkLayer(buffer);
@@ -133,7 +134,9 @@ void DataLink::GoBack1() {
 		event = WaitForEvent(event);
 		if(*event == arrival) {
 			r = FromPhysicalLayer(r);
+			//r->Print();
 			//cout << (r->seq == frameExpect) << " seq:expect " << r->seq << ":" << frameExpect;
+			fflush(stdout);
 			if(r->type == ack) {
 				if(currReady < MAX_READY) currReady++; else currReady = 0;
 				numReady--;
@@ -147,6 +150,8 @@ void DataLink::GoBack1() {
 			} else if(r->seq == frameExpect) {
 				if(r->end == true) {
 					ToNetworkLayer();
+				} else {
+					//recvFrames.push(r);
 				}
 				inc(frameExpect);
 			}
@@ -283,9 +288,11 @@ void DataLink::ToNetworkLayer() {
 	if(pktArrive) return;
 	Packet* pkt = (Packet*) calloc(1, sizeof(Packet));
 	pthread_mutex_lock(&mutRF);
-	Frame* fr1 = recvFrames.front();
+	Frame* fr1 = (Frame*) calloc(1, sizeof(Frame));
+	fr1 = recvFrames.front();
 	recvFrames.pop();
-	Frame* fr2 = recvFrames.front();
+	Frame* fr2 = (Frame*) calloc(1, sizeof(Frame));
+	fr2 = recvFrames.front();
 	recvFrames.pop();
 	pthread_mutex_unlock(&mutRF);
 	if(fr2 != NULL) {
@@ -309,8 +316,7 @@ void DataLink::ToNetworkLayer() {
 Frame* DataLink::FromPhysicalLayer(Frame* r) {
 	if(!frmArrive) return NULL;
 	pthread_mutex_lock(&mutRF);
-	r = recvFrames.front();
-	recvFrames.pop();
+	r = recvFrames.back();
 	pthread_mutex_unlock(&mutRF);
 	frmArrive = false;
 	return r;
