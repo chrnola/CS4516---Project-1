@@ -39,6 +39,10 @@ void startPrompt(){
 		exit(-1);
 	}
 	
+	if(strlen(input) == 0){
+		startPrompt();
+	}
+	
 	if((tmp = strtok(input, " ")) != NULL){
 		argvNew[0] = tmp;
 		
@@ -52,11 +56,7 @@ void startPrompt(){
 			}
 		}
 		
-		if(i < 8){
-			argvNew[i] = NULL;
-		} else {
-			cerr << "This will never fire" << endl;
-		}
+		argvNew[i] = NULL;
 		
 		if(strcmp(argvNew[0], "quit") == 0){
 			cout << "Bye!" << endl;
@@ -75,11 +75,11 @@ void startPrompt(){
 				if(checkLength(argvNew[1], MAX_FIRST) && checkLength(argvNew[2], MAX_LAST) && checkLength(argvNew[3], MAX_LOCATION)){
 					Message *m = new Message();
 					int size = strlen(argvNew[0]) + strlen(argvNew[1]) + 
-							strlen(argvNew[2]) + strlen(argvNew[3]);
+							strlen(argvNew[2]) + strlen(argvNew[3]) + 3;
 					char *cmd = (char *) calloc(size, sizeof(char));
-					strcpy(cmd, argvNew[0]);
-					strcat(cmd, argvNew[1]);
-					strcat(cmd, argvNew[2]);
+					strcpy(cmd, argvNew[0]); strcat(cmd, " ");
+					strcat(cmd, argvNew[1]); strcat(cmd, " ");
+					strcat(cmd, argvNew[2]); strcat(cmd, " ");
 					strcat(cmd, argvNew[3]);
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
@@ -89,15 +89,14 @@ void startPrompt(){
 				cout << "Error: createmissing expects firstName lastName lastKnownLocation" << endl;
 			}
 		} else if(strcmp(argvNew[0], "login") == 0){
-			if((argvNew[1] != NULL) && 
-			 (argvNew[2] != NULL)){
+			if((argvNew[1] != NULL) && (argvNew[2] != NULL)){
 				if(checkLength(argvNew[1], MAX_USER) && checkLength(argvNew[2], MAX_USER)){
 					Message *m = new Message();
 					int size = strlen(argvNew[0]) + strlen(argvNew[1]) + 
-							strlen(argvNew[2]);
+							strlen(argvNew[2]) + 2;
 					char *cmd = (char *) calloc(size, sizeof(char));
-					strcpy(cmd, argvNew[0]);
-					strcat(cmd, argvNew[1]);
+					strcpy(cmd, argvNew[0]); strcat(cmd, " ");
+					strcat(cmd, argvNew[1]); strcat(cmd, " ");
 					strcat(cmd, argvNew[2]);
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
@@ -112,10 +111,10 @@ void startPrompt(){
 				if(checkLength(argvNew[1], MAX_FIRST) && checkLength(argvNew[2], MAX_LAST)) {
 					Message *m = new Message();
 					int size = strlen(argvNew[0]) + strlen(argvNew[1]) + 
-							strlen(argvNew[2]);
+							strlen(argvNew[2]) + 2;
 					char *cmd = (char *) calloc(size, sizeof(char));
-					strcpy(cmd, argvNew[0]);
-					strcat(cmd, argvNew[1]);
+					strcpy(cmd, argvNew[0]); strcat(cmd, " ");
+					strcat(cmd, argvNew[1]); strcat(cmd, " ");
 					strcat(cmd, argvNew[2]);
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
@@ -130,10 +129,10 @@ void startPrompt(){
 				if(checkLength(argvNew[1], MAX_USER) && checkLength(argvNew[2], MAX_USER)) {
 					Message *m = new Message();
 					int size = strlen(argvNew[0]) + strlen(argvNew[1]) + 
-							strlen(argvNew[2]);
+							strlen(argvNew[2]) + 2;
 					char *cmd = (char *) calloc(size, sizeof(char));
-					strcpy(cmd, argvNew[0]);
-					strcat(cmd, argvNew[1]);
+					strcpy(cmd, argvNew[0]); strcat(cmd, " ");
+					strcat(cmd, argvNew[1]); strcat(cmd, " ");
 					strcat(cmd, argvNew[2]);
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
@@ -149,11 +148,11 @@ void startPrompt(){
 				if(checkLength(argvNew[1], MAX_ID) && checkLength(argvNew[2], MAX_FIRST) && checkLength(argvNew[3], MAX_LAST)) {
 					Message *m = new Message();
 					int size = strlen(argvNew[0]) + strlen(argvNew[1]) + 
-							strlen(argvNew[2]) + strlen(argvNew[3]);
+							strlen(argvNew[2]) + strlen(argvNew[3]) +3;
 					char *cmd = (char *) calloc(size, sizeof(char));
-					strcpy(cmd, argvNew[0]);
-					strcat(cmd, argvNew[1]);
-					strcat(cmd, argvNew[2]);
+					strcpy(cmd, argvNew[0]); strcat(cmd, " ");
+					strcat(cmd, argvNew[1]); strcat(cmd, " ");
+					strcat(cmd, argvNew[2]); strcat(cmd, " ");
 					strcat(cmd, argvNew[3]);
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
@@ -168,10 +167,10 @@ void startPrompt(){
 				if(checkLength(argvNew[1], MAX_USER) && checkLength(argvNew[2], MAX_USER)) {
 					Message *m = new Message();
 					int size = strlen(argvNew[0]) + strlen(argvNew[1]) + 
-							strlen(argvNew[2]);
+							strlen(argvNew[2]) + 2;
 					char *cmd = (char *) calloc(size, sizeof(char));
-					strcpy(cmd, argvNew[0]);
-					strcat(cmd, argvNew[1]);
+					strcpy(cmd, argvNew[0]); strcat(cmd, " ");
+					strcat(cmd, argvNew[1]); strcat(cmd, " ");
 					strcat(cmd, argvNew[2]);
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
@@ -179,6 +178,136 @@ void startPrompt(){
 				}
 			} else{
 				cout << "Error: password expects oldPassword newPassword" << endl;
+			}
+		} else if(strcmp(argvNew[0], "removemissing") == 0){
+			if(argvNew[1] != NULL){
+				if(checkLength(argvNew[1], MAX_ID)) {
+					Message *m = new Message();
+					int size = strlen(argvNew[0]) + strlen(argvNew[1]) + 1;
+					char *cmd = (char *) calloc(size, sizeof(char));
+					strcpy(cmd, argvNew[0]); strcat(cmd, " ");
+					strcat(cmd, argvNew[1]);
+					m->setCmd(cmd);
+					nl -> FromApplicationLayer(m);
+					//TODO: wait for response, display it
+				}
+			} else{
+				cout << "Error: removemissing expects id" << endl;
+			}
+		} else if(strcmp(argvNew[0], "removebody") == 0){
+			if(argvNew[1] != NULL){
+				if(checkLength(argvNew[1], MAX_ID)) {
+					Message *m = new Message();
+					int size = strlen(argvNew[0]) + strlen(argvNew[1]) + 1;
+					char *cmd = (char *) calloc(size, sizeof(char));
+					strcpy(cmd, argvNew[0]); strcat(cmd, " ");
+					strcat(cmd, argvNew[1]);
+					m->setCmd(cmd);
+					nl -> FromApplicationLayer(m);
+					//TODO: wait for response, display it
+				}
+			} else{
+				cout << "Error: removebody expects id" << endl;
+			}
+		} else if(strcmp(argvNew[0], "createbody") == 0){
+			if((argvNew[1] != NULL) && (argvNew[2] != NULL) &&
+			(argvNew[3] != NULL) && (argvNew[4] != NULL)){
+				if(checkLength(argvNew[1], MAX_ID) && checkLength(argvNew[2], MAX_LOCATION) && 
+				 checkLength(argvNew[3], MAX_FIRST) && checkLength(argvNew[4], MAX_LAST)) {
+					Message *m = new Message();
+					int size = strlen(argvNew[0]) + strlen(argvNew[1]) + 
+							strlen(argvNew[2]) + strlen(argvNew[3]) + strlen(argvNew[4]) + 4;
+					char *cmd = (char *) calloc(size, sizeof(char));
+					strcpy(cmd, argvNew[0]); strcat(cmd, " ");
+					strcat(cmd, argvNew[1]); strcat(cmd, " ");
+					strcat(cmd, argvNew[2]); strcat(cmd, " ");
+					strcat(cmd, argvNew[3]); strcat(cmd, " ");
+					strcat(cmd, argvNew[4]);
+					m->setCmd(cmd);
+					nl -> FromApplicationLayer(m);
+					//TODO: wait for response, display it
+				}
+			} else if((argvNew[1] != NULL) && (argvNew[2] != NULL)){
+				if(checkLength(argvNew[1], MAX_ID) && checkLength(argvNew[2], MAX_LOCATION)) {
+					Message *m = new Message();
+					int size = strlen(argvNew[0]) + strlen(argvNew[1]) + 
+							strlen(argvNew[2]) + 2;
+					char *cmd = (char *) calloc(size, sizeof(char));
+					strcpy(cmd, argvNew[0]); strcat(cmd, " ");
+					strcat(cmd, argvNew[1]); strcat(cmd, " ");
+					strcat(cmd, argvNew[2]);
+					m->setCmd(cmd);
+					nl -> FromApplicationLayer(m);
+					//TODO: wait for response, display it
+				}
+			} else{
+				cout << "Error: createbody expects id location [firstName lastName]" << endl;
+			}
+		} else if((strcmp(argvNew[0], "addphoto") == 0) || (strcmp(argvNew[0], "addbodyphoto") == 0)){
+			if((argvNew[1] != NULL) && (argvNew[2] != NULL)){
+				if(checkLength(argvNew[1], MAX_ID)){
+					Message *m = new Message();
+					int size = strlen(argvNew[0]) + strlen(argvNew[1]) + 1;
+					char *cmd = (char *) calloc(size, sizeof(char));
+					strcpy(cmd, argvNew[0]); strcat(cmd, " ");
+					strcat(cmd, argvNew[1]);
+					m->setCmd(cmd);
+					
+					ifstream pic;
+					pic.open(argvNew[2], ios::in | ios::binary | ios::ate);
+	
+					ifstream::pos_type newsize;
+					char *img;
+	
+					if(pic.is_open()){
+						newsize = pic.tellg();
+						img = new char[newsize];
+						pic.seekg(0, ios::beg);
+						pic.read(img, size);
+						pic.close();
+						m->setImg(img, (long)size);
+						delete[] img;
+						nl -> FromApplicationLayer(m);
+						//TODO: wait for response, display it
+					} else{
+						cout << "Unable to load file!" << endl;
+					}
+				}
+			} else{
+				if(strcmp(argvNew[0], "addphoto") == 0){
+					cout << "Error: addphoto expects id filename" << endl;
+				} else{
+					cout << "Error: addbodyphoto expects id filename" << endl;
+				}
+			}
+		} else if(strcmp(argvNew[0], "dlmissingphoto") == 0){
+			if((argvNew[1] != NULL) && (argvNew[2] != NULL)){
+				if(checkLength(argvNew[1], MAX_ID)) {
+					Message *m = new Message();
+					int size = strlen(argvNew[0]) + strlen(argvNew[1]) + 1;
+					char *cmd = (char *) calloc(size, sizeof(char));
+					strcpy(cmd, argvNew[0]); strcat(cmd, " ");
+					strcat(cmd, argvNew[1]);
+					m->setCmd(cmd);
+					nl -> FromApplicationLayer(m);
+					//TODO: wait for response, display it
+					Message *resp = new Message(); //fromLower
+					long newSize = resp->getContentSize();
+					char *newImg = (char *) calloc(newSize, sizeof(char));
+					memcpy(newImg, resp->getContent(), newSize);
+					
+					ofstream newPic;
+					newPic.open(argvNew[2], ios::out|ios::binary);
+					if(newPic.is_open()){
+						newPic.write(newImg, newSize);
+						newPic.close();
+						cout << "File saved to " << argvNew[2] << endl;
+					} else{
+						cout << "Error writing file!" << endl;
+					}
+				}
+			} else{
+				cout << "Error: dlmissingphoto expects id" << endl;
 			}
 		} else{
 			cout << "Bad command!" << endl;

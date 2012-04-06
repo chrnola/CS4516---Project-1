@@ -2,7 +2,7 @@
 
 all: client server
 
-client: client.o PhysicalLayer.o NetworkLayer.o Message.o Utils.o
+client: client.o PhysicalLayer.o NetworkLayer.o Message.o Utils.o Packet.o
 	g++ client.o PhysicalLayer.o NetworkLayer.o Message.o Packet.o Utils.o -o client
 
 client.o: client.cpp did
