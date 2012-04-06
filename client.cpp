@@ -29,10 +29,6 @@ void startPrompt(){
 		exit(-1);
 	}
 	
-	if(() != NULL){
-		
-	}
-	
 }
 
 void testPL(){
