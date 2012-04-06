@@ -11,6 +11,11 @@
 class Frame;
 class Packet;
 
+extern Packet** sendPackets, ** recvPackets;
+extern Frame** sendFrames, ** recvFrames;
+extern char sPNum, sPCur, rPNum, rPCur, sFNum, sFCur, rFNum, rFCur;
+extern pthread_mutex_t mutSP, mutRP, mutSF, mutRF;
+
 #include "did.h"
 
 #define MAX_READY 20

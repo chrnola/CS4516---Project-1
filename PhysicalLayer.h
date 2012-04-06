@@ -10,6 +10,10 @@
 #define PHYSICAL_H_
 #include <pthread.h>
 
+extern Frame** sendFrames, ** recvFrames;
+extern char sFNum, sFCur, rFNum, rFCur;
+extern pthread_mutex_t mutSF, mutRF;
+
 class PhysicalLayer {
 private:
 	int sockfd;
