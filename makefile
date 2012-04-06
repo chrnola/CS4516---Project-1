@@ -2,9 +2,10 @@
 
 all: client server
 
-client: client.o PhysicalLayer.o NetworkLayer.o Message.o Utils.o
-	g++ client.o PhysicalLayer.o NetworkLayer.o Message.o Packet.o Utils.o -o client
+client: client.cpp PhysicalLayer.cpp NetworkLayer.cpp Message.cpp Utils.cpp Packet.cpp DataLink.cpp Frame.cpp did
+	g++ client.cpp PhysicalLayer.cpp NetworkLayer.cpp Message.cpp Packet.cpp Utils.cpp DataLink.cpp Frame.cpp -o client -g
 
+<<<<<<< HEAD
 client.o: client.cpp did
 	g++ -c client.cpp
 	
@@ -31,20 +32,21 @@ server.o: server.cpp did.h
 
 db.o: db.cpp did
 	g++ -c -I /usr/local/mysql-current/include db.cpp
+=======
+server: server.cpp PhysicalLayer.cpp db.cpp
+	g++ -o server -g server.cpp PhysicalLayer.cpp db.cpp -Wall -L /usr/local/mysql-current/lib/mysql -lmysqlclient -ldl
+>>>>>>> eac6d30e3f80fddbe2d356983bb99e58e0e64a8a
 
 did: did.h Frame.h Packet.h DataLink.h NetworkLayer.h PhysicalLayer.h Message.h Utils.h
 	
 ray: DataLink.cpp Frame.cpp Packet.cpp Message.cpp ray.cpp did
 	g++ ray.cpp DataLink.cpp Frame.cpp Packet.cpp Message.cpp Utils.cpp -o test -g -pthread
 	
-chris: db.o Message.o chris.o did
-	g++ chris.o db.o Message.o Utils.cpp -o chris -g -L /usr/local/mysql-current/lib/mysql -lmysqlclient -ldl
+chris: db.cpp Message.cpp chris.cpp Utils.cpp did
+	g++ chris.cpp db.cpp Message.cpp Utils.cpp -o chris -g -L /usr/local/mysql-current/lib/mysql -lmysqlclient -ldl
 	
-chris.o: chris.cpp
-	g++ -c chris.cpp
-	
-aaron: aaron.cpp PhysicalLayer.o did
-	g++ aaron.cpp PhysicalLayer.o -o aaron -pthread
+aaron: aaron.cpp PhysicalLayer.cpp did
+	g++ aaron.cpp PhysicalLayer.cpp -o aaron -g -pthread
 
 clean:
 	rm *.o *~ *.h.gch -f

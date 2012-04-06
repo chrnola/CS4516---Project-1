@@ -13,6 +13,12 @@ class Packet;
 
 #include "did.h"
 
+using namespace std;
+
+extern queue<Packet*> sendPackets, recvPackets;
+extern queue<Frame*> sendFrames, recvFrames;
+extern pthread_mutex_t mutSP, mutRP, mutSF, mutRF;
+
 #define MAX_READY 20
 
 // make some of my own signals
@@ -41,11 +47,6 @@ public:
 	void StopTimer(unsigned short k);
 	void EnableNetworkLayer(void);
 	void DisableNetworkLayer(void);
-	
-	// testing variables
-	Packet** s_packets;
-	Packet** r_packets;
-	Frame** r_frames;
 	
 private:
 	Frame** window;

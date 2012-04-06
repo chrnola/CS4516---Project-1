@@ -13,7 +13,7 @@
 
 using namespace std;
 
-void testDB();
+void handlePacket(Message *m);
 void testPL();
 
 Packet **sendPackets, **recvPackets;
@@ -47,45 +47,6 @@ void *RunPLThread(void* ptr){
 	PhysicalLayer *pl = (PhysicalLayer*) ptr;
 	pl->run();
 	
-}
-
-
-void testDB(){
-	cout << "Connecting to database" << endl;
-	bool connected = connectToDB();
-	char *bl;
-	if (connected){
-		cout << "Connected!" << endl;
-		//int rws = getRowCountPublic();
-		//cout << createMissing("Bob", "Smith", "Worcester, MA") << endl;
-		//cout << locationsWithMissing() << endl;
-		//if(createMissingAdmin("000000008", "Haverhill, MA", "John", "Dough")){
-		//	cout << "it worked!" << endl;
-		//}
-		//if(createMissingAdmin("000000009", "Acton, MA", NULL, NULL)){
-		//	cout << "it also worked!" << endl;
-		//}
-		//if(positiveID("000000009", "Bill", "Jones")){
-		//	cout << "\\m/" << endl;
-		//}
-		//cout << locationsWithMissing() << endl;
-		//if(removeFromAdmin("000000002")){
-		//	cout << "it wurk'd!" << endl;
-		//}
-		//if(removeFromPublic("5")){
-		//	cout << "it also wurk'd!" << endl;
-		//}
-		//if(newUser("boss", "abc123")){
-		//	cout << "yhusssss" << endl;
-		//}
-		if(changePassword("boss", "abc123", "123abc")){
-			cout << "yay!" << endl;
-		}
-		
-	} else{
-		cout << "Connection error!" << endl;
-	}
-	disconnectFromDB();
 }
 
 

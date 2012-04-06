@@ -70,14 +70,7 @@ DataLink::DataLink() {
 	currReady = 0;
 	nextSend = 0;
 	frameExpect = 0;
-	
-	// should only send 1 packet for testing
-	s_packets = (Packet**) calloc(1, sizeof(Packet*));
-	// should only ever receive 1 packet
-	r_packets = (Packet**) calloc(1, sizeof(Packet*));
-	// receive up to 2 frames
-	r_frames = (Frame**) calloc(2, sizeof(Frame*));
-	
+		
 	Packet* p = new Packet();
 	p->type = data;
 	p->seq = 30;
@@ -88,7 +81,9 @@ DataLink::DataLink() {
 	char* str = const_cast<char*>(s.c_str());
 	p->payload = (unsigned char*) strcpy((char*)p->payload, str);
 	
-	s_packets[0] = p;
+	pthread_mutex_lock(&mutSP);
+	sendPackets.push(p);
+	pthread_mutex_unlock(&mutSP);
 	frmTimeout = false;
 	frmArrive = false;
 	pktArrive = false;
@@ -115,8 +110,6 @@ DataLink::DataLink() {
 DataLink::~DataLink() {
 	free(window);
 	free(ready);
-	free(s_packets);
-	free(r_packets);
 }
 
 void DataLink::GoBack1() {
@@ -145,15 +138,14 @@ void DataLink::GoBack1() {
 				if(currReady < MAX_READY) currReady++; else currReady = 0;
 				numReady--;
 				if(numReady < MAX_READY - 2) EnableNetworkLayer();
-				Frame* f = r_frames[0];
-				r_frames[0] = NULL;
+				pthread_mutex_lock(&mutRF);
+				Frame* f = recvFrames.front();
+				recvFrames.pop();
+				pthread_mutex_unlock(&mutRF);
 				StopTimer(0);
 				free(f);
 			} else if(r->seq == frameExpect) {
-				if(r->end == false) {
-					r_frames[1] = r_frames[0];
-					r_frames[0] = NULL;
-				} else {
+				if(r->end == true) {
 					ToNetworkLayer();
 				}
 				inc(frameExpect);
@@ -279,7 +271,10 @@ Event* DataLink::WaitForEvent(Event* e) {
 
 Packet* DataLink::FromNetworkLayer(Packet* p) {
 	if(!pktSend) return NULL;
-	p = s_packets[0];
+	pthread_mutex_lock(&mutSP);
+	p = sendPackets.front();
+	sendPackets.pop();
+	pthread_mutex_unlock(&mutSP);
 	pktSend = false;
 	return p;
 }
@@ -287,19 +282,25 @@ Packet* DataLink::FromNetworkLayer(Packet* p) {
 void DataLink::ToNetworkLayer() {
 	if(pktArrive) return;
 	Packet* pkt = (Packet*) calloc(1, sizeof(Packet));
-	if(r_frames[1] != NULL) {
-		unsigned char* f1 = r_frames[1]->payload;
-		unsigned char* f2 = r_frames[0]->payload;
-		char* pload = (char*) calloc(r_frames[0]->payloadLength + r_frames[1]->payloadLength + 8, sizeof(char));
-		memcpy(pload, f1, r_frames[1]->payloadLength);
-		memcpy(pload + r_frames[1]->payloadLength, f2, r_frames[0]->payloadLength + 8);
+	pthread_mutex_lock(&mutRF);
+	Frame* fr1 = recvFrames.front();
+	recvFrames.pop();
+	Frame* fr2 = recvFrames.front();
+	recvFrames.pop();
+	pthread_mutex_unlock(&mutRF);
+	if(fr2 != NULL) {
+		unsigned char* f1 = fr1->payload;
+		unsigned char* f2 = fr2->payload;
+		char* pload = (char*) calloc(fr1->payloadLength + fr2->payloadLength + 8, sizeof(char));
+		memcpy(pload, f1, fr1->payloadLength);
+		memcpy(pload + fr1->payloadLength, f2, fr2->payloadLength + 8);
 		pkt = Packet:: Unserialize((char*) pload);
 	} else {
-		pkt = Packet::Unserialize((char*) r_frames[0]->payload);
+		pkt = Packet::Unserialize((char*) fr1->payload);
 	}
-	r_frames[0] = NULL;
-	r_frames[1] = NULL;
-	r_packets[0] = pkt;
+	pthread_mutex_lock(&mutRP);
+	recvPackets.push(pkt);
+	pthread_mutex_unlock(&mutRP);
 	pkt->Print();
 	pktArrive = true;
 	raise(SIGPRCV);
@@ -307,7 +308,10 @@ void DataLink::ToNetworkLayer() {
 
 Frame* DataLink::FromPhysicalLayer(Frame* r) {
 	if(!frmArrive) return NULL;
-	r = r_frames[0];
+	pthread_mutex_lock(&mutRF);
+	r = recvFrames.front();
+	recvFrames.pop();
+	pthread_mutex_unlock(&mutRF);
 	frmArrive = false;
 	return r;
 }
@@ -318,7 +322,9 @@ void DataLink::ToPhysicalLayer(Frame* s) {
 	window[0] = s;
 	numWindow++;
 	raise(SIGFSND);
-	r_frames[0] = s;
+	pthread_mutex_lock(&mutRF);
+	recvFrames.push(s);
+	pthread_mutex_unlock(&mutRF);
 	raise(SIGFRCV);
 	/*Packet* p = Packet::Unserialize((char*) s->payload);
 	bool p1type = (p->type+0 == data);
