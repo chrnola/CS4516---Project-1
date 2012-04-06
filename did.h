@@ -26,6 +26,12 @@
 #define MAX_READY 20
 #define MAX_SEQ 65535
 
+#define MAX_FIRST 15
+#define MAX_LAST 20
+#define MAX_LOCATION 36
+#define MAX_ID 9
+#define MAX_USER 20
+
 #define inc(k) if (k < MAX_SEQ) k++; else k = 0;
 
 enum Type{data, ack};
