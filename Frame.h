@@ -20,7 +20,8 @@ public:
 
 	Frame();
 	virtual ~Frame();
-	unsigned char* Serialize();
+	void Print(void);
+	unsigned char* Serialize(void);
 	static Frame* Unserialize(char* d);
 };
 
