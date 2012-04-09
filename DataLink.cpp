@@ -158,6 +158,7 @@ void DataLink::GoBackN() {
 				inc(nextSend);
 			}
 			break;
+		case none: break;
 		}
 	}
 }
