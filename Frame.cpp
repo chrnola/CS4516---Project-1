@@ -21,7 +21,8 @@ void Frame::Print() {
 	cout << "\nFrame sequence number: " << this->seq;
 	cout << "\nFrame is end: " << this->end;
 	cout << "\nFrame payload length is: " << this->payloadLength;
-	cout << "\nFrame message: " << this->payload << "\n";
+	if(this->payloadLength > 0)
+		cout << "\nFrame message: " << this->payload << "\n";
 }
 
 /*
