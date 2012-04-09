@@ -14,8 +14,8 @@ using namespace std;
 
 extern queue<Packet*> sendPackets, recvPackets;
 extern pthread_mutex_t mutSP, mutRP;
-queue<Packet*> buildPackets;
-volatile bool readyToBuild = false;
+//queue<Packet*> buildPackets;
+//volatile bool readyToBuild = false;
 
 class NetworkLayer {
 	public:

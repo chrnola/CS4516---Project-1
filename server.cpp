@@ -16,7 +16,7 @@ class Message;
 
 using namespace std;
 
-void handlePacket(Message *m);
+void handleMessage(Message *m);
 void testPL();
 
 
@@ -24,6 +24,7 @@ queue<Packet*> sendPackets, recvPackets;
 queue<Frame*> sendFrames, recvFrames;
 pthread_mutex_t mutSP, mutRP, mutSF, mutRF;
 
+bool connected = false;
 bool auth = false;
 char *user;
 
@@ -48,7 +49,7 @@ int main(){
 	here. Past here, we're a child with a valid, connected socket file descriptor. */
 
 	
-	bool connected = connectToDB(); //true if connected
+	connected = connectToDB(); //true if connected
 	nl = new NetworkLayer();
 	
 	pl = new PhysicalLayer(0);
@@ -57,6 +58,11 @@ int main(){
 
 	dl = new DataLink();
 	//pthread_create(&DL_thread, NULL, RunDLThread, dl);
+	
+	while(connected){
+		Message *incoming = nl -> FromDataLinkLayer();
+		handleMessage(incoming);
+	}
 	
 	disconnectFromDB();
 	
@@ -76,7 +82,7 @@ void *RunDLThread(void* ptr){
 /*
  * Author: Chris Pinola
  */
-void handlePacket(Message *inm){
+void handleMessage(Message *inm){
 	char *cmd = inm->getCmd(); //extract CMD from packet
 	char *tmp; // just to hold string tokens
 	char *argvNew[8]; // holds onto the various arguments given by the user
@@ -106,6 +112,8 @@ void handlePacket(Message *inm){
 		if(strcmp(argvNew[0], "locations") == 0){
 			m->setCmd(locationsWithMissing());
 			nl -> FromApplicationLayer(m);
+		} else if(strcmp(argvNew[0], "quit") == 0){
+			connected = false;
 		} else if(strcmp(argvNew[0], "createmissing") == 0){
 			long newID;
 			if((newID = createMissing(argvNew[1], argvNew[2], argvNew[3])) <= 0){

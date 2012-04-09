@@ -24,7 +24,7 @@ class Message{
 		unsigned char *getContentRaw();
 		long getContentSize();
 		
-		unsigned char *serialize();
+		unsigned char *serialize(short size);
 		static Message* unserialize(unsigned char *pkt);
 };
 

@@ -28,12 +28,10 @@ void NetworkLayer::SendAPacket(Packet *p){
 	//useless
 }
 
-
-
 void NetworkLayer::FromApplicationLayer(Message *m){
-	unsigned char *mess = m -> serialize();
 	short mLength = m -> getContentSize();
 	mLength += strlen(m -> getCmd());
+	unsigned char *mess = m -> serialize(mLength);
 	
 	//make packets (and be greedy about it)!
 	int pToMake = mLength / MAX_PACKET;
@@ -51,6 +49,7 @@ void NetworkLayer::FromApplicationLayer(Message *m){
 		} else{
 			p->end = false;
 		}
+		p->payload = (unsigned char *) calloc(MAX_PACKET, sizeof(unsigned char));
 		memcpy(p->payload, mess, MAX_PACKET);
 		mess += MAX_PACKET;
 		p->payloadLength = (unsigned short) MAX_PACKET;
@@ -64,6 +63,7 @@ void NetworkLayer::FromApplicationLayer(Message *m){
 		p->end = true;
 		inc(s);
 		p->seq = s;
+		p->payload = (unsigned char *) calloc(leftover, sizeof(unsigned char));
 		memcpy(p->payload, mess, leftover);
 		p->payloadLength = (unsigned short) leftover;
 		NetworkLayer::ToDataLinkLayer(p);
@@ -72,11 +72,11 @@ void NetworkLayer::FromApplicationLayer(Message *m){
 }
 
 void NetworkLayer::ToApplicationLayer(unsigned char *message){
-	Message *m = Message::unserialize(message);
-	//to app layer?
-	pthread_mutex_lock(&mutSP);
-	
-	pthread_mutex_unlock(&mutSP);
+// 	Message *m = Message::unserialize(message);
+// 	//to app layer?
+// 	pthread_mutex_lock(&mutSP);
+// 	
+// 	pthread_mutex_unlock(&mutSP);
 }
 
 void NetworkLayer::ToDataLinkLayer(Packet *p){
@@ -105,11 +105,12 @@ Packet *ReceiveAPacket(queue<Packet*> *buildBuffer){
 
 Message *Assemble(queue<Packet*> *buildBuffer){
 	Message *result = (Message *) malloc(sizeof(char) * MAX_PACKET * buildBuffer->size());
-	for(int i = 0; i < buildBuffer->size(); i++){
+	for(int i = 0; i < (int)buildBuffer->size(); i++){
 		Packet *tPack = buildBuffer->front();
 		buildBuffer->pop();
 		Message *current = result + (i * MAX_PACKET * sizeof(char));
-		*current = tPack->payload;
+		memcpy(current, tPack->payload, tPack->payloadLength);
+		//*current = tPack->payload;
 	}
 	
 	return result;

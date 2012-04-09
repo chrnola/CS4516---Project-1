@@ -60,9 +60,10 @@ unsigned char *Message::getContentRaw(){
 	return content;
 }
 
-unsigned char *Message::serialize(){
-	unsigned char *data = (unsigned char*) calloc(strlen((char *) this), sizeof(unsigned char));
-	strcat((char *) data, (char *) this);
+unsigned char *Message::serialize(short size){
+	unsigned char *data = (unsigned char*) calloc(size, sizeof(unsigned char));
+	memcpy(data, (char *) this, size);
+	//strcat((char *) data, (char *) this);
 	return data;
 }
 
