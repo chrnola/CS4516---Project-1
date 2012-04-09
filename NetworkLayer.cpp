@@ -84,7 +84,9 @@ Packet *ReceiveAPacket(queue<Packet*> *buildBuffer){
 	Packet *result;
 	
 	while(!hasPacket){
+		cout << "Gonna lock!" << endl;
 		pthread_mutex_lock(&mutRP);
+		cout << "Yeah I locked" << endl;
 		if(!recvPackets.empty()){
 			result = recvPackets.front();
 			buildBuffer->push(result);

@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
 	// once connected on well known port...	
 	nl = new NetworkLayer();
 	dl = new DataLink();
-	//pl = new PhysicalLayer();
+	pl = new PhysicalLayer("localhost");
 	
 	pthread_mutex_init(&mutSP, NULL);
 	pthread_mutex_init(&mutRP, NULL);
