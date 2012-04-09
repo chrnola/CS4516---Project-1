@@ -82,30 +82,11 @@ void HandleFrameError(int sig) {
  * Author: Ray Short
  */
 DataLink::DataLink() {
-	//window = (Frame**) calloc(1, sizeof(Frame*)); // 1-sliding window
-	//window = (Frame**) calloc(4, sizeof(Frame*)); // 4-sliding window
-	//ready = (Frame**) calloc(MAX_READY, sizeof(Frame*)); // for frames ready to send
-	//numWindow = 0;
-	//currWindow = 0;
-	//numReady = 0;
-	//currReady = 0;
+	numWindow = 0;
+	numReady = 0;
 	nextSend = 0;
 	frameExpect = 0;
 		
-	/*Packet* p = new Packet();
-	p->type = data;
-	p->seq = 30;
-	p->end = true;
-	p->payloadLength = 186;
-	p->payload = (unsigned char*) calloc(200, sizeof(unsigned char));
-	string s = "Yay it works through layers n stuff. This is quite long to test some stuffYay it works through layers n stuff. This is quite long to test some stuffYay it works through layers n stuff.\n";
-	char* str = const_cast<char*>(s.c_str());
-	p->payload = (unsigned char*) strcpy((char*)p->payload, str);
-	
-	pthread_mutex_lock(&mutSP);
-	sendPackets.push(p);
-	//sendPackets.front()->Print();
-	pthread_mutex_unlock(&mutSP);*/
 	frmTimeout = false;
 	frmArrive = false;
 	pktArrive = false;
@@ -125,16 +106,12 @@ DataLink::DataLink() {
 	pthread_mutex_init(&mutFSnd, NULL);
 	pthread_mutex_init(&mutPSnd, NULL);
 	pthread_mutex_init(&mutFErr, NULL);
-	
-	// make a dummy network layer thread that will make and send packets to the DLL
 }
 
 /*
  * Author: Ray Short
  */
 DataLink::~DataLink() {
-	//free(window);
-	//free(ready);
 }
 
 /*
@@ -161,13 +138,14 @@ void DataLink::GoBack1() {
 		event = WaitForEvent(event);
 		if(*event == arrival) {
 			r = FromPhysicalLayer(r);
+			//cout << "received is";
 			//r->Print();
 			//cout << (r->seq == frameExpect) << " seq:expect " << r->seq << ":" << frameExpect;
 			//fflush(stdout);
 			if(r->type == ack) {
+				//cout << "Got an ack";
 				StopTimer(0);
 				ready.pop();
-				//if(numReady < MAX_READY - 2) EnableNetworkLayer();
 				// remove ack from queue of received frames
 				RemoveAck();
 				pthread_mutex_lock(&mutRF);
@@ -176,12 +154,13 @@ void DataLink::GoBack1() {
 				pthread_mutex_unlock(&mutRF);			
 				free(f);
 			} else if(r->seq == frameExpect) {
+				//cout << "this is the expected frame";
 				if(r->end == true) {
 					ToNetworkLayer();
-				} else {
-					//recvFrames.push(r);
 				}
-				SendAck();
+				//cout << "Sending an ack";
+				//SendAck();
+				//cout << "Ack sent";
 				inc(frameExpect);
 			}
 		}
@@ -201,8 +180,10 @@ void DataLink::GoBack1() {
 /*
  * Author: Ray Short
  */
+// implement once go back 1 is working
+// dummy code copied from tanenbaum
 void DataLink::GoBackN() {
-  /*unsigned short ackExpect = 0;
+  unsigned short ackExpect = 0;
 	Frame r;
 	Packet buffer[MAX_SEQ + 1];
 	int numBuff = 0, i = 0;
@@ -214,13 +195,13 @@ void DataLink::GoBackN() {
 		case pktReady:
 			FromNetworkLayer(&buffer[nextSend]);
 			numBuff++;
-			SendData(nextSend, frameExpect, buffer);
+			ToPhysicalLayer(sendFrames.front());
 			inc(nextSend);
 			break;
 		case arrival:
 			FromPhysicalLayer(&r);
 			if(r.seq == frameExpect) {
-				ToNetworkLayer(r.payload);
+				ToNetworkLayer();
 				inc(frameExpect);
 			}
 			if(r.type == ack && r.seq == ackExpect) {
@@ -233,17 +214,12 @@ void DataLink::GoBackN() {
 		case timeout:
 			nextSend = ackExpect;
 			for(i = 0;i < numBuff;i++) {
-				SendData(nextSend, frameExpect, buffer);
+				ToPhysicalLayer(sendFrames.front());
 				inc(nextSend);
 			}
 			break;
 		}
-
-		if(numBuff < MAX_SEQ)
-			EnableNetworkLayer();
-		else
-			DisableNetworkLayer();
-	}*/
+	}
 }
 
 /*
@@ -253,6 +229,10 @@ void DataLink::MakeFrames(Packet* p) {
 	if(p == NULL) return;
 	unsigned char* currPacket;
 	Frame* f1 = new Frame(), * f2 = new Frame();
+	
+	//cout << "Got packet";
+	//p->Print();
+	//cout << "Making into frames\n";
 	
 	unsigned short pktLen = p->payloadLength + PACKET_HEAD;
 	currPacket = p->Serialize();
@@ -265,6 +245,7 @@ void DataLink::MakeFrames(Packet* p) {
 		f1->end = true;
 		inc(nextSend);
 		ready.push(f1);
+		f1->Print();
 	} else {
 		f1->payload = (unsigned char*) calloc(MAX_FRAME, sizeof(unsigned char));
 		f2->payload = (unsigned char*) calloc(pktLen - MAX_FRAME, sizeof(unsigned char));
@@ -275,6 +256,7 @@ void DataLink::MakeFrames(Packet* p) {
 		f1->end = false;
 		inc(nextSend);
 		ready.push(f1);
+		f1->Print();
 		memcpy(f2->payload, currPacket + MAX_FRAME, pktLen - MAX_FRAME + 8);
 		f2->type = data;
 		f2->seq = nextSend;
@@ -282,8 +264,8 @@ void DataLink::MakeFrames(Packet* p) {
 		f2->end = true;
 		inc(nextSend);
 		ready.push(f2);
+		f2->Print();
 	}
-	//if(numReady > MAX_READY - 2) DisableNetworkLayer();
 }
 
 /*
@@ -296,13 +278,6 @@ void DataLink::SendAck() {
 	f->end = true;
 	f->payloadLength = 0;
 	ToPhysicalLayer(f);
-}
-
-/*
- * Author: Ray Short
- */
-void DataLink::SendData(unsigned int frame_num, unsigned int frame_expect, Packet buffer[]) {
-
 }
 
 /*
@@ -386,6 +361,8 @@ Frame* DataLink::FromPhysicalLayer(Frame* r) {
 void DataLink::ToPhysicalLayer(Frame* s) {
 	if(numWindow == 1) return; // 1-sliding window
 	//if(numWindow == 4) return; // 4-sliding window
+	//cout << "Sending frame";
+	//s->Print();
 	window.push(s);
 	numWindow++;
 	pthread_mutex_lock(&mutSF);
@@ -396,13 +373,8 @@ void DataLink::ToPhysicalLayer(Frame* s) {
 	recvFrames.push(s);
 	pthread_mutex_unlock(&mutRF);
 	raise(SIGFRCV);
-	/*Packet* p = Packet::Unserialize((char*) s->payload);
-	bool p1type = (p->type+0 == data);
-	cout << "\nPacket is data: " << p1type;
-	cout << "\nPacket sequence number: " << p->seq;
-	cout << "\nPacket is end: " << p->end;
-	cout << "\nPacket payload length is: " << p->payloadLength;
-	cout << "\nPacket message: " << p->payload << "\n";*/
+	//Packet* p = Packet::Unserialize((char*) s->payload);
+	//p->Print();
 }
 
 /*

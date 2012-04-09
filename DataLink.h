@@ -38,7 +38,6 @@ public:
 	void GoBackN(void);
 	void MakeFrames(Packet* p);
 	void SendAck(void);
-	void SendData(unsigned int frame_num, unsigned int frame_expect, Packet buffer[]);
 	Event* WaitForEvent(Event* e);
 	Packet* FromNetworkLayer(Packet* p);
 	void ToNetworkLayer(void);
