@@ -37,6 +37,7 @@ public:
 	void GoBack1(void);
 	void GoBackN(void);
 	void MakeFrames(Packet* p);
+	void SendAck(void);
 	void SendData(unsigned int frame_num, unsigned int frame_expect, Packet buffer[]);
 	Event* WaitForEvent(Event* e);
 	Packet* FromNetworkLayer(Packet* p);
@@ -47,8 +48,7 @@ public:
 	void StopTimer(unsigned short k);
 	
 private:
-	Frame** window;
-	Frame** ready;
+	queue<Frame*> window, ready;
 	char numReady, currReady, numWindow, currWindow;
 	unsigned short nextSend, frameExpect;
 };

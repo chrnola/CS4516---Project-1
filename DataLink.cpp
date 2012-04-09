@@ -82,13 +82,13 @@ void HandleFrameError(int sig) {
  * Author: Ray Short
  */
 DataLink::DataLink() {
-	window = (Frame**) calloc(1, sizeof(Frame*)); // 1-sliding window
+	//window = (Frame**) calloc(1, sizeof(Frame*)); // 1-sliding window
 	//window = (Frame**) calloc(4, sizeof(Frame*)); // 4-sliding window
-	ready = (Frame**) calloc(MAX_READY, sizeof(Frame*)); // for frames ready to send
-	numWindow = 0;
-	currWindow = 0;
-	numReady = 0;
-	currReady = 0;
+	//ready = (Frame**) calloc(MAX_READY, sizeof(Frame*)); // for frames ready to send
+	//numWindow = 0;
+	//currWindow = 0;
+	//numReady = 0;
+	//currReady = 0;
 	nextSend = 0;
 	frameExpect = 0;
 		
@@ -133,8 +133,8 @@ DataLink::DataLink() {
  * Author: Ray Short
  */
 DataLink::~DataLink() {
-	free(window);
-	free(ready);
+	//free(window);
+	//free(ready);
 }
 
 /*
@@ -150,7 +150,7 @@ void DataLink::GoBack1() {
 	MakeFrames(buffer);
 	//cout << "Curr ready is " << currReady+0 << " and num ready is " << numReady+0;
 	//fflush(stdout);
-	ToPhysicalLayer(ready[currReady]);
+	ToPhysicalLayer(ready.front());
 	StartTimer(0);
 	r->type = ack;
 	*event = arrival;
@@ -163,16 +163,17 @@ void DataLink::GoBack1() {
 			r = FromPhysicalLayer(r);
 			//r->Print();
 			//cout << (r->seq == frameExpect) << " seq:expect " << r->seq << ":" << frameExpect;
-			fflush(stdout);
+			//fflush(stdout);
 			if(r->type == ack) {
-				if(currReady < MAX_READY) currReady++; else currReady = 0;
-				numReady--;
+				StopTimer(0);
+				ready.pop();
 				//if(numReady < MAX_READY - 2) EnableNetworkLayer();
+				// remove ack from queue of received frames
+				RemoveAck();
 				pthread_mutex_lock(&mutRF);
 				Frame* f = recvFrames.front();
 				recvFrames.pop();
-				pthread_mutex_unlock(&mutRF);
-				StopTimer(0);
+				pthread_mutex_unlock(&mutRF);			
 				free(f);
 			} else if(r->seq == frameExpect) {
 				if(r->end == true) {
@@ -180,6 +181,7 @@ void DataLink::GoBack1() {
 				} else {
 					//recvFrames.push(r);
 				}
+				SendAck();
 				inc(frameExpect);
 			}
 		}
@@ -191,8 +193,7 @@ void DataLink::GoBack1() {
 		//cout << "Curr ready is " << currReady+0 << " and num ready is " << numReady+0;
 		numReady--;
 		if(numReady == 0) return;
-		currReady++;
-		ToPhysicalLayer(ready[currReady]);
+		ToPhysicalLayer(ready.front());
 		StartTimer(0);
 	}
 }
@@ -263,8 +264,7 @@ void DataLink::MakeFrames(Packet* p) {
 		f1->payloadLength = pktLen;
 		f1->end = true;
 		inc(nextSend);
-		ready[numReady] = f1;
-		numReady++;
+		ready.push(f1);
 	} else {
 		f1->payload = (unsigned char*) calloc(MAX_FRAME, sizeof(unsigned char));
 		f2->payload = (unsigned char*) calloc(pktLen - MAX_FRAME, sizeof(unsigned char));
@@ -274,18 +274,28 @@ void DataLink::MakeFrames(Packet* p) {
 		f1->payloadLength = MAX_FRAME;
 		f1->end = false;
 		inc(nextSend);
-		ready[numReady] = f1;
-		numReady++;
+		ready.push(f1);
 		memcpy(f2->payload, currPacket + MAX_FRAME, pktLen - MAX_FRAME + 8);
 		f2->type = data;
 		f2->seq = nextSend;
 		f2->payloadLength = pktLen - MAX_FRAME;
 		f2->end = true;
 		inc(nextSend);
-		ready[numReady] = f2;
-		numReady++;
+		ready.push(f2);
 	}
 	//if(numReady > MAX_READY - 2) DisableNetworkLayer();
+}
+
+/*
+ * Author: Ray Short
+ */
+void DataLink::SendAck() {
+	Frame* f = new Frame();
+	f->type = ack;
+	f->seq = frameExpect;
+	f->end = true;
+	f->payloadLength = 0;
+	ToPhysicalLayer(f);
 }
 
 /*
@@ -376,8 +386,11 @@ Frame* DataLink::FromPhysicalLayer(Frame* r) {
 void DataLink::ToPhysicalLayer(Frame* s) {
 	if(numWindow == 1) return; // 1-sliding window
 	//if(numWindow == 4) return; // 4-sliding window
-	window[0] = s;
+	window.push(s);
 	numWindow++;
+	pthread_mutex_lock(&mutSF);
+	sendFrames.push(s);
+	pthread_mutex_unlock(&mutSF);
 	raise(SIGFSND);
 	pthread_mutex_lock(&mutRF);
 	recvFrames.push(s);
@@ -398,7 +411,7 @@ void DataLink::ToPhysicalLayer(Frame* s) {
 void DataLink::StartTimer(unsigned short k) {
 	struct timeval* tval = (struct timeval*) calloc(1, sizeof(struct timeval));
 	struct timeval* zero = (struct timeval*) calloc(1, sizeof(struct timeval));
-	// 1 second timeout
+	// 0.5 second timeout
 	tval->tv_usec = 500000;
 	tval->tv_sec = 0;
 	zero->tv_usec = 0;
@@ -420,4 +433,26 @@ void DataLink::StopTimer(unsigned short k) {
 	timerval->it_value = *zero;
 	timerval->it_interval = *zero;
 	setitimer(ITIMER_REAL, timerval, NULL);
+}
+
+// remove ack from queue of received frames
+void DataLink::RemoveAck() {
+	int i, size = recvFrames.size();
+	for(i = 0;i < size;i++) {
+		pthread_mutex_lock(&mutRF);
+		Frame* f = recvFrames.front();
+		pthread_mutex_unlock(&mutRF);
+		if(f->type == ack) {
+			pthread_mutex_lock(&mutRF);
+			recvFrames.pop();
+			pthread_mutex_unlock(&mutRF);
+			free(f);
+			return;
+		} else {
+			pthread_mutex_lock(&mutRF);
+			recvFrames.pop();
+			recvFrames.push(f);
+			pthread_mutex_unlock(&mutRF);
+		}
+	}
 }
