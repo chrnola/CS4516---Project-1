@@ -13,6 +13,7 @@ NetworkLayer::~NetworkLayer(){
 }
 
 void NetworkLayer::Run(){
+	//useless
 // 	while(true){
 // 		if(!pthread_mutex_trylock(&mutSP)){
 // 			if(!sendPackets.empty()){
@@ -24,14 +25,10 @@ void NetworkLayer::Run(){
 }
 
 void NetworkLayer::SendAPacket(Packet *p){
-	pthread_mutex_lock(&mutSP);
-	sendPackets.push(p);
-	pthread_mutex_unlock(&mutSP);
+	//useless
 }
 
-void NetworkLayer::ReceivePackets(){
-	
-}
+
 
 void NetworkLayer::FromApplicationLayer(Message *m){
 	unsigned char *mess = m -> serialize();
@@ -77,16 +74,60 @@ void NetworkLayer::FromApplicationLayer(Message *m){
 void NetworkLayer::ToApplicationLayer(unsigned char *message){
 	Message *m = Message::unserialize(message);
 	//to app layer?
+	pthread_mutex_lock(&mutSP);
+	
+	pthread_mutex_unlock(&mutSP);
 }
 
 void NetworkLayer::ToDataLinkLayer(Packet *p){
 	//to DL shared buffer
-	//pthread_mutex_lock(&mutSP);
-	//sendPacket
+	pthread_mutex_lock(&mutSP);
+	sendPackets.push(p);
+	pthread_mutex_unlock(&mutSP);
 }
 
-void NetworkLayer::FromDataLinkLayer(Packet *p){
+Packet *ReceiveAPacket(queue<Packet*> *buildBuffer){
+	bool hasPacket = false;
+	Packet *result;
+	
+	while(!hasPacket){
+		pthread_mutex_lock(&mutRP);
+		if(!recvPackets.empty()){
+			result = recvPackets.front();
+			buildBuffer->push(result);
+			recvPackets.pop();
+			hasPacket = true;
+		}
+		pthread_mutex_unlock(&mutRP);
+	}
+	return result;
+}
+
+Message *Assemble(queue<Packet*> *buildBuffer){
+	Message *result = (Message *) malloc(sizeof(char) * MAX_PACKET * buildBuffer->size());
+	for(int i = 0; i < buildBuffer->size(); i++){
+		Packet *tPack = buildBuffer->front();
+		buildBuffer->pop();
+		Message *current = result + (i * MAX_PACKET * sizeof(char));
+		*current = tPack->payload;
+	}
+	
+	return result;
+}
+
+Message *NetworkLayer::FromDataLinkLayer(){
 	//get from shared buffer
 	//reconstruct
+	queue<Packet*> buildBuffer;
+	Packet *thisPacket;
+	
+	while(true){
+		thisPacket = ReceiveAPacket(&buildBuffer);
+		if(thisPacket->end) return Assemble(&buildBuffer);
+	}
+	
+	return NULL;
 }
+
+
 

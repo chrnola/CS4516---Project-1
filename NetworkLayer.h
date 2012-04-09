@@ -14,6 +14,8 @@ using namespace std;
 
 extern queue<Packet*> sendPackets, recvPackets;
 extern pthread_mutex_t mutSP, mutRP;
+queue<Packet*> buildPackets;
+volatile bool readyToBuild = false;
 
 class NetworkLayer {
 	public:
@@ -23,7 +25,7 @@ class NetworkLayer {
 		//static unsigned char *Serialize(Message *m);
 		//static Message *Unserialize(const unsigned char *d);
 		void ToDataLinkLayer(Packet *p);
-		void FromDataLinkLayer(Packet *p);
+		Message *FromDataLinkLayer();
 		void FromApplicationLayer(Message *m);
 		void Run();
 		void SendAPacket(Packet *p);
