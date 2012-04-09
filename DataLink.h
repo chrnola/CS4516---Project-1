@@ -46,10 +46,9 @@ public:
 	void ToPhysicalLayer(Frame* s);
 	void StartTimer(unsigned short k);
 	void StopTimer(unsigned short k);
-	void RemoveAck(void);
 	
 private:
-	queue<Frame*> window, ready;
+	queue<Frame*> window, ready, reconstructFrames;
 	char numReady, numWindow;
 	unsigned short nextSend, frameExpect;
 };

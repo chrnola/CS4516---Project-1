@@ -9,8 +9,8 @@
 
 using namespace std;
 
-volatile bool frmTimeout, frmArrive, pktArrive, frmSend, pktSend, frmError;
-pthread_mutex_t mutTime, mutFArv, mutPArv, mutFSnd, mutPSnd, mutFErr;
+volatile bool frmTimeout, frmArrive, pktSend;
+pthread_mutex_t mutTime;
 
 /*
  * Author: Ray Short
@@ -21,61 +21,6 @@ void HandleFrameTimeout(int sig) {
 	frmTimeout = true;
 	pthread_mutex_unlock(&mutTime);
 	signal(sig, HandleFrameTimeout);
-}
-
-/*
- * Author: Ray Short
- */
-void HandleFrameArrival(int sig) {
-	cout << "Frame arrive.\n";
-	pthread_mutex_lock(&mutFArv);
-	frmArrive = true;
-	pthread_mutex_unlock(&mutFArv);
-	signal(sig, HandleFrameArrival);
-}
-
-/*
- * Author: Ray Short
- */
-void HandlePacketArrival(int sig) {
-	cout << "Packet arrive.\n";
-	pthread_mutex_lock(&mutPArv);
-	pktArrive = true;
-	pthread_mutex_unlock(&mutPArv);
-	signal(sig, HandlePacketArrival);
-}
-
-/*
- * Author: Ray Short
- */
-void HandleFrameSend(int sig) {
-	cout << "Frame send.\n";
-	pthread_mutex_lock(&mutFSnd);
-	frmSend = true;
-	pthread_mutex_unlock(&mutFSnd);
-	signal(sig, HandleFrameSend);
-}
-
-/*
- * Author: Ray Short
- */
-void HandlePacketSend(int sig) {
-	cout << "Packet send.\n";
-	pthread_mutex_lock(&mutPSnd);
-	pktSend = true;
-	pthread_mutex_unlock(&mutPSnd);
-	signal(sig, HandlePacketSend);
-}
-
-/*
- * Author: Ray Short
- */
-void HandleFrameError(int sig) {
-	cout << "Frame error.\n";
-	pthread_mutex_lock(&mutFErr);
-	frmError = true;
-	pthread_mutex_unlock(&mutFErr);
-	signal(sig, HandleFrameError);
 }
 
 /*
@@ -92,24 +37,11 @@ DataLink::DataLink() {
 	// initialize handling variables
 	frmTimeout = false;
 	frmArrive = false;
-	pktArrive = false;
-	frmSend = false;
 	pktSend = true;
-	frmError = false;
 	signal(SIGALRM, HandleFrameTimeout);
-	signal(SIGFRCV, HandleFrameArrival);
-	signal(SIGPRCV, HandlePacketArrival);
-	signal(SIGFSND, HandleFrameSend);
-	signal(SIGPSND, HandlePacketSend);
-	signal(SIGFERR, HandleFrameError);
 	
-	// initialize mutex variables for flags
+	// initialize mutex variable for timeout
 	pthread_mutex_init(&mutTime, NULL);
-	pthread_mutex_init(&mutFArv, NULL);
-	pthread_mutex_init(&mutPArv, NULL);
-	pthread_mutex_init(&mutFSnd, NULL);
-	pthread_mutex_init(&mutPSnd, NULL);
-	pthread_mutex_init(&mutFErr, NULL);
 }
 
 /*
@@ -156,22 +88,26 @@ void DataLink::GoBack1() {
 				StopTimer(0);
 				ready.pop();
 				// remove ack from queue of received frames
-				RemoveAck();
+				pthread_mutex_lock(&mutRF);
+				recvFrames.pop();
+				pthread_mutex_unlock(&mutRF);
 			} else if(r->seq == frameExpect) {
 				//cout << "this is the expected frame";
 				if(r->end == true) {
 					ToNetworkLayer();
 				}
 				//cout << "Sending an ack";
-				//SendAck();
+				SendAck();
 				//cout << "Ack sent";
 				inc(frameExpect);
 			}
 		}
+		// reset for waiting
 		*event = none;
 		if(numReady < MAX_READY - 2 && pktSend) {
 			FromNetworkLayer(buffer);
 			MakeFrames(buffer);
+			pktSend = false;
 		}
 		//cout << "Curr ready is " << currReady+0 << " and num ready is " << numReady+0;
 		// some more testing code
@@ -299,11 +235,16 @@ Event* DataLink::WaitForEvent(Event* e) {
 		if(frmTimeout) {
 			*e = timeout;
 			frmTimeout = false;
-		} else if(frmError) {
-			*e = error;
-			frmError = false;
-		} else if(frmArrive) {
-			*e = arrival;
+		} else if(pthread_mutex_trylock(&mutRF) == 0) {
+			if(!recvFrames.empty()) {
+				frmArrive = true;
+				*e = arrival;
+			}
+			pthread_mutex_unlock(&mutRF);
+		} else if(!pktSend && pthread_mutex_trylock(&mutSP) == 0) {
+			if(!sendPackets.empty()) {
+				pktSend = true;
+			}
 		}
 	}
 	return e;
@@ -330,15 +271,20 @@ Packet* DataLink::FromNetworkLayer(Packet* p) {
 // a packet from them
 // checks for 2-frame and 1-frame length packets
 void DataLink::ToNetworkLayer() {
-	if(pktArrive) return;
+	if(pthread_mutex_trylock(&mutRP) == 0){
+		if(!recvPackets.empty()) {
+			pthread_mutex_unlock(&mutRP);
+			return;
+		}
+	}
 	Packet* pkt = (Packet*) calloc(1, sizeof(Packet));
 	Frame* fr1 = (Frame*) calloc(1, sizeof(Frame));
 	Frame* fr2 = (Frame*) calloc(1, sizeof(Frame));
 	pthread_mutex_lock(&mutRF);
-	fr1 = recvFrames.front();
-	recvFrames.pop();
-	fr2 = recvFrames.front();
-	recvFrames.pop();
+	fr1 = reconstructFrames.front();
+	reconstructFrames.pop();
+	fr2 = reconstructFrames.front();
+	reconstructFrames.pop();
 	pthread_mutex_unlock(&mutRF);
 	if(fr2 != NULL) { // long packet
 		unsigned char* f1 = fr1->payload;
@@ -355,8 +301,6 @@ void DataLink::ToNetworkLayer() {
 	recvPackets.push(pkt);
 	pthread_mutex_unlock(&mutRP);
 	//pkt->Print();
-	pktArrive = true;
-	raise(SIGPRCV);
 }
 
 /*
@@ -369,8 +313,10 @@ void DataLink::ToNetworkLayer() {
 Frame* DataLink::FromPhysicalLayer(Frame* r) {
 	if(!frmArrive) return NULL;
 	pthread_mutex_lock(&mutRF);
-	r = recvFrames.back();
+	r = recvFrames.front();
+	recvFrames.pop();
 	pthread_mutex_unlock(&mutRF);
+	reconstructFrames.push(r);
 	frmArrive = false;
 	return r;
 }
@@ -391,11 +337,10 @@ void DataLink::ToPhysicalLayer(Frame* s) {
 	pthread_mutex_lock(&mutSF);
 	sendFrames.push(s);
 	pthread_mutex_unlock(&mutSF);
-	raise(SIGFSND);
+	// testing below
 	pthread_mutex_lock(&mutRF);
 	recvFrames.push(s);
 	pthread_mutex_unlock(&mutRF);
-	raise(SIGFRCV);
 	//Packet* p = Packet::Unserialize((char*) s->payload);
 	//p->Print();
 }
@@ -430,29 +375,4 @@ void DataLink::StopTimer(unsigned short k) {
 	timerval->it_value = *zero;
 	timerval->it_interval = *zero;
 	setitimer(ITIMER_REAL, timerval, NULL);
-}
-
-/*
- * Author: Ray Short
- */
-// remove ack from queue of received frames
-void DataLink::RemoveAck() {
-	int i, size = recvFrames.size();
-	for(i = 0;i < size;i++) {
-		pthread_mutex_lock(&mutRF);
-		Frame* f = recvFrames.front();
-		pthread_mutex_unlock(&mutRF);
-		if(f->type == ack) { // remove the ack
-			pthread_mutex_lock(&mutRF);
-			recvFrames.pop();
-			pthread_mutex_unlock(&mutRF);
-			free(f);
-			return;
-		} else { // cycle through data, retain order
-			pthread_mutex_lock(&mutRF);
-			recvFrames.pop();
-			recvFrames.push(f);
-			pthread_mutex_unlock(&mutRF);
-		}
-	}
 }

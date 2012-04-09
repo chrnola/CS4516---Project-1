@@ -1,4 +1,4 @@
-//server.cpp
+t//server.cpp
 
 #include <iostream>
 #include <netinet/in.h>		// For sockadd_in
@@ -61,13 +61,9 @@ void *RunPLThread(void* ptr){
 	pl->run();
 }
 
-void *RunNLThread(void* ptr){
-
-}
-
 void *RunDLThread(void* ptr){
-
-
+	DataLink* dl = (DataLink*) ptr;
+	dl->GoBack1();
 }
 
 void handlePacket(Message *inm){

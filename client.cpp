@@ -64,6 +64,16 @@ int main(int argc, char **argv) {
 
 }
 
+void *RunPLThread(void* ptr){
+	PhysicalLayer *pl = (PhysicalLayer*) ptr;
+	pl->run();
+}
+
+void *RunDLThread(void* ptr){
+	DataLink* dl = (DataLink*) ptr;
+	dl->GoBack1();
+}
+
 void quit(){
 	//close connection, disconnet
 	cout << endl;
