@@ -82,12 +82,14 @@ void NetworkLayer::ToDataLinkLayer(Packet *p){
 Packet *ReceiveAPacket(queue<Packet*> *buildBuffer){
 	bool hasPacket = false;
 	Packet *result;
+	int i = 0;
 	
 	while(!hasPacket){
-		cout << "Gonna lock!" << endl;
+		//cout << "Gonna lock!" << endl;
 		pthread_mutex_lock(&mutRP);
-		cout << "Yeah I locked" << endl;
+		//cout << "Yeah I locked" << endl;
 		if(!recvPackets.empty()){
+			cout << "ACTUALLY GOT SOMETHING";
 			result = recvPackets.front();
 			buildBuffer->push(result);
 			recvPackets.pop();

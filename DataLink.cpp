@@ -81,13 +81,14 @@ void DataLink::GoBack1() {
 			//r->Print();
 			//cout << (r->seq == frameExpect) << " seq:expect " << r->seq << ":" << frameExpect;
 			//fflush(stdout);
+			if(r == NULL) continue;
 			if(r->type == ack) {
 				//cout << "Got an ack";
 				StopTimer(0);
 				ready.pop();
 				// remove ack from queue of received frames
 				pthread_mutex_lock(&mutRF);
-				recvFrames.pop();
+				if(!recvFrames.empty()) recvFrames.pop();
 				pthread_mutex_unlock(&mutRF);
 			} else if(r->seq == frameExpect) {
 				//cout << "this is the expected frame";
@@ -319,13 +320,16 @@ void DataLink::ToNetworkLayer() {
 Frame* DataLink::FromPhysicalLayer(Frame* r) {
 	if(!frmArrive) return NULL;
 	pthread_mutex_lock(&mutRF);
-	r = recvFrames.front();
-	recvFrames.pop();
+	cout << "receivedFrames has size " << recvFrames.size();
+	if(!recvFrames.empty()) {
+		r = recvFrames.front();
+		recvFrames.pop();
+	}
 	if(recvFrames.empty()) frmArrive = false;
 	pthread_mutex_unlock(&mutRF);
-	if(r->type == data) {
+	if(r != NULL && r->type == data) {
 		reconstructFrames.push(r);
-		//reconstructFrames.front()->Print();
+		reconstructFrames.front()->Print();
 	}
 	
 	return r;

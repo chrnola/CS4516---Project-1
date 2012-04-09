@@ -95,17 +95,22 @@ void PhysicalLayer::run(){
 // Assumes it has a mutex on mutSF.
 // Sends 1 frame from sendFrames out on the wire.
 void PhysicalLayer::SendAFrame(){
-	Frame *theFrame = sendFrames.front();
-	sendFrames.pop();
+	Frame *theFrame;
+	if(!sendFrames.empty()) {
+		theFrame = sendFrames.front();
+		sendFrames.pop();
+	}
 	pthread_mutex_unlock(&mutSF);
 
-	unsigned char *cereal = theFrame->Serialize();
-	int len = theFrame->payloadLength + FRAME_HEAD;
-	cereal = FoldSerializedFrame(cereal, len);
-	len += 2;
+	if(theFrame != NULL) {
+		unsigned char *cereal = theFrame->Serialize();
+		int len = theFrame->payloadLength + FRAME_HEAD;
+		cereal = FoldSerializedFrame(cereal, len);
+		len += 2;
 
-	if(send(sockfd, cereal, len, 0) != len){
-		cout << "Crap! Couldn't send the whole frame" << endl;
+		if(send(sockfd, cereal, len, 0) != len){
+			cout << "Crap! Couldn't send the whole frame" << endl;
+		}
 	}
 }
 
