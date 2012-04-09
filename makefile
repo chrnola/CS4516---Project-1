@@ -3,10 +3,10 @@
 all: client server
 
 client: client.cpp PhysicalLayer.cpp NetworkLayer.cpp Message.cpp Utils.cpp Packet.cpp DataLink.cpp Frame.cpp did
-	g++ client.cpp PhysicalLayer.cpp NetworkLayer.cpp Message.cpp Packet.cpp Utils.cpp DataLink.cpp Frame.cpp -o client -g
+	g++ client.cpp PhysicalLayer.cpp NetworkLayer.cpp Message.cpp Packet.cpp Utils.cpp DataLink.cpp Frame.cpp -o client -g -pthread
 
-server: server.cpp PhysicalLayer.cpp db.cpp
-	g++ -I/usr/local/mysql-current/include -o server -g server.cpp PhysicalLayer.cpp db.cpp Message.cpp -Wall -L /usr/local/mysql-current/lib/mysql -lmysqlclient -ldl
+server: server.cpp PhysicalLayer.cpp db.cpp Message.cpp NetworkLayer.cpp Frame.cpp Packet.cpp Utils.cpp did
+	g++ -I/usr/local/mysql-current/include -o server -g server.cpp PhysicalLayer.cpp db.cpp Message.cpp NetworkLayer.cpp Frame.cpp Packet.cpp Utils.cpp -Wall -L /usr/local/mysql-current/lib/mysql -lmysqlclient -ldl -pthread
 
 did: db.h did.h Frame.h Packet.h DataLink.h NetworkLayer.h PhysicalLayer.h Message.h Utils.h
 	
