@@ -36,7 +36,7 @@ DataLink::DataLink() {
 	
 	// initialize handling variables
 	frmTimeout = false;
-	frmArrive = false;
+	frmArrive = true;
 	pktSend = true;
 	signal(SIGALRM, HandleFrameTimeout);
 	
@@ -57,15 +57,14 @@ DataLink::~DataLink() {
 // implementation of Go-Back-1
 // uses sliding window of 1, retransmissions and acks
 void DataLink::GoBack1() {
-	Frame* r = new Frame(), * s = new Frame();
+	Frame* r = (Frame*) calloc(1, sizeof(Frame));
 	Packet* buffer = (Packet*) calloc(1, sizeof(Packet));
 	Event* event = (Event*) calloc(1, sizeof(Event));
 	*event = none;
 	
 	buffer = FromNetworkLayer(buffer);
+	buffer->Print();
 	MakeFrames(buffer);
-	//cout << "Curr ready is " << currReady+0 << " and num ready is " << numReady+0;
-	//fflush(stdout);
 	ToPhysicalLayer(ready.front());
 	StartTimer(0);
 	// testing code
@@ -188,7 +187,7 @@ void DataLink::MakeFrames(Packet* p) {
 		f1->end = true;
 		inc(nextSend);
 		ready.push(f1);
-		//f1->Print();
+		f1->Print();
 	} else { // 2 frame's worth (never more than 2)
 		// assign first frame
 		f1->payload = (unsigned char*) calloc(MAX_FRAME, sizeof(unsigned char));
@@ -200,7 +199,7 @@ void DataLink::MakeFrames(Packet* p) {
 		f1->end = false;
 		inc(nextSend);
 		ready.push(f1);
-		//f1->Print();
+		f1->Print();
 		//assign second frame
 		memcpy(f2->payload, currPacket + MAX_FRAME, pktLen - MAX_FRAME + 8);
 		f2->type = data;
@@ -209,7 +208,7 @@ void DataLink::MakeFrames(Packet* p) {
 		f2->end = true;
 		inc(nextSend);
 		ready.push(f2);
-		//f2->Print();
+		f2->Print();
 	}
 }
 
@@ -317,6 +316,7 @@ Frame* DataLink::FromPhysicalLayer(Frame* r) {
 	recvFrames.pop();
 	pthread_mutex_unlock(&mutRF);
 	reconstructFrames.push(r);
+	//reconstructFrames.front()->Print();
 	frmArrive = false;
 	return r;
 }
