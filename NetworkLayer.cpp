@@ -23,8 +23,10 @@ void NetworkLayer::Run(){
 // 	}
 }
 
-void NetworkLayer::SendAPacket(){
-	
+void NetworkLayer::SendAPacket(Packet *p){
+	pthread_mutex_lock(&mutSP);
+	sendPackets.push(p);
+	pthread_mutex_unlock(&mutSP);
 }
 
 void NetworkLayer::ReceivePackets(){
