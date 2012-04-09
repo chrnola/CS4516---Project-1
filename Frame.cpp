@@ -7,6 +7,8 @@
 
 #include "Frame.h"
 
+#include <string.h>
+
 Frame::Frame() {
 }
 

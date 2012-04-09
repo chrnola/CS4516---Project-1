@@ -139,7 +139,7 @@ unsigned char* PhysicalLayer::FoldSerializedFrame(unsigned char* sFrame, int len
 	*(sFrame + len) = foldByteA;
 	*(sFrame + len + 1) = foldByteB;
 
-	return reinterpret_cast<unsigned char*>(sFrame);	
+	return reinterpret_cast<unsigned char*>(sFrame);
 }
 
 bool PhysicalLayer::FrameValid(char* sFrame, int length){
