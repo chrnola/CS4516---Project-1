@@ -82,7 +82,6 @@ void NetworkLayer::ToDataLinkLayer(Packet *p){
 Packet *ReceiveAPacket(queue<Packet*> *buildBuffer){
 	bool hasPacket = false;
 	Packet *result;
-	int i = 0;
 	
 	while(!hasPacket){
 		//cout << "Gonna lock!" << endl;

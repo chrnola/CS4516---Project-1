@@ -89,7 +89,7 @@ void PhysicalLayer::run(){
 	send(sockfd, &i, 4, 0);
 	i = 2;
 	recv(sockfd, &i, 4, 0);
-	cout << "Frame received! i=" << i << endl; /**/
+	cout << "Frame received! i=" << i << endl; */
 }
 
 // Assumes it has a mutex on mutSF.

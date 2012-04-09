@@ -64,8 +64,12 @@ void DataLink::GoBack1() {
 	
 	buffer = FromNetworkLayer(buffer);
 	MakeFrames(buffer);
-	ToPhysicalLayer(ready.front());
-	StartTimer(0);
+	cout << "ready has " << ready.size();
+	cout << "ready is empty? " << ready.empty();
+	if(!ready.empty()) {
+		ToPhysicalLayer(ready.front());
+		StartTimer(0);
+	}
 	// testing code
 	r->type = ack;
 	*event = arrival;
@@ -85,7 +89,8 @@ void DataLink::GoBack1() {
 			if(r->type == ack) {
 				//cout << "Got an ack";
 				StopTimer(0);
-				ready.pop();
+				if(!ready.empty()) 
+					ready.pop();
 				// remove ack from queue of received frames
 				pthread_mutex_lock(&mutRF);
 				if(!recvFrames.empty()) recvFrames.pop();
@@ -113,8 +118,12 @@ void DataLink::GoBack1() {
 		numReady--;
 		if(numReady == 0) return;
 		// end of testing code
-		ToPhysicalLayer(ready.front());
-		StartTimer(0);
+		cout << "ready has " << ready.size();
+		cout << "ready is empty? " << ready.empty();
+		if(!ready.empty()) {
+			ToPhysicalLayer(ready.front());
+			StartTimer(0);
+		}
 	}
 }
 
@@ -172,14 +181,15 @@ void DataLink::MakeFrames(Packet* p) {
 	unsigned char* currPacket;
 	Frame* f1 = new Frame(), * f2 = new Frame();
 	
-	//cout << "Got packet";
-	//p->Print();
-	//cout << "Making into frames\n";
+	cout << "Got packet";
+	p->Print();
+	cout << "Making into frames\n";
 	
 	// get length of packet and serialize into char array
 	unsigned short pktLen = p->payloadLength + PACKET_HEAD;
 	currPacket = p->Serialize();
 	if(pktLen <= MAX_FRAME) { // 1 frame's worth
+		cout << "one frame";
 		f1->payload = (unsigned char*) calloc(pktLen, sizeof(unsigned char));
 		memcpy(f1->payload, currPacket, pktLen);
 		f1->type = data;
@@ -188,8 +198,9 @@ void DataLink::MakeFrames(Packet* p) {
 		f1->end = true;
 		inc(nextSend);
 		ready.push(f1);
-		//f1->Print();
+		f1->Print();
 	} else { // 2 frame's worth (never more than 2)
+		cout << "two frames";
 		// assign first frame
 		f1->payload = (unsigned char*) calloc(MAX_FRAME, sizeof(unsigned char));
 		f2->payload = (unsigned char*) calloc(pktLen - MAX_FRAME, sizeof(unsigned char));
@@ -200,7 +211,7 @@ void DataLink::MakeFrames(Packet* p) {
 		f1->end = false;
 		inc(nextSend);
 		ready.push(f1);
-		//f1->Print();
+		f1->Print();
 		//assign second frame
 		memcpy(f2->payload, currPacket + MAX_FRAME, pktLen - MAX_FRAME + 8);
 		f2->type = data;
@@ -209,7 +220,7 @@ void DataLink::MakeFrames(Packet* p) {
 		f2->end = true;
 		inc(nextSend);
 		ready.push(f2);
-		//f2->Print();
+		f2->Print();
 	}
 }
 
@@ -344,8 +355,8 @@ Frame* DataLink::FromPhysicalLayer(Frame* r) {
 void DataLink::ToPhysicalLayer(Frame* s) {
 	if(numWindow == 1) return; // 1-sliding window
 	//if(numWindow == 4) return; // 4-sliding window
-	//cout << "Sending frame";
-	//s->Print();
+	cout << "Sending frame";
+	s->Print();
 	window.push(s);
 	numWindow++;
 	pthread_mutex_lock(&mutSF);
