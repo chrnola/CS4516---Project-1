@@ -19,6 +19,8 @@ void startPrompt();
 bool checkLength(char *field, int max);
 void quit();
 
+void* RunDLThread(void* ptr);
+
 void testPL();
 
 struct timeval* start, * end;
@@ -52,12 +54,14 @@ int main(int argc, char **argv) {
 	
 	pthread_mutex_lock(&mutSP);
 	sendPackets.push(p);
-	//sendPackets.front()->Print();
+	sendPackets.front()->Print();
 	pthread_mutex_unlock(&mutSP);
 	
 	dl->GoBack1();
-	recvPackets.front()->Print();
-	
+	//recvPackets.front()->Print();
+	DataLink* dl = new DataLink();
+	pthread_t DL_thread;
+	//pthread_create(&DL_thread, NULL, RunDLThread, dl);
 
 	
 	startPrompt();
