@@ -60,8 +60,9 @@ int main(int argc, char **argv) {
 	//dl->GoBack1();
 	//recvPackets.front()->Print();
 	DataLink* dl = new DataLink();
-	pthread_t DL_thread;
+	pthread_t DL_thread, PL_thread;
 	pthread_create(&DL_thread, NULL, RunDLThread, dl);
+	pthread_create(&PL_thread, NULL, RunPLThread, pl);
 
 	
 	startPrompt();
