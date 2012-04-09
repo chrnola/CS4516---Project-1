@@ -20,18 +20,23 @@ void handlePacket(Message *m);
 void testPL();
 
 
+queue<Packet*> sendPackets, recvPackets;
 queue<Frame*> sendFrames, recvFrames;
-pthread_mutex_t mutSF, mutRF;
+pthread_mutex_t mutSP, mutRP, mutSF, mutRF;
 
 bool auth = false;
 char *user;
 
 NetworkLayer *nl;
+DataLink* dl;
+PhysicalLayer* pl;
+
 char *err = "The server encountered an error while processing your request.";
 char *nauth = "You are not authorized to execute this command, please login first.";
 
 int AcceptConn();
 void *RunPLThread(void* ptr);
+void* RunDLThread(void* ptr);
 
 int main(){
 
@@ -46,10 +51,12 @@ int main(){
 	bool connected = connectToDB(); //true if connected
 	nl = new NetworkLayer();
 	
-	PhysicalLayer *pl = new PhysicalLayer(0);
+	pl = new PhysicalLayer(0);
 	pthread_t PL_thread, NL_thread, DL_thread;
-	pthread_create(&PL_thread, NULL, RunPLThread, pl);
+	//pthread_create(&PL_thread, NULL, RunPLThread, pl);
 
+	dl = new DataLink();
+	//pthread_create(&DL_thread, NULL, RunDLThread, dl);
 	
 	disconnectFromDB();
 	
