@@ -22,8 +22,8 @@ aaron: aaron.cpp PhysicalLayer.cpp did
 aaronserver: aaronserver.cpp PhysicalLayer.cpp did
 	g++ aaronserver.cpp PhysicalLayer.cpp Frame.cpp Utils.cpp -o aaronserver -pthread
 
-aaronclient: aaronclient.cpp did
-	G++ aaronclient -o aaronclient
+aaronclient: aaronclient.cpp did PhysicalLayer.cpp Utils.cpp Frame.cpp
+	g++ aaronclient.cpp PhysicalLayer.cpp Frame.cpp Utils.cpp -o aaronclient -pthread
 
 clean:
 	rm *.o *~ *.h.gch -f
