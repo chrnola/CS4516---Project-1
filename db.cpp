@@ -9,7 +9,7 @@
 // don't want to expose them to everyone else
 int getRowCountTbl(const char*);
 bool removeFromTableWhereCol(const char *table, const char *col, const char *id);
-char *getPhoto(const char *id, unsigned long *fsize, const char *q1);
+char *getPhoto(const char *id, long *fsize, const char *q1);
 bool addPhoto(const char *id, char *file, long fileSize, const char *q1, const char *q2);
 
 // the global MySQL connection object that will be used for all

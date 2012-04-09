@@ -22,8 +22,10 @@ private:
 public:
 	void start(pthread_t *PL_thread);
 	void run();
-	static char* FoldSerializedFrame(char* sFrame, int len);  //Note, sFrame may no longer be a valid pointer
+	static unsigned char* FoldSerializedFrame(unsigned char* sFrame, int len);  //Note, sFrame may no longer be a valid pointer
 	static bool FrameValid(char* sFrame, int length);
+	void SendAFrame();
+	void ReceiveFrames();
 	PhysicalLayer(const char *hostname);
 	PhysicalLayer(int sockfd);
 	virtual ~PhysicalLayer();

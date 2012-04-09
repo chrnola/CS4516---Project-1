@@ -92,11 +92,11 @@ void PhysicalLayer::run(){
 // Assumes it has a mutex on mutSF.
 // Sends 1 frame from sendFrames out on the wire.
 void PhysicalLayer::SendAFrame(){
-	Frame *theFrame = sendFrames.front;
+	Frame *theFrame = sendFrames.front();
 	sendFrames.pop();
-	pthread_mutex_unlock(mutSF);
+	pthread_mutex_unlock(&mutSF);
 
-	char *cereal = theFrame->Serialize();
+	unsigned char *cereal = theFrame->Serialize();
 	int len = theFrame->payloadLength + FRAME_HEAD;
 	cereal = FoldSerializedFrame(cereal, len);
 	len += 2;
@@ -108,12 +108,12 @@ void PhysicalLayer::SendAFrame(){
 
 
 // Checks if a frame is waiting on the wire. Validates it and sends it on up.
-void ReceiveFrames(){
+void PhysicalLayer::ReceiveFrames(){
 	int len = MAX_FRAME + FRAME_HEAD + FRAME_TAIL;
 	char *incoming = (char *) malloc(len);
 	int recvd = recv(sockfd, (void*)incoming, len, 0);
 	if(FrameValid(incoming, recvd)){
-		Frame *result = Unserialize(incoming);
+		Frame *result = Frame::Unserialize(incoming);
 		pthread_mutex_lock(&mutRF);
 		recvFrames.push(result);
 		pthread_mutex_unlock(&mutRF);
@@ -123,7 +123,7 @@ void ReceiveFrames(){
 // NB: sFrame may no longer be valid!
 // Use XOR folding to generate a 2-byte error-checking field at the end of
 // serialized frame sFrame.
-char* PhysicalLayer::FoldSerializedFrame(char* sFrame, int len){
+unsigned char* PhysicalLayer::FoldSerializedFrame(unsigned char* sFrame, int len){
 	unsigned char foldByteA = 0;
 	unsigned char foldByteB = 0;
 	for(int i = 0; i < len; i++){
@@ -135,12 +135,11 @@ char* PhysicalLayer::FoldSerializedFrame(char* sFrame, int len){
 		}
 	}
 
-	sFrame = (char *) realloc(sFrame, len + 2); // + 1 for null termination, + 2 for folded bytes
+	sFrame = (unsigned char *) realloc(sFrame, len + 2); // + 1 for null termination, + 2 for folded bytes
 	*(sFrame + len) = foldByteA;
 	*(sFrame + len + 1) = foldByteB;
 
-	return sFrame;
-	
+	return reinterpret_cast<unsigned char*>(sFrame);	
 }
 
 bool PhysicalLayer::FrameValid(char* sFrame, int length){

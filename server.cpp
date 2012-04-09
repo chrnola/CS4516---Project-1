@@ -9,6 +9,9 @@
 #include <unistd.h>		// For close()
 #include <pthread.h>
 
+class NetworkLayer;
+class Message;
+
 #include "did.h"
 
 using namespace std;
@@ -67,8 +70,8 @@ void *RunDLThread(void* ptr){
 
 }
 
-void handlePacket(Message *m){
-	char *cmd = m->getCmd();
+void handlePacket(Message *inm){
+	char *cmd = inm->getCmd();
 	char *tmp;
 	char *argvNew[8];
 	int i = 1;
@@ -206,7 +209,7 @@ void handlePacket(Message *m){
 			}
 			nl -> FromApplicationLayer(m);
 		} else if(strcmp(argvNew[0], "addphoto") == 0){
-			if(addPhotoPublic(argvNew[1], m->getContent(), m->getContentSize())){
+			if(addPhotoPublic(argvNew[1], inm->getContent(), inm->getContentSize())){
 				m->setCmd("Successfully added photo");
 			} else{
 				m->setCmd(err);
@@ -214,7 +217,7 @@ void handlePacket(Message *m){
 			nl -> FromApplicationLayer(m);
 		} else if(strcmp(argvNew[0], "addbodyphoto") == 0){
 			if(auth){
-				if(addPhotoAdmin(argvNew[1], m->getContent(), m->getContentSize())){
+				if(addPhotoAdmin(argvNew[1], inm->getContent(), inm->getContentSize())){
 					m->setCmd("Successfully added photo");
 				} else{
 					m->setCmd(err);
