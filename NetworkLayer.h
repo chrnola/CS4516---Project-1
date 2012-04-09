@@ -6,6 +6,7 @@
 
 class Message;
 class Packet;
+class DataLink;
 
 #include "did.h"
 

@@ -70,13 +70,17 @@ void *RunDLThread(void* ptr){
 
 }
 
+/*
+ * Author: Chris Pinola
+ */
 void handlePacket(Message *inm){
-	char *cmd = inm->getCmd();
-	char *tmp;
-	char *argvNew[8];
-	int i = 1;
-	Message *m = new Message();
+	char *cmd = inm->getCmd(); //extract CMD from packet
+	char *tmp; // just to hold string tokens
+	char *argvNew[8]; // holds onto the various arguments given by the user
+	int i = 1; // helps us stay within the array bounds
+	Message *m = new Message(); // the message that we'll eventually send back to the client
 	
+	// run through and split the command string on all spaces
 	if((tmp = strtok(cmd, " ")) != NULL){
 		argvNew[0] = tmp;
 		
@@ -89,8 +93,13 @@ void handlePacket(Message *inm){
 			}
 		}
 		
-		argvNew[i] = NULL;
+		argvNew[i] = NULL; //make sure the array is NULL "terminated"
 		
+		//now the fun part begins
+		//each branch corresponds to a different command
+		//basically just calls the appropriate database functions
+		//and makes fills in our new message object with the
+		//response
 		if(strcmp(argvNew[0], "locations") == 0){
 			m->setCmd(locationsWithMissing());
 			nl -> FromApplicationLayer(m);

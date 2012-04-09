@@ -33,6 +33,7 @@ void NetworkLayer::FromApplicationLayer(Message *m){
 		memcpy(p->payload, mess, MAX_PACKET);
 		mess += MAX_PACKET;
 		p->payloadLength = (unsigned short) MAX_PACKET;
+		NetworkLayer::ToDataLinkLayer(p);
 	}
 	
 	//make partial packet
@@ -44,6 +45,7 @@ void NetworkLayer::FromApplicationLayer(Message *m){
 		p->seq = s;
 		memcpy(p->payload, mess, leftover);
 		p->payloadLength = (unsigned short) leftover;
+		NetworkLayer::ToDataLinkLayer(p);
 	}
 	
 }
