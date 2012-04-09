@@ -71,13 +71,6 @@ void NetworkLayer::FromApplicationLayer(Message *m){
 	
 }
 
-void NetworkLayer::ToApplicationLayer(unsigned char *message){
-// 	Message *m = Message::unserialize(message);
-// 	//to app layer?
-// 	pthread_mutex_lock(&mutSP);
-// 	
-// 	pthread_mutex_unlock(&mutSP);
-}
 
 void NetworkLayer::ToDataLinkLayer(Packet *p){
 	//to DL shared buffer

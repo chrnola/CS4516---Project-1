@@ -30,7 +30,6 @@ class NetworkLayer {
 		void Run();
 		void SendAPacket(Packet *p);
 		void ReceivePackets();
-		void ToApplicationLayer(unsigned char *message);
 };
 
 #endif

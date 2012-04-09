@@ -53,11 +53,11 @@ int main(){
 	nl = new NetworkLayer();
 	
 	pl = new PhysicalLayer(sockfd);
-	pthread_t PL_thread, NL_thread, DL_thread;
-	//pthread_create(&PL_thread, NULL, RunPLThread, pl);
+	pthread_t PL_thread, DL_thread;
+	pthread_create(&PL_thread, NULL, RunPLThread, pl);
 
 	dl = new DataLink();
-	//pthread_create(&DL_thread, NULL, RunDLThread, dl);
+	pthread_create(&DL_thread, NULL, RunDLThread, dl);
 	
 	while(connected){
 		Message *incoming = nl -> FromDataLinkLayer();
@@ -72,11 +72,13 @@ int main(){
 void *RunPLThread(void* ptr){
 	PhysicalLayer *pl = (PhysicalLayer*) ptr;
 	pl->run();
+	return NULL;
 }
 
 void *RunDLThread(void* ptr){
 	DataLink* dl = (DataLink*) ptr;
 	dl->GoBack1();
+	return NULL;
 }
 
 /*

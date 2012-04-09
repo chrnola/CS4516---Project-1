@@ -321,12 +321,13 @@ Frame* DataLink::FromPhysicalLayer(Frame* r) {
 	pthread_mutex_lock(&mutRF);
 	r = recvFrames.front();
 	recvFrames.pop();
+	if(recvFrames.empty()) frmArrive = false;
 	pthread_mutex_unlock(&mutRF);
 	if(r->type == data) {
 		reconstructFrames.push(r);
 		//reconstructFrames.front()->Print();
 	}
-	frmArrive = false;
+	
 	return r;
 }
 
@@ -348,9 +349,9 @@ void DataLink::ToPhysicalLayer(Frame* s) {
 	pthread_mutex_unlock(&mutSF);
 	// testing below
 	//cout << "adding to recvFrames";
-	pthread_mutex_lock(&mutRF);
+	/*pthread_mutex_lock(&mutRF);
 	recvFrames.push(s);
-	pthread_mutex_unlock(&mutRF);
+	pthread_mutex_unlock(&mutRF);*/
 	//Packet* p = Packet::Unserialize((char*) s->payload);
 	//p->Print();
 }
