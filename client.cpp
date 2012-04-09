@@ -43,20 +43,20 @@ int main(int argc, char **argv) {
 	pthread_mutex_init(&mutSF, NULL);
 	pthread_mutex_init(&mutRF, NULL);
 	
-	Packet* p = new Packet();
-	p->type = data;
-	p->seq = 30;
-	p->end = true;
-	p->payloadLength = 186;
-	p->payload = (unsigned char*) calloc(200, sizeof(unsigned char));
-	string s = "Yay it works through layers n stuff. This is quite long to test some stuffYay it works through layers n stuff. This is quite long to test some stuffYay it works through layers n stuff.\n";
-	char* str = const_cast<char*>(s.c_str());
-	p->payload = (unsigned char*) strcpy((char*)p->payload, str);
-	
-	pthread_mutex_lock(&mutSP);
-	sendPackets.push(p);
-	//sendPackets.front()->Print();
-	pthread_mutex_unlock(&mutSP);
+// 	Packet* p = new Packet();
+// 	p->type = data;
+// 	p->seq = 30;
+// 	p->end = true;
+// 	p->payloadLength = 186;
+// 	p->payload = (unsigned char*) calloc(200, sizeof(unsigned char));
+// 	string s = "Yay it works through layers n stuff. This is quite long to test some stuffYay it works through layers n stuff. This is quite long to test some stuffYay it works through layers n stuff.\n";
+// 	char* str = const_cast<char*>(s.c_str());
+// 	p->payload = (unsigned char*) strcpy((char*)p->payload, str);
+// 	
+// 	pthread_mutex_lock(&mutSP);
+// 	sendPackets.push(p);
+// 	//sendPackets.front()->Print();
+// 	pthread_mutex_unlock(&mutSP);
 	
 	//dl->GoBack1();
 	//recvPackets.front()->Print();
@@ -154,7 +154,10 @@ void startPrompt(){
 			Message *m = new Message();
 			m->setCmd("locations");
 			nl -> FromApplicationLayer(m);
-			//TODO: wait for response, display it
+			
+			Message *incoming = nl -> FromDataLinkLayer();
+			
+			cout << incoming->getCmd() << endl;
 			
 		} else if(strcmp(argvNew[0], "createmissing") == 0){
 			if((argvNew[1] != NULL) && 
@@ -171,7 +174,9 @@ void startPrompt(){
 					strcat(cmd, argvNew[3]);
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
-					//TODO: wait for response, display it
+					
+					Message *incoming = nl -> FromDataLinkLayer();
+					cout << incoming->getCmd() << endl;
 					
 					free(cmd);
 				}
@@ -190,7 +195,9 @@ void startPrompt(){
 					strcat(cmd, argvNew[2]);
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
-					//TODO: wait for response, display it
+					
+					Message *incoming = nl -> FromDataLinkLayer();
+					cout << incoming->getCmd() << endl;
 					
 					free(cmd);
 				}
@@ -210,7 +217,9 @@ void startPrompt(){
 					strcat(cmd, argvNew[2]);
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
-					//TODO: wait for response, display it
+					
+					Message *incoming = nl -> FromDataLinkLayer();
+					cout << incoming->getCmd() << endl;
 					
 					free(cmd);
 				}
@@ -230,7 +239,9 @@ void startPrompt(){
 					strcat(cmd, argvNew[2]);
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
-					//TODO: wait for response, display it
+					
+					Message *incoming = nl -> FromDataLinkLayer();
+					cout << incoming->getCmd() << endl;
 					
 					free(cmd);
 				}
@@ -252,7 +263,9 @@ void startPrompt(){
 					strcat(cmd, argvNew[3]);
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
-					//TODO: wait for response, display it
+					
+					Message *incoming = nl -> FromDataLinkLayer();
+					cout << incoming->getCmd() << endl;
 					
 					free(cmd);
 				}
@@ -272,7 +285,9 @@ void startPrompt(){
 					strcat(cmd, argvNew[2]);
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
-					//TODO: wait for response, display it
+					
+					Message *incoming = nl -> FromDataLinkLayer();
+					cout << incoming->getCmd() << endl;
 					
 					free(cmd);
 				}
@@ -289,7 +304,9 @@ void startPrompt(){
 					strcat(cmd, argvNew[1]);
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
-					//TODO: wait for response, display it
+					
+					Message *incoming = nl -> FromDataLinkLayer();
+					cout << incoming->getCmd() << endl;
 					
 					free(cmd);
 				}
@@ -306,7 +323,9 @@ void startPrompt(){
 					strcat(cmd, argvNew[1]);
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
-					//TODO: wait for response, display it
+					
+					Message *incoming = nl -> FromDataLinkLayer();
+					cout << incoming->getCmd() << endl;
 					
 					free(cmd);
 				}
@@ -329,7 +348,9 @@ void startPrompt(){
 					strcat(cmd, argvNew[4]);
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
-					//TODO: wait for response, display it
+					
+					Message *incoming = nl -> FromDataLinkLayer();
+					cout << incoming->getCmd() << endl;
 					
 					free(cmd);
 				}
@@ -344,7 +365,9 @@ void startPrompt(){
 					strcat(cmd, argvNew[2]);
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
-					//TODO: wait for response, display it
+					
+					Message *incoming = nl -> FromDataLinkLayer();
+					cout << incoming->getCmd() << endl;
 					
 					free(cmd);
 				}
@@ -376,7 +399,10 @@ void startPrompt(){
 						m->setImg(img, (long)size);
 						delete[] img;
 						nl -> FromApplicationLayer(m);
-						//TODO: wait for response, display it
+						
+						Message *incoming = nl -> FromDataLinkLayer();
+						cout << incoming->getCmd() << endl;
+						
 					} else{
 						cout << "Unable to load file!" << endl;
 					}
@@ -399,9 +425,10 @@ void startPrompt(){
 					strcat(cmd, argvNew[1]);
 					m->setCmd(cmd);
 					nl -> FromApplicationLayer(m);
-					//TODO: wait for response, display it
+					
+					Message *resp = nl -> FromDataLinkLayer();
+					
 					free(cmd);
-					Message *resp = new Message(); //fromLower
 					long newSize = resp->getContentSize();
 					char *newImg = (char *) calloc(newSize, sizeof(char));
 					memcpy(newImg, resp->getContent(), newSize);
