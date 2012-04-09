@@ -51,7 +51,7 @@ int main(){
 	bool connected = connectToDB(); //true if connected
 	nl = new NetworkLayer();
 	
-	pl = new PhysicalLayer(0);
+	pl = new PhysicalLayer(sockfd);
 	pthread_t PL_thread, NL_thread, DL_thread;
 	//pthread_create(&PL_thread, NULL, RunPLThread, pl);
 

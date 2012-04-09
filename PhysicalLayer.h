@@ -19,6 +19,7 @@ extern pthread_mutex_t mutSF, mutRF;
 class PhysicalLayer {
 private:
 	int sockfd;
+	bool connected;
 public:
 	void start(pthread_t *PL_thread);
 	void run();

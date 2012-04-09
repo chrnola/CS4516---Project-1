@@ -13,6 +13,7 @@
 #include <netdb.h>
 #include <string.h>		// Required for memset()
 #include <pthread.h>
+#include <sys/poll.h>		// For poll
 
 
 #include "did.h"
@@ -56,6 +57,7 @@ PhysicalLayer::PhysicalLayer(const char *hostname) {
 		cerr << "Couldn't connect() to host." << endl;
 		exit(EXIT_FAILURE);
 	}
+	connected = true;
 }
 
 
@@ -63,6 +65,7 @@ PhysicalLayer::PhysicalLayer(const char *hostname) {
 // so just passes control to the general physical layer code.
 PhysicalLayer::PhysicalLayer(int sockfd) {
 	PhysicalLayer::sockfd = sockfd;
+	connected = true;
 }
 
 
@@ -109,14 +112,23 @@ void PhysicalLayer::SendAFrame(){
 
 // Checks if a frame is waiting on the wire. Validates it and sends it on up.
 void PhysicalLayer::ReceiveFrames(){
-	int len = MAX_FRAME + FRAME_HEAD + FRAME_TAIL;
-	char *incoming = (char *) malloc(len);
-	int recvd = recv(sockfd, (void*)incoming, len, 0);
-	if(FrameValid(incoming, recvd)){
-		Frame *result = Frame::Unserialize(incoming);
-		pthread_mutex_lock(&mutRF);
-		recvFrames.push(result);
-		pthread_mutex_unlock(&mutRF);
+	struct pollfd pfd;
+	pfd.fd = sockfd;
+	pfd.events = POLLIN;		// Use poll, so we don't block on the recv call
+	if(poll(&pfd, 1, 10)){
+		int len = MAX_FRAME + FRAME_HEAD + FRAME_TAIL;
+		char *incoming = (char *) malloc(len);
+		int recvd = recv(sockfd, (void*)incoming, len, 0);
+		if(recvd == 0){
+			connected = false;
+			return;
+		}
+		if(FrameValid(incoming, recvd)){
+			Frame *result = Frame::Unserialize(incoming);
+			pthread_mutex_lock(&mutRF);
+			recvFrames.push(result);
+			pthread_mutex_unlock(&mutRF);
+		}
 	}
 }
 
