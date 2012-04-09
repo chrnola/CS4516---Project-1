@@ -17,6 +17,7 @@ bool addPhoto(const char *id, char *file, long fileSize, const char *q1, const c
 // have to worry about maintaining the connection object!
 MYSQL mysql;
 
+// Author: Chris Pinola
 //Initalizes the MySQL C library, creates the global connection
 // object and attempts to connect to WPI's server
 // returns true if successful
@@ -41,24 +42,28 @@ bool connectToDB(){
 	return true;
 }
 
+// Author: Chris Pinola
 // calls library routines to deallocate MySQL objects
 void disconnectFromDB(){
 	mysql_close(&mysql);
 	mysql_library_end();
 }
 
+// Author: Chris Pinola
 // Returns number of rows in the public table
 // Error if return value is < 0
 int getRowCountPublic(){
 	return getRowCountTbl("public");
 }
 
+// Author: Chris Pinola
 // Returns number of rows in the admin table
 // Error if return value is < 0
 int getRowCountAdmin(){
 	return getRowCountTbl("admin");
 }
 
+// Author: Chris Pinola
 // Performs an aggregate count on the specified table
 // Returns number < 0 in the event of an error
 // NOTE: don't let the user pass input to this, to speed
@@ -120,14 +125,17 @@ int getRowCountTbl(const char* tbl){
 	return -3;
 }
 
+// Author: Chris Pinola
 bool removeFromPublic(const char *id){
 	return removeFromTableWhereCol("public", "id", id);
 }
 
+// Author: Chris Pinola
 bool removeFromAdmin(const char *id){
 	return removeFromTableWhereCol("admin", "personID", id);
 }
 
+// Author: Chris Pinola
 bool removeFromTableWhereCol(const char *table, const char *col, const char *id){
 	// ensures the connection to the server is still active, attempts to
 	// reconnect if its not
@@ -177,6 +185,7 @@ bool removeFromTableWhereCol(const char *table, const char *col, const char *id)
 	return false;
 }
 
+// Author: Chris Pinola
 bool positiveID(const char *id, const char *firstName, const char *lastName){
 	// ensures the connection to the server is still active, attempts to
 	// reconnect if its not
@@ -239,6 +248,7 @@ bool positiveID(const char *id, const char *firstName, const char *lastName){
 	return false;
 }
 
+// Author: Chris Pinola
 bool newUser(const char *username, const char *password){
 	// ensures the connection to the server is still active, attempts to
 	// reconnect if its not
@@ -290,6 +300,7 @@ bool newUser(const char *username, const char *password){
 	return false;
 }
 
+// Author: Chris Pinola
 // inserts a new missing person record into the public table, if there's room (<= 100 entries)
 // returns id of new entry, negative number on failure
 long createMissing(const char *first, const char *last, const char *location){
@@ -359,6 +370,7 @@ long createMissing(const char *first, const char *last, const char *location){
 	return -2; //error
 }
 
+// Author: Chris Pinola
 bool createMissingAdmin(const char *id, const char *location, const char *firstName, const char *lastName){
 	// ensures the connection to the server is still active, attempts to
 	// reconnect if its not
@@ -444,6 +456,7 @@ bool createMissingAdmin(const char *id, const char *location, const char *firstN
 	return false;
 }
 
+// Author: Chris Pinola
 // returns the alphabetically sorted list of locations with unidentified bodies
 // just needs to be sent back to the client
 char *locationsWithMissing(){
@@ -489,6 +502,7 @@ char *locationsWithMissing(){
 	return retval;
 }
 
+// Author: Chris Pinola
 bool changePassword(const char *username, const char *oldPass, const char *newPass){
 	//first make sure that the user has provided the correct old password
 	if(!authenticateUser(username, oldPass)){
@@ -537,6 +551,7 @@ bool changePassword(const char *username, const char *oldPass, const char *newPa
 	return false;
 }
 
+// Author: Chris Pinola
 // authenticates admin credentials provided by user
 // returns true on success
 bool authenticateUser(const char *username, const char *password){
@@ -609,6 +624,7 @@ bool authenticateUser(const char *username, const char *password){
 	return false; //error
 }
 
+// Author: Chris Pinola
 // searches the admin table to see if the person with
 // the given name has been positively ID'd
 bool queryAdmin(const char *first, const char *last){
@@ -681,14 +697,17 @@ bool queryAdmin(const char *first, const char *last){
 	return false; //error
 }
 
+// Author: Chris Pinola
 char *getPhotoPublic(const char *id, long *fsize){
 	return getPhoto(id, fsize, "SELECT photo FROM public WHERE id =\'");
 }
 
+// Author: Chris Pinola
 char *getPhotoAdmin(const char *id, long *fsize){
 	return getPhoto(id, fsize, "SELECT photo FROM admin WHERE personID =\'");
 }
 
+// Author: Chris Pinola
 char *getPhoto(const char *id, long *fsize, const char *q1){
 	// ensures the connection to the server is still active, attempts to
 	// reconnect if its not
@@ -732,14 +751,17 @@ char *getPhoto(const char *id, long *fsize, const char *q1){
 	return "error";
 }
 
+// Author: Chris Pinola
 bool addPhotoPublic(const char *id, char *file, long fileSize){
 	return addPhoto(id, file, fileSize, "UPDATE public SET photo=\'", "\' WHERE id=\'");
 }
 
+// Author: Chris Pinola
 bool addPhotoAdmin(const char *id, char *file, long fileSize){
 	return addPhoto(id, file, fileSize, "UPDATE admin SET photo=\'", "\' WHERE personID=\'");
 }
 
+// Author: Chris Pinola
 bool addPhoto(const char *id, char *file, long fileSize, const char *q1, const char *q2){
 	// ensures the connection to the server is still active, attempts to
 	// reconnect if its not

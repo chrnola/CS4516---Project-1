@@ -3,10 +3,32 @@
 
 #include "NetworkLayer.h"
 
+// Author: Chris Pinola
 NetworkLayer::NetworkLayer(){
+	//pthread_mutex_init(&mutSP, NULL);
+	//pthread_mutex_init(&mutRP, NULL);
 }
 
 NetworkLayer::~NetworkLayer(){
+}
+
+void NetworkLayer::Run(){
+// 	while(true){
+// 		if(!pthread_mutex_trylock(&mutSP)){
+// 			if(!sendPackets.empty()){
+// 				SendAPacket();
+// 			}
+// 		}
+// 		ReceivePackets();
+// 	}
+}
+
+void NetworkLayer::SendAPacket(){
+	
+}
+
+void NetworkLayer::ReceivePackets(){
+	
 }
 
 void NetworkLayer::FromApplicationLayer(Message *m){
@@ -57,6 +79,8 @@ void NetworkLayer::ToApplicationLayer(unsigned char *message){
 
 void NetworkLayer::ToDataLinkLayer(Packet *p){
 	//to DL shared buffer
+	//pthread_mutex_lock(&mutSP);
+	//sendPacket
 }
 
 void NetworkLayer::FromDataLinkLayer(Packet *p){
