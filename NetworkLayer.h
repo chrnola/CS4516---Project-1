@@ -1,8 +1,8 @@
 // NetworkLayer.h
 // Author: Chris Pinola
 
-#ifndef __MESSAGE_H__
-#define __MESSAGE_H__
+#ifndef __NETWORKLAYER_H__
+#define __NETWORKLAYER_H__
 
 class Message;
 class Packet;
