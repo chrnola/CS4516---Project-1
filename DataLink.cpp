@@ -16,7 +16,7 @@ pthread_mutex_t mutTime;
  * Author: Ray Short
  */
 void HandleFrameTimeout(int sig) {
-	cout << "Got timeout.\n";
+	//cout << "Got timeout.\n";
 	pthread_mutex_lock(&mutTime);
 	frmTimeout = true;
 	pthread_mutex_unlock(&mutTime);
@@ -63,7 +63,6 @@ void DataLink::GoBack1() {
 	*event = none;
 	
 	buffer = FromNetworkLayer(buffer);
-	buffer->Print();
 	MakeFrames(buffer);
 	ToPhysicalLayer(ready.front());
 	StartTimer(0);
@@ -187,7 +186,7 @@ void DataLink::MakeFrames(Packet* p) {
 		f1->end = true;
 		inc(nextSend);
 		ready.push(f1);
-		f1->Print();
+		//f1->Print();
 	} else { // 2 frame's worth (never more than 2)
 		// assign first frame
 		f1->payload = (unsigned char*) calloc(MAX_FRAME, sizeof(unsigned char));
@@ -199,7 +198,7 @@ void DataLink::MakeFrames(Packet* p) {
 		f1->end = false;
 		inc(nextSend);
 		ready.push(f1);
-		f1->Print();
+		//f1->Print();
 		//assign second frame
 		memcpy(f2->payload, currPacket + MAX_FRAME, pktLen - MAX_FRAME + 8);
 		f2->type = data;
@@ -208,7 +207,7 @@ void DataLink::MakeFrames(Packet* p) {
 		f2->end = true;
 		inc(nextSend);
 		ready.push(f2);
-		f2->Print();
+		//f2->Print();
 	}
 }
 
@@ -235,13 +234,17 @@ Event* DataLink::WaitForEvent(Event* e) {
 			*e = timeout;
 			frmTimeout = false;
 		} else if(pthread_mutex_trylock(&mutRF) == 0) {
+			//cout << "checking recvFrames\n";
 			if(!recvFrames.empty()) {
+				//cout << "recvframes has something";
 				frmArrive = true;
 				*e = arrival;
 			}
 			pthread_mutex_unlock(&mutRF);
 		} else if(!pktSend && pthread_mutex_trylock(&mutSP) == 0) {
+			//cout << "checking sendpackets\n";
 			if(!sendPackets.empty()) {
+				//cout << "sendpackets has something";
 				pktSend = true;
 			}
 		}
@@ -288,6 +291,9 @@ void DataLink::ToNetworkLayer() {
 	if(fr2 != NULL) { // long packet
 		unsigned char* f1 = fr1->payload;
 		unsigned char* f2 = fr2->payload;
+		//cout << "sending to network, frame1 followed by frame2";
+		//fr1->Print();
+		//fr2->Print();
 		char* pload = (char*) calloc(fr1->payloadLength + fr2->payloadLength + 8, sizeof(char));
 		memcpy(pload, f1, fr1->payloadLength);
 		memcpy(pload + fr1->payloadLength, f2, fr2->payloadLength + 8);
@@ -315,8 +321,10 @@ Frame* DataLink::FromPhysicalLayer(Frame* r) {
 	r = recvFrames.front();
 	recvFrames.pop();
 	pthread_mutex_unlock(&mutRF);
-	reconstructFrames.push(r);
-	//reconstructFrames.front()->Print();
+	if(r->type == data) {
+		reconstructFrames.push(r);
+		//reconstructFrames.front()->Print();
+	}
 	frmArrive = false;
 	return r;
 }
@@ -338,6 +346,7 @@ void DataLink::ToPhysicalLayer(Frame* s) {
 	sendFrames.push(s);
 	pthread_mutex_unlock(&mutSF);
 	// testing below
+	//cout << "adding to recvFrames";
 	pthread_mutex_lock(&mutRF);
 	recvFrames.push(s);
 	pthread_mutex_unlock(&mutRF);
