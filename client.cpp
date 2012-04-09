@@ -22,6 +22,7 @@ void quit();
 void* RunDLThread(void* ptr);
 
 void testPL();
+void *RunPLThread(void* ptr);
 
 struct timeval* start, * end;
 
