@@ -133,13 +133,98 @@ void handlePacket(Message *m){
 			nl -> FromApplicationLayer(m);
 		} else if(strcmp(argvNew[0], "id") == 0){
 			if(auth){
-				//bookmark
+				if(positiveID(argvNew[1], argvNew[2], argvNew[3])){
+					m->setCmd("Successfully ID'd body");
+				} else{
+					m->setCmd(err);
+				}
+			} else{
+				m->setCmd(nauth);
+			}
+			nl -> FromApplicationLayer(m);
+		} else if(strcmp(argvNew[0], "removemissing") == 0){
+			if(auth){
+				if(removeFromPublic(argvNew[1])){
+					m->setCmd("Successfully removed entry");
+				} else{
+					m->setCmd(err);
+				}
+			} else{
+				m->setCmd(nauth);
+			}
+			nl -> FromApplicationLayer(m);
+		} else if(strcmp(argvNew[0], "removebody") == 0){
+			if(auth){
+				if(removeFromAdmin(argvNew[1])){
+					m->setCmd("Successfully removed entry");
+				} else{
+					m->setCmd(err);
+				}
+			} else{
+				m->setCmd(nauth);
+			}
+			nl -> FromApplicationLayer(m);
+		} else if(strcmp(argvNew[0], "password") == 0){
+			if(auth){
+				if(changePassword(argvNew[1], argvNew[2], argvNew[3])){
+					m->setCmd("Successfully changed password");
+				} else{
+					m->setCmd("Either the given username does not exist, or the old password doesn't match for that user.");
+				}
+			} else{
+				m->setCmd(nauth);
+			}
+			nl -> FromApplicationLayer(m);
+		} else if(strcmp(argvNew[0], "createbody") == 0){
+			if(auth){
+				if((argvNew[3] != NULL) && (argvNew[4] != NULL)){
+					// full command
+					if(createMissingAdmin(argvNew[1], argvNew[2], argvNew[3], argvNew[4])){
+						m->setCmd("Successfully added entry");
+					} else{
+						m->setCmd(err);
+					}
+				} else{
+					// no name given
+					if(createMissingAdmin(argvNew[1], argvNew[2], NULL, NULL)){
+						m->setCmd("Successfully added entry");
+					} else{
+						m->setCmd(err);
+					}
+				}
+			} else{
+				m->setCmd(nauth);
+			}
+			nl -> FromApplicationLayer(m);
+		} else if(strcmp(argvNew[0], "dlmissingphoto") == 0){
+			if(auth){
+				long s;
+				m->setImg(getPhotoPublic(argvNew[1], &s), s);
+				m->setCmd("Successfully retrieved photo!");
+			} else{
+				m->setCmd(nauth);
+			}
+			nl -> FromApplicationLayer(m);
+		} else if(strcmp(argvNew[0], "addphoto") == 0){
+			if(addPhotoPublic(argvNew[1], m->getContent(), m->getContentSize())){
+				m->setCmd("Successfully added photo");
+			} else{
+				m->setCmd(err);
+			}
+			nl -> FromApplicationLayer(m);
+		} else if(strcmp(argvNew[0], "addbodyphoto") == 0){
+			if(auth){
+				if(addPhotoAdmin(argvNew[1], m->getContent(), m->getContentSize())){
+					m->setCmd("Successfully added photo");
+				} else{
+					m->setCmd(err);
+				}
 			} else{
 				m->setCmd(nauth);
 			}
 			nl -> FromApplicationLayer(m);
 		} else{
-			cerr << "Server received unrecognized command?" << endl;
+			cerr << "Server received unrecognized command" << endl;
 		}
 		
 	}

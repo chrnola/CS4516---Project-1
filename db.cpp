@@ -1,8 +1,8 @@
-// db.C
+// db.cpp
 // Used for server side interactions with the database
 // Author: Chris Pinola
 
-#include "did.h"
+#include "db.h"
 #include <mysql.h>
 
 //forward declare these function, not included in header,
@@ -681,15 +681,15 @@ bool queryAdmin(const char *first, const char *last){
 	return false; //error
 }
 
-char *getPhotoPublic(const char *id, unsigned long *fsize){
+char *getPhotoPublic(const char *id, long *fsize){
 	return getPhoto(id, fsize, "SELECT photo FROM public WHERE id =\'");
 }
 
-char *getPhotoAdmin(const char *id, unsigned long *fsize){
+char *getPhotoAdmin(const char *id, long *fsize){
 	return getPhoto(id, fsize, "SELECT photo FROM admin WHERE personID =\'");
 }
 
-char *getPhoto(const char *id, unsigned long *fsize, const char *q1){
+char *getPhoto(const char *id, long *fsize, const char *q1){
 	// ensures the connection to the server is still active, attempts to
 	// reconnect if its not
 	if(mysql_ping(&mysql)){
@@ -726,7 +726,7 @@ char *getPhoto(const char *id, unsigned long *fsize, const char *q1){
 	
 	mysql_free_result(result);
 	
-	*fsize = lengths[0];
+	*fsize = (long)lengths[0];
 	return row[0];
 	
 	return "error";
