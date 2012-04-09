@@ -15,6 +15,7 @@ class Packet;
 
 using namespace std;
 
+// shared memory structures
 extern queue<Packet*> sendPackets, recvPackets;
 extern queue<Frame*> sendFrames, recvFrames;
 extern pthread_mutex_t mutSP, mutRP, mutSF, mutRF;
@@ -49,7 +50,7 @@ public:
 	
 private:
 	queue<Frame*> window, ready;
-	char numReady, currReady, numWindow, currWindow;
+	char numReady, numWindow;
 	unsigned short nextSend, frameExpect;
 };
 

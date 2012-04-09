@@ -81,12 +81,15 @@ void HandleFrameError(int sig) {
 /*
  * Author: Ray Short
  */
+// constructor for initializing some variables
 DataLink::DataLink() {
+	// initialize counters
 	numWindow = 0;
 	numReady = 0;
 	nextSend = 0;
 	frameExpect = 0;
-		
+	
+	// initialize handling variables
 	frmTimeout = false;
 	frmArrive = false;
 	pktArrive = false;
@@ -100,6 +103,7 @@ DataLink::DataLink() {
 	signal(SIGPSND, HandlePacketSend);
 	signal(SIGFERR, HandleFrameError);
 	
+	// initialize mutex variables for flags
 	pthread_mutex_init(&mutTime, NULL);
 	pthread_mutex_init(&mutFArv, NULL);
 	pthread_mutex_init(&mutPArv, NULL);
@@ -111,12 +115,15 @@ DataLink::DataLink() {
 /*
  * Author: Ray Short
  */
+// deconstructor, nothing really
 DataLink::~DataLink() {
 }
 
 /*
  * Author: Ray Short
  */
+// implementation of Go-Back-1
+// uses sliding window of 1, retransmissions and acks
 void DataLink::GoBack1() {
 	Frame* r = new Frame(), * s = new Frame();
 	Packet* buffer = (Packet*) calloc(1, sizeof(Packet));
@@ -129,8 +136,10 @@ void DataLink::GoBack1() {
 	//fflush(stdout);
 	ToPhysicalLayer(ready.front());
 	StartTimer(0);
+	// testing code
 	r->type = ack;
 	*event = arrival;
+	// end testing code
 	while(true) {
 		// for testing
 		numWindow = 0;
@@ -148,11 +157,6 @@ void DataLink::GoBack1() {
 				ready.pop();
 				// remove ack from queue of received frames
 				RemoveAck();
-				pthread_mutex_lock(&mutRF);
-				Frame* f = recvFrames.front();
-				recvFrames.pop();
-				pthread_mutex_unlock(&mutRF);			
-				free(f);
 			} else if(r->seq == frameExpect) {
 				//cout << "this is the expected frame";
 				if(r->end == true) {
@@ -170,8 +174,10 @@ void DataLink::GoBack1() {
 			MakeFrames(buffer);
 		}
 		//cout << "Curr ready is " << currReady+0 << " and num ready is " << numReady+0;
+		// some more testing code
 		numReady--;
 		if(numReady == 0) return;
+		// end of testing code
 		ToPhysicalLayer(ready.front());
 		StartTimer(0);
 	}
@@ -234,9 +240,10 @@ void DataLink::MakeFrames(Packet* p) {
 	//p->Print();
 	//cout << "Making into frames\n";
 	
+	// get length of packet and serialize into char array
 	unsigned short pktLen = p->payloadLength + PACKET_HEAD;
 	currPacket = p->Serialize();
-	if(pktLen <= MAX_FRAME) {
+	if(pktLen <= MAX_FRAME) { // 1 frame's worth
 		f1->payload = (unsigned char*) calloc(pktLen, sizeof(unsigned char));
 		memcpy(f1->payload, currPacket, pktLen);
 		f1->type = data;
@@ -245,8 +252,9 @@ void DataLink::MakeFrames(Packet* p) {
 		f1->end = true;
 		inc(nextSend);
 		ready.push(f1);
-		f1->Print();
-	} else {
+		//f1->Print();
+	} else { // 2 frame's worth (never more than 2)
+		// assign first frame
 		f1->payload = (unsigned char*) calloc(MAX_FRAME, sizeof(unsigned char));
 		f2->payload = (unsigned char*) calloc(pktLen - MAX_FRAME, sizeof(unsigned char));
 		memcpy(f1->payload, currPacket, MAX_FRAME);
@@ -256,7 +264,8 @@ void DataLink::MakeFrames(Packet* p) {
 		f1->end = false;
 		inc(nextSend);
 		ready.push(f1);
-		f1->Print();
+		//f1->Print();
+		//assign second frame
 		memcpy(f2->payload, currPacket + MAX_FRAME, pktLen - MAX_FRAME + 8);
 		f2->type = data;
 		f2->seq = nextSend;
@@ -264,13 +273,14 @@ void DataLink::MakeFrames(Packet* p) {
 		f2->end = true;
 		inc(nextSend);
 		ready.push(f2);
-		f2->Print();
+		//f2->Print();
 	}
 }
 
 /*
  * Author: Ray Short
  */
+// sends an ack for the frame just received
 void DataLink::SendAck() {
 	Frame* f = new Frame();
 	f->type = ack;
@@ -283,6 +293,7 @@ void DataLink::SendAck() {
 /*
  * Author: Ray Short
  */
+// poll for signals and change event as needed
 Event* DataLink::WaitForEvent(Event* e) {
 	while(*e == none) {
 		if(frmTimeout) {
@@ -301,6 +312,7 @@ Event* DataLink::WaitForEvent(Event* e) {
 /*
  * Author: Ray Short
  */
+// move a packet from the shared buffer into a local Packet
 Packet* DataLink::FromNetworkLayer(Packet* p) {
 	if(!pktSend) return NULL;
 	pthread_mutex_lock(&mutSP);
@@ -314,27 +326,31 @@ Packet* DataLink::FromNetworkLayer(Packet* p) {
 /*
  * Author: Ray Short
  */
+// take the recently received frames and construct
+// a packet from them
+// checks for 2-frame and 1-frame length packets
 void DataLink::ToNetworkLayer() {
 	if(pktArrive) return;
 	Packet* pkt = (Packet*) calloc(1, sizeof(Packet));
-	pthread_mutex_lock(&mutRF);
 	Frame* fr1 = (Frame*) calloc(1, sizeof(Frame));
+	Frame* fr2 = (Frame*) calloc(1, sizeof(Frame));
+	pthread_mutex_lock(&mutRF);
 	fr1 = recvFrames.front();
 	recvFrames.pop();
-	Frame* fr2 = (Frame*) calloc(1, sizeof(Frame));
 	fr2 = recvFrames.front();
 	recvFrames.pop();
 	pthread_mutex_unlock(&mutRF);
-	if(fr2 != NULL) {
+	if(fr2 != NULL) { // long packet
 		unsigned char* f1 = fr1->payload;
 		unsigned char* f2 = fr2->payload;
 		char* pload = (char*) calloc(fr1->payloadLength + fr2->payloadLength + 8, sizeof(char));
 		memcpy(pload, f1, fr1->payloadLength);
 		memcpy(pload + fr1->payloadLength, f2, fr2->payloadLength + 8);
 		pkt = Packet:: Unserialize((char*) pload);
-	} else {
+	} else { // short packet
 		pkt = Packet::Unserialize((char*) fr1->payload);
 	}
+	// move packet up to network layer
 	pthread_mutex_lock(&mutRP);
 	recvPackets.push(pkt);
 	pthread_mutex_unlock(&mutRP);
@@ -346,6 +362,10 @@ void DataLink::ToNetworkLayer() {
 /*
  * Author: Ray Short
  */
+// return the most recently received frame
+// takes back of queue because of 2-frame packets
+// and using this queue as temporary storage
+// for the first before the second arrives
 Frame* DataLink::FromPhysicalLayer(Frame* r) {
 	if(!frmArrive) return NULL;
 	pthread_mutex_lock(&mutRF);
@@ -358,6 +378,9 @@ Frame* DataLink::FromPhysicalLayer(Frame* r) {
 /*
  * Author: Ray Short
  */
+// places the passed frame into the window, as well
+// as the shared buffer with the physical layer,
+// signalling the physical layer that a frame is ready
 void DataLink::ToPhysicalLayer(Frame* s) {
 	if(numWindow == 1) return; // 1-sliding window
 	//if(numWindow == 4) return; // 4-sliding window
@@ -380,6 +403,7 @@ void DataLink::ToPhysicalLayer(Frame* s) {
 /*
  * Author: Ray Short
  */
+// start timeout timer for ack receive after frame send
 void DataLink::StartTimer(unsigned short k) {
 	struct timeval* tval = (struct timeval*) calloc(1, sizeof(struct timeval));
 	struct timeval* zero = (struct timeval*) calloc(1, sizeof(struct timeval));
@@ -397,6 +421,7 @@ void DataLink::StartTimer(unsigned short k) {
 /*
  * Author: Ray Short
  */
+// stops timeout timer
 void DataLink::StopTimer(unsigned short k) {
 	struct timeval* zero = (struct timeval*) calloc(1, sizeof(struct timeval));
 	zero->tv_usec = 0;
@@ -407,6 +432,9 @@ void DataLink::StopTimer(unsigned short k) {
 	setitimer(ITIMER_REAL, timerval, NULL);
 }
 
+/*
+ * Author: Ray Short
+ */
 // remove ack from queue of received frames
 void DataLink::RemoveAck() {
 	int i, size = recvFrames.size();
@@ -414,13 +442,13 @@ void DataLink::RemoveAck() {
 		pthread_mutex_lock(&mutRF);
 		Frame* f = recvFrames.front();
 		pthread_mutex_unlock(&mutRF);
-		if(f->type == ack) {
+		if(f->type == ack) { // remove the ack
 			pthread_mutex_lock(&mutRF);
 			recvFrames.pop();
 			pthread_mutex_unlock(&mutRF);
 			free(f);
 			return;
-		} else {
+		} else { // cycle through data, retain order
 			pthread_mutex_lock(&mutRF);
 			recvFrames.pop();
 			recvFrames.push(f);
