@@ -126,7 +126,7 @@ void startPrompt(){
 				break;
 			}
 		}
-		
+
 		argvNew[i] = NULL;
 		
 		if(strcmp(argvNew[0], "help") == 0){
@@ -449,7 +449,7 @@ void startPrompt(){
 		} else{
 			cout << "Bad command!" << endl;
 		}
-		
+		cout << "getting another command";
 		startPrompt();
 	}
 	

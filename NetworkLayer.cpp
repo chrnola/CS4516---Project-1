@@ -37,6 +37,7 @@ void NetworkLayer::FromApplicationLayer(Message *m){
 	int pToMake = mLength / MAX_PACKET;
 	int leftover = mLength % MAX_PACKET;
 	
+	fflush(stdout);
 	int s = MAX_SEQ;
 	//make whole packets
 	for (int i = 1; i <= pToMake; i++){

@@ -78,7 +78,11 @@ void DataLink::GoBack1() {
 		// for testing
 		numWindow = 0;
 		// end for testing
+		cout << "Waiting for an event, pktready is " << pktReady << " and none is " << none<< "\n";
+		cout << "pktsend is now " << pktSend;
 		event = WaitForEvent(event);
+		cout << "got event " << *event;
+		fflush(stdout);
 		if(*event == arrival) {
 			r = FromPhysicalLayer(r);
 			//cout << "received is";
@@ -108,8 +112,8 @@ void DataLink::GoBack1() {
 		}
 		// reset for waiting
 		*event = none;
-		if(numReady < MAX_READY - 2 && pktSend) {
-			FromNetworkLayer(buffer);
+		if(ready.size() < MAX_READY - 2 && pktSend) {
+			buffer = FromNetworkLayer(buffer);
 			MakeFrames(buffer);
 			pktSend = false;
 		}
@@ -118,8 +122,6 @@ void DataLink::GoBack1() {
 		numReady--;
 		if(numReady == 0) return;
 		// end of testing code
-		cout << "ready has " << ready.size();
-		cout << "ready is empty? " << ready.empty();
 		if(!ready.empty()) {
 			ToPhysicalLayer(ready.front());
 			StartTimer(0);
@@ -242,11 +244,13 @@ void DataLink::SendAck() {
  */
 // poll for signals and change event as needed
 Event* DataLink::WaitForEvent(Event* e) {
+	cout << "inside waiting for event";
 	while(*e == none) {
 		if(frmTimeout) {
-			*e = timeout;
 			frmTimeout = false;
-		} else if(pthread_mutex_trylock(&mutRF) == 0) {
+			*e = timeout;
+		}
+		if(pthread_mutex_trylock(&mutRF) == 0) {
 			//cout << "checking recvFrames\n";
 			if(!recvFrames.empty()) {
 				//cout << "recvframes has something";
@@ -254,12 +258,15 @@ Event* DataLink::WaitForEvent(Event* e) {
 				*e = arrival;
 			}
 			pthread_mutex_unlock(&mutRF);
-		} else if(!pktSend && pthread_mutex_trylock(&mutSP) == 0) {
+		}
+		if(!pktSend && pthread_mutex_trylock(&mutSP) == 0) {
 			//cout << "checking sendpackets\n";
 			if(!sendPackets.empty()) {
-				//cout << "sendpackets has something";
+				cout << "sendpackets has something";
 				pktSend = true;
+				*e = pktReady;
 			}
+			pthread_mutex_unlock(&mutSP);
 		}
 	}
 	return e;
@@ -272,8 +279,12 @@ Event* DataLink::WaitForEvent(Event* e) {
 Packet* DataLink::FromNetworkLayer(Packet* p) {
 	if(!pktSend) return NULL;
 	pthread_mutex_lock(&mutSP);
-	p = sendPackets.front();
-	sendPackets.pop();
+	if(!sendPackets.empty()) {
+		p = sendPackets.front();
+		sendPackets.pop();
+	} else {
+		p = NULL;
+	}
 	pthread_mutex_unlock(&mutSP);
 	pktSend = false;
 	return p;
@@ -296,10 +307,14 @@ void DataLink::ToNetworkLayer() {
 	Frame* fr1 = (Frame*) calloc(1, sizeof(Frame));
 	Frame* fr2 = (Frame*) calloc(1, sizeof(Frame));
 	pthread_mutex_lock(&mutRF);
-	fr1 = reconstructFrames.front();
-	reconstructFrames.pop();
-	fr2 = reconstructFrames.front();
-	reconstructFrames.pop();
+	if(!reconstructFrames.empty()) {
+		fr1 = reconstructFrames.front();
+		reconstructFrames.pop();
+	} else fr1 = NULL;
+	if(!reconstructFrames.empty()) {
+		fr2 = reconstructFrames.front();
+		reconstructFrames.pop();
+	} else fr2 = NULL;
 	pthread_mutex_unlock(&mutRF);
 	if(fr2 != NULL) { // long packet
 		unsigned char* f1 = fr1->payload;
@@ -353,15 +368,26 @@ Frame* DataLink::FromPhysicalLayer(Frame* r) {
 // as the shared buffer with the physical layer,
 // signalling the physical layer that a frame is ready
 void DataLink::ToPhysicalLayer(Frame* s) {
-	if(numWindow == 1) return; // 1-sliding window
+	cout << "attempting to send to physical layer";
+	if(window.size() == 1) return; // 1-sliding window
 	//if(numWindow == 4) return; // 4-sliding window
 	cout << "Sending frame";
 	s->Print();
+	cout << "size of window is " << window.size();
+	fflush(stdout);
 	window.push(s);
+	cout << "size of window is " << window.size();
+	fflush(stdout);
 	numWindow++;
-	pthread_mutex_lock(&mutSF);
-	sendFrames.push(s);
-	pthread_mutex_unlock(&mutSF);
+	cout << "locking mutex to send frame";
+	fflush(stdout);
+	char lock;
+	if((lock = pthread_mutex_trylock(&mutSF)) == 0) {
+		sendFrames.push(s);
+		pthread_mutex_unlock(&mutSF);
+	}
+	cout << "lock was " << lock+0x30;
+	fflush(stdout);
 	// testing below
 	//cout << "adding to recvFrames";
 	/*pthread_mutex_lock(&mutRF);
