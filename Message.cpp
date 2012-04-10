@@ -42,22 +42,22 @@ long Message::getContentSize(){
 
 //Returns cmd converted back to a regular char*
 char *Message::getCmd(){
-	return reinterpret_cast<char*>(cmd);
+	return reinterpret_cast<char*>(this->cmd);
 }
 
 //Same thing, but for content
 char *Message::getContent(){
-	return reinterpret_cast<char*>(content);
+	return reinterpret_cast<char*>(this->content);
 }
 
 //In the event that you would want the actual unsigned value of the cmd field
 unsigned char *Message::getCmdRaw(){
-	return cmd;
+	return this->cmd;
 }
 
 //Same thing, but for content
 unsigned char *Message::getContentRaw(){
-	return content;
+	return this->content;
 }
 
 unsigned char *Message::serialize(short size){
@@ -65,7 +65,6 @@ unsigned char *Message::serialize(short size){
 	char cmdLen = strlen((char*) this->cmd);
 	memcpy(data, this->getCmd(), cmdLen);
 	memcpy(data + cmdLen, this->getContent(), this->getContentSize());
-	//strcat((char *) data, (char *) this);
 	return data;
 }
 

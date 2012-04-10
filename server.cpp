@@ -62,6 +62,11 @@ int main(){
 	while(connected){
 		Message *incoming = nl -> FromDataLinkLayer();
 		cout << "Got message from the shadow realm" << endl;
+		short q = incoming->getContentSize() + strlen((char*)incoming->cmd);
+		cout << "$$$$$$$$$$$$$$$ " << q << endl;
+		cout << incoming->serialize(q) << endl;
+		cout << "End region" << endl;
+		fflush(stdout);
 		handleMessage(incoming);
 	}
 	

@@ -8,10 +8,10 @@
 
 class Message{
 	private:
-		unsigned char *cmd; // only text
 		unsigned char *content; //binary
 		long contentSize;
 	public:
+		unsigned char *cmd; // only text
 		Message();
 		Message(char *_cmd, char *_content);
 		~Message();
