@@ -384,6 +384,7 @@ void DataLink::ToPhysicalLayer(Frame* s) {
 	int lock;
 	if((lock = (int) pthread_mutex_trylock(&mutSF)) == 0) {
 		sendFrames.push(s);
+		cout << "pushed frame";
 		pthread_mutex_unlock(&mutSF);
 	}
 	//cout << "lock was " << lock;

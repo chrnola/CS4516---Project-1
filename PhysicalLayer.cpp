@@ -79,6 +79,8 @@ void PhysicalLayer::run(){
 			if(!sendFrames.empty()){
 				SendAFrame();
 			}
+			pthread_mutex_trylock(&mutSF);
+			pthread_mutex_unlock(&mutSF);
 		}
 		ReceiveFrames();
 	}
@@ -128,8 +130,11 @@ void PhysicalLayer::ReceiveFrames(){
 			connected = false;
 			return;
 		}
+
 		if(FrameValid(incoming, recvd)){
 			Frame *result = Frame::Unserialize(incoming);
+			cout << "\n\n!!!!!got frame: ";
+			result->Print();
 			pthread_mutex_lock(&mutRF);
 			recvFrames.push(result);
 			pthread_mutex_unlock(&mutRF);
@@ -143,20 +148,30 @@ void PhysicalLayer::ReceiveFrames(){
 unsigned char* PhysicalLayer::FoldSerializedFrame(unsigned char* sFrame, int len){
 	unsigned char foldByteA = 0;
 	unsigned char foldByteB = 0;
+	unsigned char* fCpy = (unsigned char*) calloc(len, sizeof(unsigned char));
+	memcpy(fCpy, sFrame, len);
 	for(int i = 0; i < len; i++){
 		if(i % 2 == 0){
-			foldByteA = foldByteA ^ *(sFrame + i);
+			foldByteA = foldByteA ^ *(fCpy + i);
 		}
 		else{
-			foldByteB = foldByteB ^ *(sFrame + i);
+			foldByteB = foldByteB ^ *(fCpy + i);
 		}
 	}
 
-	sFrame = (unsigned char *) realloc(sFrame, len + 2); // + 1 for null termination, + 2 for folded bytes
-	*(sFrame + len) = foldByteA;
-	*(sFrame + len + 1) = foldByteB;
+	fCpy = (unsigned char *) realloc(fCpy, len + 3); // + 1 for null termination, + 2 for folded bytes
+	*(fCpy + len) = foldByteA;
+	*(fCpy + len + 1) = foldByteB;
+	
+	Frame* fasdfss = Frame::Unserialize((char*)fCpy);
+	//Frame* f2 = Frame::Unserialize((char*)sFrame);
+	cout << "##########################";
+	fasdfss->Print();
+	fflush(stdout);
+	//cout << "##########################";
+	//f2->Print();	
 
-	return reinterpret_cast<unsigned char*>(sFrame);
+	return reinterpret_cast<unsigned char*>(fCpy);
 }
 
 bool PhysicalLayer::FrameValid(char* sFrame, int length){

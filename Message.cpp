@@ -62,7 +62,9 @@ unsigned char *Message::getContentRaw(){
 
 unsigned char *Message::serialize(short size){
 	unsigned char *data = (unsigned char*) calloc(size, sizeof(unsigned char));
-	memcpy(data, (char *) this, size);
+	char cmdLen = strlen((char*) this->cmd);
+	memcpy(data, this->getCmd(), cmdLen);
+	memcpy(data + cmdLen, this->getContent(), this->getContentSize());
 	//strcat((char *) data, (char *) this);
 	return data;
 }
