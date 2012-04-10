@@ -382,12 +382,12 @@ void DataLink::ToPhysicalLayer(Frame* s) {
 	cout << "locking mutex to send frame";
 	fflush(stdout);
 	int lock;
-	if((lock = pthread_mutex_trylock(&mutSF)) == 0) {
+	if((lock = (int) pthread_mutex_trylock(&mutSF)) == 0) {
 		sendFrames.push(s);
 		pthread_mutex_unlock(&mutSF);
 	}
-	cout << "lock was " << lock;
-	fflush(stdout);
+	//cout << "lock was " << lock;
+	//fflush(stdout);
 	// testing below
 	//cout << "adding to recvFrames";
 	/*pthread_mutex_lock(&mutRF);
