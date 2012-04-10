@@ -61,6 +61,7 @@ int main(){
 	
 	while(connected){
 		Message *incoming = nl -> FromDataLinkLayer();
+		cout << "Got message from the shadow realm" << endl;
 		handleMessage(incoming);
 	}
 	
@@ -112,6 +113,7 @@ void handleMessage(Message *inm){
 		//and makes fills in our new message object with the
 		//response
 		if(strcmp(argvNew[0], "locations") == 0){
+			cout << "awesome" << endl;
 			m->setCmd(locationsWithMissing());
 			nl -> FromApplicationLayer(m);
 		} else if(strcmp(argvNew[0], "quit") == 0){

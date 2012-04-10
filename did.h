@@ -22,8 +22,8 @@
 #include "db.h"
 
 #define WELL_KNOWN_PORT 2778 //Why not?
-#define PACKET_HEAD 6
-#define FRAME_HEAD 6
+#define PACKET_HEAD 12
+#define FRAME_HEAD 12
 #define FRAME_TAIL 2
 #define MAX_FRAME 150
 #define MAX_PACKET 256

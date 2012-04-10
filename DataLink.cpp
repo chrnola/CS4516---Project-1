@@ -215,7 +215,7 @@ void DataLink::MakeFrames(Packet* p) {
 		ready.push(f1);
 		f1->Print();
 		//assign second frame
-		memcpy(f2->payload, currPacket + MAX_FRAME, pktLen - MAX_FRAME + 8);
+		memcpy(f2->payload, currPacket + MAX_FRAME, pktLen - MAX_FRAME);
 		f2->type = data;
 		f2->seq = nextSend;
 		f2->payloadLength = pktLen - MAX_FRAME;

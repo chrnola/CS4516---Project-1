@@ -150,16 +150,17 @@ unsigned char* PhysicalLayer::FoldSerializedFrame(unsigned char* sFrame, int len
 	unsigned char foldByteB = 0;
 	unsigned char* fCpy = (unsigned char*) calloc(len, sizeof(unsigned char));
 	memcpy(fCpy, sFrame, len);
+	
 	for(int i = 0; i < len; i++){
 		if(i % 2 == 0){
-			foldByteA = foldByteA ^ *(fCpy + i);
+			foldByteA ^= *(fCpy + i);
 		}
 		else{
-			foldByteB = foldByteB ^ *(fCpy + i);
+			foldByteB ^= *(fCpy + i);
 		}
 	}
 
-	fCpy = (unsigned char *) realloc(fCpy, len + 3); // + 1 for null termination, + 2 for folded bytes
+	fCpy = (unsigned char *) realloc(fCpy, len + 2); // + 2 for folded bytes
 	*(fCpy + len) = foldByteA;
 	*(fCpy + len + 1) = foldByteB;
 	
