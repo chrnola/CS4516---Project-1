@@ -139,7 +139,7 @@ void PhysicalLayer::ReceiveFrames(){
 
 		if(FrameValid(incoming, recvd)){
 			Frame *result = Frame::Unserialize(incoming);
-			cout << "\n\n!!!!!got frame: ";
+			cout << "[PhysicalLayer:ReceiveFrames] Got a frame:"<<endl;
 			result->Print();
 			pthread_mutex_lock(&mutRF);
 			recvFrames.push(result);
