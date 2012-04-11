@@ -78,6 +78,7 @@ void NetworkLayer::ToDataLinkLayer(Packet *p){
 	//to DL shared buffer
 	pthread_mutex_lock(&mutSP);
 	sendPackets.push(p);
+	if(debug) cout <<"[NetworkLayer:ToDataLinkLayer] Put packet in 'pipe' "<<endl;
 	pthread_mutex_unlock(&mutSP);
 }
 
@@ -85,31 +86,36 @@ Packet *ReceiveAPacket(queue<Packet*> *buildBuffer){
 	bool hasPacket = false;
 	Packet *result;
 	
+	if(debug) cout <<"[NetworkLayer:ReceiveAPacket] Func start"<<endl;
+	
 	while(!hasPacket){
-		pthread_mutex_lock(&mutRP);
-		if(!recvPackets.empty()){
-			///cout << "NL - Pulling packet from recvPackets" << endl;
-			result = recvPackets.front();
-			buildBuffer->push(result);
-			recvPackets.pop();
-			hasPacket = true;
+		if(pthread_mutex_trylock(&mutRP) == 0){
+			if(debug) cout <<"[NetworkLayer:ReceiveAPacket] Got lock"<<endl;
+			if(!recvPackets.empty()){
+				if(debug) cout <<"[NetworkLayer:ReceiveAPacket] Pulling packet from pipe"<<endl;
+				result = recvPackets.front();
+				buildBuffer->push(result);
+				recvPackets.pop();
+				hasPacket = true;
+			}
+			pthread_mutex_unlock(&mutRP);
+			if(debug) cout <<"[NetworkLayer:ReceiveAPacket] Unlocked"<<endl;
 		}
-		pthread_mutex_unlock(&mutRP);
 	}
 	return result;
 }
 
 Message *Assemble(queue<Packet*> *buildBuffer){
-	///cout << "Assembling packets into a message" << endl;
+	if(debug) cout <<"[NetworkLayer:Assemble] Constructing Message"<<endl;
 	unsigned char *result = (unsigned char *) malloc(sizeof(unsigned char) * MAX_PACKET * buildBuffer->size());
 	for(int i = 0; i < (int)buildBuffer->size(); i++){
 		Packet *tPack = buildBuffer->front();
 		buildBuffer->pop();
 		unsigned char *current = result + (i * MAX_PACKET * sizeof(unsigned char));
 		memcpy(current, tPack->payload, tPack->payloadLength);
-		//*current = tPack->payload;
+		if(debug) cout <<"[NetworkLayer:Assemble] Tacked on packet #" << i <<endl;
 	}
-	
+	if(debug) cout <<"[NetworkLayer:Assemble] Returning Message"<<endl;
 	return Message::unserialize(result);
 }
 
@@ -120,8 +126,11 @@ Message *NetworkLayer::FromDataLinkLayer(){
 	Packet *thisPacket;
 	
 	while(true){
+		if(debug) cout <<"[NetworkLayer:FromDataLinkLayer] Starting packet retrieval loop"<<endl;
 		thisPacket = ReceiveAPacket(&buildBuffer);
+		if(debug) cout <<"[NetworkLayer:FromDataLinkLayer] Got one"<<endl;
 		if(thisPacket->end){
+			if(debug) cout <<"[NetworkLayer:FromDataLinkLayer] ...and its the last one"<<endl;
 			return Assemble(&buildBuffer);
 		}
 	}
