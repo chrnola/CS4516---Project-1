@@ -64,11 +64,6 @@ int main(){
 	
 	while(connected){
 		Message *incoming = nl -> FromDataLinkLayer();
-
-		///cout << "Got message from the shadow realm" << endl;
-		///short q = incoming->getContentSize() + strlen(incoming->getCmd());
-		///cout << "$$$$$$$$$$$$$$$ " << q << endl;
-		fflush(stdout);
 		handleMessage(incoming);
 	}
 	

@@ -23,14 +23,11 @@ bool checkLength(char *field, int max);
 void quit();
 
 void* RunDLThread(void* ptr);
-
-void testPL();
 void *RunPLThread(void* ptr);
 
 struct timeval* start, * end;
 
 int main(int argc, char **argv) {
-	//testPL();
 	start = (struct timeval*) calloc(1, sizeof(struct timeval));
 	end = (struct timeval*) calloc(1, sizeof(struct timeval));
 	gettimeofday(start, NULL);
@@ -46,31 +43,12 @@ int main(int argc, char **argv) {
 	pthread_mutex_init(&mutSF, NULL);
 	pthread_mutex_init(&mutRF, NULL);
 	
-// 	Packet* p = new Packet();
-// 	p->type = data;
-// 	p->seq = 30;
-// 	p->end = true;
-// 	p->payloadLength = 186;
-// 	p->payload = (unsigned char*) calloc(200, sizeof(unsigned char));
-// 	string s = "Yay it works through layers n stuff. This is quite long to test some stuffYay it works through layers n stuff. This is quite long to test some stuffYay it works through layers n stuff.\n";
-// 	char* str = const_cast<char*>(s.c_str());
-// 	p->payload = (unsigned char*) strcpy((char*)p->payload, str);
-// 	
-// 	pthread_mutex_lock(&mutSP);
-// 	sendPackets.push(p);
-// 	//sendPackets.front()->Print();
-// 	pthread_mutex_unlock(&mutSP);
-	
-	//dl->GoBack1();
-	//recvPackets.front()->Print();
 	DataLink* dl = new DataLink();
 	pthread_t DL_thread, PL_thread;
 	pthread_create(&DL_thread, NULL, RunDLThread, dl);
 	pthread_create(&PL_thread, NULL, RunPLThread, pl);
 
-	
 	startPrompt();
-
 }
 
 void *RunPLThread(void* ptr){
@@ -484,8 +462,4 @@ bool checkLength(char *field, int max){
 		return false;
 	}
 	return true;
-}
-
-void testPL(){
-	PhysicalLayer pl = PhysicalLayer("localhost");
 }
