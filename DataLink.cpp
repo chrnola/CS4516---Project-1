@@ -306,6 +306,7 @@ void DataLink::ToNetworkLayer() {
 			if(debug) cout<<"[DataLink::ToNetworkLayer] recvPackets is empty, returning"<<endl;
 			return;
 		}
+		pthread_mutex_unlock(&mutRP);
 	}
 	Packet* pkt = (Packet*) calloc(1, sizeof(Packet));
 	Frame* fr1 = (Frame*) calloc(1, sizeof(Frame));
