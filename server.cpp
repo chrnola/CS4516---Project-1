@@ -62,10 +62,8 @@ int main(){
 	while(connected){
 		Message *incoming = nl -> FromDataLinkLayer();
 		cout << "Got message from the shadow realm" << endl;
-		short q = incoming->getContentSize() + strlen((char*)incoming->cmd);
+		short q = incoming->getContentSize() + strlen(incoming->getCmd());
 		cout << "$$$$$$$$$$$$$$$ " << q << endl;
-		cout << incoming->serialize(q) << endl;
-		cout << "End region" << endl;
 		fflush(stdout);
 		handleMessage(incoming);
 	}
@@ -119,7 +117,9 @@ void handleMessage(Message *inm){
 		//response
 		if(strcmp(argvNew[0], "locations") == 0){
 			cout << "awesome" << endl;
-			m->setCmd(locationsWithMissing());
+			char *r = locationsWithMissing();
+			cout << r << endl;
+			m->setCmd(r);
 			nl -> FromApplicationLayer(m);
 		} else if(strcmp(argvNew[0], "quit") == 0){
 			connected = false;
@@ -256,7 +256,7 @@ void handleMessage(Message *inm){
 			}
 			nl -> FromApplicationLayer(m);
 		} else{
-			cerr << "Server received unrecognized command" << endl;
+			cerr << "Server received unrecognized command: " << cmd << endl;
 		}
 		
 	}

@@ -13,6 +13,7 @@
 class Utils {
 public:
 	static unsigned char* itoa(unsigned short n);
+	static unsigned char *ltoa(long n);
 };
 
 #endif /* UTILS_H_ */

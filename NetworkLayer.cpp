@@ -29,8 +29,9 @@ void NetworkLayer::SendAPacket(Packet *p){
 }
 
 void NetworkLayer::FromApplicationLayer(Message *m){
-	short mLength = m -> getContentSize();
+	long mLength = m -> getContentSize();
 	mLength += strlen(m -> getCmd());
+	mLength += 22;
 	unsigned char *mess = m -> serialize(mLength);
 	
 	//make packets (and be greedy about it)!
@@ -85,11 +86,9 @@ Packet *ReceiveAPacket(queue<Packet*> *buildBuffer){
 	Packet *result;
 	
 	while(!hasPacket){
-		//cout << "Gonna lock!" << endl;
 		pthread_mutex_lock(&mutRP);
-		//cout << "Yeah I locked" << endl;
 		if(!recvPackets.empty()){
-			cout << "ACTUALLY GOT SOMETHING";
+			cout << "NL - Pulling packet from recvPackets" << endl;
 			result = recvPackets.front();
 			buildBuffer->push(result);
 			recvPackets.pop();
@@ -101,16 +100,17 @@ Packet *ReceiveAPacket(queue<Packet*> *buildBuffer){
 }
 
 Message *Assemble(queue<Packet*> *buildBuffer){
-	Message *result = (Message *) malloc(sizeof(char) * MAX_PACKET * buildBuffer->size());
+	cout << "Assembling packets into a message" << endl;
+	unsigned char *result = (unsigned char *) malloc(sizeof(unsigned char) * MAX_PACKET * buildBuffer->size());
 	for(int i = 0; i < (int)buildBuffer->size(); i++){
 		Packet *tPack = buildBuffer->front();
 		buildBuffer->pop();
-		Message *current = result + (i * MAX_PACKET * sizeof(char));
+		unsigned char *current = result + (i * MAX_PACKET * sizeof(unsigned char));
 		memcpy(current, tPack->payload, tPack->payloadLength);
 		//*current = tPack->payload;
 	}
 	
-	return result;
+	return Message::unserialize(result);
 }
 
 Message *NetworkLayer::FromDataLinkLayer(){
@@ -121,7 +121,9 @@ Message *NetworkLayer::FromDataLinkLayer(){
 	
 	while(true){
 		thisPacket = ReceiveAPacket(&buildBuffer);
-		if(thisPacket->end) return Assemble(&buildBuffer);
+		if(thisPacket->end){
+			return Assemble(&buildBuffer);
+		}
 	}
 	
 	return NULL;

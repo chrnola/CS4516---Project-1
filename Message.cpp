@@ -60,16 +60,30 @@ unsigned char *Message::getContentRaw(){
 	return this->content;
 }
 
-unsigned char *Message::serialize(short size){
-	unsigned char *data = (unsigned char*) calloc(size, sizeof(unsigned char));
-	char cmdLen = strlen((char*) this->cmd);
-	memcpy(data, this->getCmd(), cmdLen);
-	memcpy(data + cmdLen, this->getContent(), this->getContentSize());
+unsigned char *Message::serialize(long size){
+	unsigned char *data = (unsigned char*) calloc(size + 17 + 5, sizeof(unsigned char));
+	short cmdLen = strlen(this->getCmd());
+	long contentLength = this->getContentSize();
+	memcpy(data, Utils::ltoa(contentLength), 17);
+	memcpy(data + 17, Utils::itoa(cmdLen), 5);
+	memcpy(data + 22, this->getCmd(), cmdLen);
+	memcpy(data + 22 + cmdLen, this->getContent(), contentLength);
+	//unsigned char *ldata = reinterpret_cast<unsigned char*>(this);
+	cout << "SERIALIZED: " << data << endl;
 	return data;
 }
 
 Message* Message::unserialize(unsigned char *pkt){
-	return (Message *) pkt;
+	Message *m = new Message();
+	string str(reinterpret_cast<char*>(pkt));
+	long size = atol(str.substr(1,17).c_str());
+	short strSize = atoi(str.substr(18,5).c_str());
+	char *cmd = (char *)str.substr(22,strSize).c_str();
+	m->setCmd(cmd);
+	char *img = (char *)str.substr(22+strSize, size).c_str();
+	m->setImg(img, size);
+	
+	return m;
 }
 
 Message::~Message(){

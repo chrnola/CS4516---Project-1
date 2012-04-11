@@ -10,8 +10,8 @@ class Message{
 	private:
 		unsigned char *content; //binary
 		long contentSize;
-	public:
 		unsigned char *cmd; // only text
+	public:
 		Message();
 		Message(char *_cmd, char *_content);
 		~Message();
@@ -24,7 +24,7 @@ class Message{
 		unsigned char *getContentRaw();
 		long getContentSize();
 		
-		unsigned char *serialize(short size);
+		unsigned char *serialize(long size);
 		static Message* unserialize(unsigned char *pkt);
 };
 
