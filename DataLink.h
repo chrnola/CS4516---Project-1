@@ -8,6 +8,9 @@
 #ifndef DATALINK_H_
 #define DATALINK_H_
 
+extern bool debug;
+extern bool verboseDebug;
+
 class Frame;
 class Packet;
 

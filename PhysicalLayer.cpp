@@ -141,11 +141,10 @@ void PhysicalLayer::ReceiveFrames(){
 
 		if(FrameValid(incoming, recvd)){
 			Frame *result = Frame::Unserialize(incoming);
-			///cout << "[PhysicalLayer:ReceiveFrames] Got a frame:"<<endl;
-			///result->Print();
 			pthread_mutex_lock(&mutRF);
 			recvFrames.push(result);
 			pthread_mutex_unlock(&mutRF);
+			if(debug) cout<<"[PhysicalLayer:ReceiveFrames] Pushed the received frame"<<endl;
 		}
 	}
 	else if(verboseDebug) cout <<"[PhysicalLayer:ReceiveFrames] Nothing available on the wire"<<endl;
