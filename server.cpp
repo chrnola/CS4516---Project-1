@@ -61,9 +61,9 @@ int main(){
 	
 	while(connected){
 		Message *incoming = nl -> FromDataLinkLayer();
-		cout << "Got message from the shadow realm" << endl;
-		short q = incoming->getContentSize() + strlen(incoming->getCmd());
-		cout << "$$$$$$$$$$$$$$$ " << q << endl;
+		///cout << "Got message from the shadow realm" << endl;
+		///short q = incoming->getContentSize() + strlen(incoming->getCmd());
+		///cout << "$$$$$$$$$$$$$$$ " << q << endl;
 		fflush(stdout);
 		handleMessage(incoming);
 	}
@@ -116,7 +116,7 @@ void handleMessage(Message *inm){
 		//and makes fills in our new message object with the
 		//response
 		if(strcmp(argvNew[0], "locations") == 0){
-			cout << "awesome" << endl;
+			///cout << "awesome" << endl;
 			char *r = locationsWithMissing();
 			cout << r << endl;
 			m->setCmd(r);

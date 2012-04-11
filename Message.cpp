@@ -69,7 +69,7 @@ unsigned char *Message::serialize(long size){
 	memcpy(data + 22, this->getCmd(), cmdLen);
 	memcpy(data + 22 + cmdLen, this->getContent(), contentLength);
 	//unsigned char *ldata = reinterpret_cast<unsigned char*>(this);
-	cout << "SERIALIZED: " << data << endl;
+	//cout << "SERIALIZED: " << data << endl;
 	return data;
 }
 

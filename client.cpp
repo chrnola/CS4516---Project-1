@@ -449,7 +449,7 @@ void startPrompt(){
 		} else{
 			cout << "Bad command!" << endl;
 		}
-		cout << "getting another command";
+
 		startPrompt();
 	}
 	

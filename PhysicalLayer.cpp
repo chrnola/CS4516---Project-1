@@ -110,12 +110,12 @@ void PhysicalLayer::SendAFrame(){
 		cereal = FoldSerializedFrame(cereal, len);
 		len += 2;
 
-		cout << "Sending a frame !!!";
-		theFrame->Print();
+		///cout << "Sending a frame !!!";
+		///theFrame->Print();
 		if(send(sockfd, cereal, len, 0) != len){
 			cout << "Crap! Couldn't send the whole frame" << endl;
 		}
-		cout << "Sent a frame !!!";
+		///cout << "Sent a frame !!!";
 	}
 }
 
@@ -139,8 +139,8 @@ void PhysicalLayer::ReceiveFrames(){
 
 		if(FrameValid(incoming, recvd)){
 			Frame *result = Frame::Unserialize(incoming);
-			cout << "[PhysicalLayer:ReceiveFrames] Got a frame:"<<endl;
-			result->Print();
+			///cout << "[PhysicalLayer:ReceiveFrames] Got a frame:"<<endl;
+			///result->Print();
 			pthread_mutex_lock(&mutRF);
 			recvFrames.push(result);
 			pthread_mutex_unlock(&mutRF);
@@ -170,11 +170,11 @@ unsigned char* PhysicalLayer::FoldSerializedFrame(unsigned char* sFrame, int len
 	*(fCpy + len) = foldByteA;
 	*(fCpy + len + 1) = foldByteB;
 	
-	Frame* fasdfss = Frame::Unserialize((char*)fCpy);
+	///Frame* fasdfss = Frame::Unserialize((char*)fCpy);
 	//Frame* f2 = Frame::Unserialize((char*)sFrame);
-	cout << "##########################";
-	fasdfss->Print();
-	fflush(stdout);
+	///cout << "##########################";
+	///fasdfss->Print();
+	///fflush(stdout);
 	//cout << "##########################";
 	//f2->Print();	
 
