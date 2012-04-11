@@ -90,6 +90,8 @@ Packet *ReceiveAPacket(queue<Packet*> *buildBuffer){
 	
 	while(!hasPacket){
 		if(pthread_mutex_trylock(&mutRP) == 0){
+			if(verboseDebug) cout <<"[NetworkLayer:ReceiveAPacket] Got lock"<<endl;
+
 			if(!recvPackets.empty()){
 				if(debug) cout <<"[NetworkLayer:ReceiveAPacket] Pulling packet from pipe"<<endl;
 				result = recvPackets.front();
@@ -98,6 +100,8 @@ Packet *ReceiveAPacket(queue<Packet*> *buildBuffer){
 				hasPacket = true;
 			}
 			pthread_mutex_unlock(&mutRP);
+
+			if(verboseDebug) cout <<"[NetworkLayer:ReceiveAPacket] Unlocked"<<endl;
 		}
 	}
 	if(debug) cout <<"[NetworkLayer:ReceiveAPacket] Done"<<endl;
