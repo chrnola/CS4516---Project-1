@@ -1,5 +1,5 @@
 This program has basic functionality. It uses a sliding window of 1 without errors. 
-General functionality is complete, and there are not any modules that are not working.
+General functionality is complete, and there are not any modules that are unimplemented.
 
 Changing the value of debug and verboseDebug at the top of the client.cpp and server.cpp
 files will toggle whether debug messages are printed to the terminal during runtime.
