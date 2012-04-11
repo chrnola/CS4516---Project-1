@@ -180,15 +180,7 @@ unsigned char* PhysicalLayer::FoldSerializedFrame(unsigned char* sFrame, int len
 
 	fCpy = (unsigned char *) realloc(fCpy, len + 2); // + 2 for folded bytes
 	*(fCpy + len) = foldByteA;
-	*(fCpy + len + 1) = foldByteB;
-	
-	///Frame* fasdfss = Frame::Unserialize((char*)fCpy);
-	//Frame* f2 = Frame::Unserialize((char*)sFrame);
-	///cout << "##########################";
-	///fasdfss->Print();
-	///fflush(stdout);
-	//cout << "##########################";
-	//f2->Print();	
+	*(fCpy + len + 1) = foldByteB;	
 
 	return reinterpret_cast<unsigned char*>(fCpy);
 }

@@ -3,31 +3,13 @@
 
 #include "NetworkLayer.h"
 
-// Author: Chris Pinola
 NetworkLayer::NetworkLayer(){
-	//pthread_mutex_init(&mutSP, NULL);
-	//pthread_mutex_init(&mutRP, NULL);
 }
 
 NetworkLayer::~NetworkLayer(){
 }
 
-void NetworkLayer::Run(){
-	//useless
-// 	while(true){
-// 		if(!pthread_mutex_trylock(&mutSP)){
-// 			if(!sendPackets.empty()){
-// 				SendAPacket();
-// 			}
-// 		}
-// 		ReceivePackets();
-// 	}
-}
-
-void NetworkLayer::SendAPacket(Packet *p){
-	//useless
-}
-
+//Author: Chris Pinola
 void NetworkLayer::FromApplicationLayer(Message *m){
 	if(debug){
 		cout<<"[NetworkLayer:FromApplicationLayer] Gonna send this message down: "<<endl;
@@ -35,7 +17,7 @@ void NetworkLayer::FromApplicationLayer(Message *m){
 	}
 	long mLength = m -> getContentSize();
 	mLength += strlen(m -> getCmd());
-	mLength += 22;
+	mLength += MESSAGE_HEAD;
 	unsigned char *mess = m -> serialize(mLength);
 	
 	//make packets (and be greedy about it)!
@@ -77,7 +59,7 @@ void NetworkLayer::FromApplicationLayer(Message *m){
 	
 }
 
-
+//Author: Chris Pinola
 void NetworkLayer::ToDataLinkLayer(Packet *p){
 	//to DL shared buffer
 	if(debug){
@@ -90,6 +72,7 @@ void NetworkLayer::ToDataLinkLayer(Packet *p){
 	pthread_mutex_unlock(&mutSP);
 }
 
+//Author: Chris Pinola
 Packet *ReceiveAPacket(queue<Packet*> *buildBuffer){
 	bool hasPacket = false;
 	Packet *result;
@@ -116,6 +99,7 @@ Packet *ReceiveAPacket(queue<Packet*> *buildBuffer){
 	return result;
 }
 
+//Author: Chris Pinola
 Message *Assemble(queue<Packet*> *buildBuffer){
 	if(debug) cout <<"[NetworkLayer:Assemble] Constructing Message"<<endl;
 	unsigned char *result = (unsigned char *) malloc(sizeof(unsigned char) * MAX_PACKET * buildBuffer->size());
@@ -130,6 +114,7 @@ Message *Assemble(queue<Packet*> *buildBuffer){
 	return Message::unserialize(result);
 }
 
+//Author: Chris Pinola
 Message *NetworkLayer::FromDataLinkLayer(){
 	//get from shared buffer
 	//reconstruct
