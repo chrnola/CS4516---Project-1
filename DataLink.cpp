@@ -245,32 +245,32 @@ void DataLink::SendAck() {
  */
 // poll for signals and change event as needed
 Event* DataLink::WaitForEvent(Event* e) {
-	///cout << "inside waitForEvent, ";
+	if(debug) cout<<"[DataLink:WaitForEvent] Function start"<<endl;
 	while(*e == none) {
 		if(frmTimeout) {
 			frmTimeout = false;
 			*e = timeout;
+			if(debug) cout<<"[DataLink:WaitForEvent] Timeout event"<<endl;
 		}
 		if(pthread_mutex_trylock(&mutRF) == 0) {
-			//cout << "checking recvFrames\n";
 			if(!recvFrames.empty()) {
-				//cout << "recvframes has something";
 				frmArrive = true;
 				*e = arrival;
+				if(debug) cout<<"[DataLink:WaitForEvent] Frame arrival"<<endl;
 			}
 			pthread_mutex_unlock(&mutRF);
 		}
 		if(!pktSend && pthread_mutex_trylock(&mutSP) == 0) {
 			//cout << "checking sendpackets\n";
 			if(!sendPackets.empty()) {
-				///cout << "sendpackets has something";
 				pktSend = true;
 				*e = pktReady;
+				if(debug) cout<<"[DataLink:WaitForEvent] Packet waitin to be sent"<<endl;
 			}
 			pthread_mutex_unlock(&mutSP);
 		}
 	}
-	///cout << "got event " << *e << endl;
+	if(debug) cout << "[DataLink:WaitForEvent] Got event: " << *e << endl;
 	return e;
 }
 
@@ -346,9 +346,10 @@ void DataLink::ToNetworkLayer() {
 // and using this queue as temporary storage
 // for the first before the second arrives
 Frame* DataLink::FromPhysicalLayer(Frame* r) {
+	if(debug) cout<<"[DataLink:FromPhysicalLayer] Function start"<<endl;
 	if(!frmArrive) return NULL;
 	pthread_mutex_lock(&mutRF);
-	///cout << "receivedFrames has size " << recvFrames.size() << endl;
+	if(debug) cout << "[DataLink:FromPhysicalLayer] " << recvFrames.size() <<" frames waiting to be received"<<endl;
 	if(!recvFrames.empty()) {
 		r = recvFrames.front();
 		recvFrames.pop();
@@ -359,7 +360,6 @@ Frame* DataLink::FromPhysicalLayer(Frame* r) {
 		reconstructFrames.push(r);
 	}
 	///cout << "receivedFrames has size after reconstruct " << recvFrames.size();
-	fflush(stdout);
 	
 	return r;
 }
