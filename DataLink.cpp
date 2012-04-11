@@ -299,9 +299,11 @@ Packet* DataLink::FromNetworkLayer(Packet* p) {
 // a packet from them
 // checks for 2-frame and 1-frame length packets
 void DataLink::ToNetworkLayer() {
+	if(debug) cout<<"[DataLink:ToNetworkLayer] Function start"<<endl;
 	if(pthread_mutex_trylock(&mutRP) == 0){
 		if(!recvPackets.empty()) {
 			pthread_mutex_unlock(&mutRP);
+			if(debug) cout<<"[DataLink::ToNetworkLayer] recvPackets is empty, returning"<<endl;
 			return;
 		}
 		pthread_mutex_unlock(&mutRP);
@@ -334,6 +336,7 @@ void DataLink::ToNetworkLayer() {
 	}
 	recvPackets.push(pkt);
 	pthread_mutex_unlock(&mutRP);
+	if(debug) cout<<"[DataLink:ToNetworkLayer] Function end"<<endl;
 }
 
 /*
