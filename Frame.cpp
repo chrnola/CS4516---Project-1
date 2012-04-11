@@ -19,12 +19,12 @@ Frame::~Frame() {
  * Author: Ray Short
  */
 void Frame::Print() {
-	cout << "\nFrame is data: " << (this->type == DATA);
-	cout << "\nFrame sequence number: " << this->seq;
-	cout << "\nFrame is end: " << this->end;
-	cout << "\nFrame payload length is: " << this->payloadLength;
+	cout << "Frame is data: " << (this->type == DATA)<<endl;
+	cout << "Frame sequence number: " << this->seq<<endl;
+	cout << "Frame is end: " << this->end<<endl;
+	cout << "Frame payload length is: " << this->payloadLength<<endl;
 	if(this->payloadLength > 0)
-		cout << "\nFrame message: " << this->payload << "\n";
+		cout << "Frame message: " << this->payload <<endl;
 }
 
 /*

@@ -85,7 +85,7 @@ void DataLink::GoBack1() {
 		cout << "pktsend is now " << pktSend << endl;
 		if(*event == arrival) {
 			r = FromPhysicalLayer(r);
-			cout << "received is";
+			cout << "[DL:GoBack1] Received frame is:"<<endl;
 			r->Print();
 			//cout << (r->seq == frameExpect) << " seq:expect " << r->seq << ":" << frameExpect;
 			fflush(stdout);
@@ -364,7 +364,6 @@ Frame* DataLink::FromPhysicalLayer(Frame* r) {
 	pthread_mutex_unlock(&mutRF);
 	if(r != NULL && r->type == DATA) {
 		reconstructFrames.push(r);
-		reconstructFrames.front()->Print();
 	}
 	cout << "receivedFrames has size after reconstruct " << recvFrames.size();
 	fflush(stdout);
