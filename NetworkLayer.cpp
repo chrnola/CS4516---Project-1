@@ -29,6 +29,10 @@ void NetworkLayer::SendAPacket(Packet *p){
 }
 
 void NetworkLayer::FromApplicationLayer(Message *m){
+	if(debug){
+		cout<<"[NetworkLayer:FromApplicationLayer] Gonna send this message down: "<<endl;
+		m->Print();
+	}
 	long mLength = m -> getContentSize();
 	mLength += strlen(m -> getCmd());
 	mLength += 22;
@@ -76,6 +80,10 @@ void NetworkLayer::FromApplicationLayer(Message *m){
 
 void NetworkLayer::ToDataLinkLayer(Packet *p){
 	//to DL shared buffer
+	if(debug){
+		cout<<"[NetworkLayer:FromApplicationLayer] Gonna send this packet down:"<<endl;
+		p->Print();
+	}
 	pthread_mutex_lock(&mutSP);
 	sendPackets.push(p);
 	if(debug) cout <<"[NetworkLayer:ToDataLinkLayer] Put packet in 'pipe' "<<endl;

@@ -5,7 +5,7 @@
 #include "did.h"
 #include <unistd.h>
 
-bool debug = false;
+bool debug = true;
 bool verboseDebug = false;
 
 using namespace std;

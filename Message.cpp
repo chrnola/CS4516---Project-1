@@ -86,5 +86,12 @@ Message* Message::unserialize(unsigned char *pkt){
 	return m;
 }
 
+void Message::Print(){
+	cout<<"Message:"<<endl;
+	cout<<"Command: "<<getCmd()<<endl;
+	cout<<"Content Size: "<<getContentSize()<<endl;
+	if(getContentSize() > 0) cout<<"Content: "<<getContent()<<endl;
+}
+
 Message::~Message(){
 }

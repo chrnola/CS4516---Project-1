@@ -17,11 +17,11 @@ Packet::~Packet() {
  * Author: Ray Short
  */
 void Packet::Print() {
-	cout << "\nPacket is data: " << (this->type == DATA);
-	cout << "\nPacket sequence number: " << this->seq;
-	cout << "\nPacket is end: " << this->end;
-	cout << "\nPacket payload length is: " << this->payloadLength;
-	cout << "\nPacket message: " << this->payload << "\n";
+	cout << "Packet is data: " << (this->type == DATA)<<endl;
+	cout << "Packet sequence number: " << this->seq<<endl;
+	cout << "Packet is end: " << this->end<<endl;
+	cout << "Packet payload length is: " << this->payloadLength<<endl;
+	cout << "Packet message: " << this->payload << endl;
 }
 
 /*

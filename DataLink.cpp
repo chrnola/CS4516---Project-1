@@ -251,12 +251,15 @@ Event* DataLink::WaitForEvent(Event* e) {
 			frmTimeout = false;
 			*e = timeout;
 			if(debug) cout<<"[DataLink:WaitForEvent] Timeout event"<<endl;
+			return e;
 		}
 		if(pthread_mutex_trylock(&mutRF) == 0) {
 			if(!recvFrames.empty()) {
 				frmArrive = true;
 				*e = arrival;
 				if(debug) cout<<"[DataLink:WaitForEvent] Frame arrival"<<endl;
+				pthread_mutex_unlock(&mutRF);
+				return e;
 			}
 			pthread_mutex_unlock(&mutRF);
 		}
@@ -266,11 +269,12 @@ Event* DataLink::WaitForEvent(Event* e) {
 				pktSend = true;
 				*e = pktReady;
 				if(debug) cout<<"[DataLink:WaitForEvent] Packet waitin to be sent"<<endl;
+				pthread_mutex_unlock(&mutSP);
+				return e;
 			}
 			pthread_mutex_unlock(&mutSP);
 		}
 	}
-	if(debug) cout << "[DataLink:WaitForEvent] Got event: " << *e << endl;
 	return e;
 }
 
@@ -280,15 +284,21 @@ Event* DataLink::WaitForEvent(Event* e) {
 // move a packet from the shared buffer into a local Packet
 Packet* DataLink::FromNetworkLayer(Packet* p) {
 	if(!pktSend) return NULL;
+	bool gotOne = false;
 	pthread_mutex_lock(&mutSP);
 	if(!sendPackets.empty()) {
 		p = sendPackets.front();
 		sendPackets.pop();
+		gotOne = true;
 	} else {
 		p = NULL;
 	}
+	if(sendPackets.empty()) pktSend = false;
 	pthread_mutex_unlock(&mutSP);
-	pktSend = false;
+	if(gotOne && debug){
+		cout<<"[DataLink:FromNetworkLayer] Found a packet:"<<endl;
+		p->Print();
+	}
 	return p;
 }
 
@@ -392,6 +402,10 @@ void DataLink::ToPhysicalLayer(Frame* s) {
 		sendFrames.push(s);
 		///cout << "pushed frame";
 		pthread_mutex_unlock(&mutSF);
+		if(debug){
+			cout<<"[DataLink:ToPhysicalLayer] Sending a frame down:"<<endl;
+			s->Print();
+		}
 	}
 	//cout << "lock was " << lock;
 	//fflush(stdout);

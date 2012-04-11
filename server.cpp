@@ -63,11 +63,12 @@ int main(){
 	pthread_create(&DL_thread, NULL, RunDLThread, dl);
 	
 	while(connected){
+		if(debug) cout<<"[Server:main] Gonna wait for a message"<<endl;
 		Message *incoming = nl -> FromDataLinkLayer();
-
-		///cout << "Got message from the shadow realm" << endl;
-		///short q = incoming->getContentSize() + strlen(incoming->getCmd());
-		///cout << "$$$$$$$$$$$$$$$ " << q << endl;
+		if(debug){
+			cout<<"[Server::main] Received a message! The command is:"<<endl;
+			cout<<incoming->getCmd()<<endl;
+		}
 		fflush(stdout);
 		handleMessage(incoming);
 	}
