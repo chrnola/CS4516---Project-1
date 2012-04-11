@@ -86,15 +86,16 @@ Packet *ReceiveAPacket(queue<Packet*> *buildBuffer){
 	Packet *result;
 	
 	while(!hasPacket){
-		pthread_mutex_lock(&mutRP);
-		if(!recvPackets.empty()){
-			///cout << "NL - Pulling packet from recvPackets" << endl;
-			result = recvPackets.front();
-			buildBuffer->push(result);
-			recvPackets.pop();
-			hasPacket = true;
+		if(pthread_mutex_trylock(&mutRP) == 0) {
+			if(!recvPackets.empty()){
+				///cout << "NL - Pulling packet from recvPackets" << endl;
+				result = recvPackets.front();
+				buildBuffer->push(result);
+				recvPackets.pop();
+				hasPacket = true;
+			}
+			pthread_mutex_unlock(&mutRP);
 		}
-		pthread_mutex_unlock(&mutRP);
 	}
 	return result;
 }

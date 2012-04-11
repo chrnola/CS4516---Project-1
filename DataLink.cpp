@@ -304,6 +304,7 @@ void DataLink::ToNetworkLayer() {
 			pthread_mutex_unlock(&mutRP);
 			return;
 		}
+		pthread_mutex_unlock(&mutRP);
 	}
 	Packet* pkt = (Packet*) calloc(1, sizeof(Packet));
 	Frame* fr1 = (Frame*) calloc(1, sizeof(Frame));
@@ -321,9 +322,6 @@ void DataLink::ToNetworkLayer() {
 	if(fr2 != NULL) { // long packet
 		unsigned char* f1 = fr1->payload;
 		unsigned char* f2 = fr2->payload;
-		//cout << "sending to network, frame1 followed by frame2";
-		//fr1->Print();
-		//fr2->Print();
 		char* pload = (char*) calloc(fr1->payloadLength + fr2->payloadLength + 8, sizeof(char));
 		memcpy(pload, f1, fr1->payloadLength);
 		memcpy(pload + fr1->payloadLength, f2, fr2->payloadLength + 8);
@@ -332,10 +330,10 @@ void DataLink::ToNetworkLayer() {
 		pkt = Packet::Unserialize((char*) fr1->payload);
 	}
 	// move packet up to network layer
-	pthread_mutex_lock(&mutRP);
+	while(pthread_mutex_trylock(&mutRP) != 0) {
+	}
 	recvPackets.push(pkt);
 	pthread_mutex_unlock(&mutRP);
-	//pkt->Print();
 }
 
 /*
