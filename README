@@ -1,6 +1,9 @@
 This program has basic functionality. It uses a sliding window of 1 without errors. 
 General functionality is complete, and there are not any modules that are not working.
 
+Changing the value of debug and verboseDebug at the top of the client.cpp and server.cpp
+files will toggle whether debug messages are printed to the terminal during runtime.
+
 The program may be started by first unzipping all source files to the desired folder. Then, a
 command of 'make' or 'make all' will compile the executables for the client and server, which
 can be run using './client <server name>' and './server' respectively. If the server name is
@@ -8,12 +11,7 @@ not specified when launching the client, it will assume localhost.
 
 The following commands are included in this program:
 
-*addbodyphoto
-addphoto
 *adduser
-*createbody
-createmissing
-*dlmissingphoto
 help
 *id
 locations
@@ -25,6 +23,17 @@ query
 quit
 
 * commands require login first
+
+
+Other commands that were included but do not function correctly are as follows:
+
+*addbodyphoto
+addphoto
+*createbody
+createmissing
+*dlmissingphoto
+
+
 
 The exact syntax and required parameters for each of the commands can be obtained by typing in only the command.
 The above list of commands is accessed by typing 'help'.
