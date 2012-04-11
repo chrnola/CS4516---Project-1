@@ -69,7 +69,6 @@ int main(){
 			cout<<"[Server::main] Received a message! The command is:"<<endl;
 			cout<<incoming->getCmd()<<endl;
 		}
-		fflush(stdout);
 		handleMessage(incoming);
 	}
 	
