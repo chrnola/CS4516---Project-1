@@ -61,15 +61,15 @@ unsigned char *Message::getContentRaw(){
 }
 
 unsigned char *Message::serialize(long size){
-	unsigned char *data = (unsigned char*) calloc(size + 17 + 5, sizeof(unsigned char));
+	unsigned char *data = (unsigned char*) calloc(size, sizeof(unsigned char));
 	short cmdLen = strlen(this->getCmd());
 	long contentLength = this->getContentSize();
-	memcpy(data, Utils::ltoa(contentLength), 17);
-	memcpy(data + 17, Utils::itoa(cmdLen), 5);
-	memcpy(data + 22, this->getCmd(), cmdLen);
-	memcpy(data + 22 + cmdLen, this->getContent(), contentLength);
-	//unsigned char *ldata = reinterpret_cast<unsigned char*>(this);
-	//cout << "SERIALIZED: " << data << endl;
+	
+	memcpy(data, Utils::ltoa(contentLength), 17); //17=long
+	memcpy(data + 17, Utils::itoa(cmdLen), 5); //5=short
+	memcpy(data + MESSAGE_HEAD, this->getCmd(), cmdLen);
+	memcpy(data + MESSAGE_HEAD + cmdLen, this->getContent(), contentLength);
+	
 	return data;
 }
 

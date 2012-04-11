@@ -24,7 +24,7 @@
 #define WELL_KNOWN_PORT 2778 //Why not?
 #define PACKET_HEAD 12
 #define FRAME_HEAD 12
-#define MESSAGE_HEAD 16
+#define MESSAGE_HEAD 22
 #define FRAME_TAIL 2
 #define MAX_FRAME 150
 #define MAX_PACKET 256
