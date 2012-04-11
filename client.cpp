@@ -29,7 +29,12 @@ void *RunPLThread(void* ptr);
 
 struct timeval* start, * end;
 
+char *hostname = (char *) malloc(100);
+
 int main(int argc, char **argv) {
+	hostname = "localhost";
+	if(argc > 1) hostname = argv[1];
+	cout<<hostname<<endl;
 	//testPL();
 	start = (struct timeval*) calloc(1, sizeof(struct timeval));
 	end = (struct timeval*) calloc(1, sizeof(struct timeval));
@@ -39,7 +44,7 @@ int main(int argc, char **argv) {
 	// once connected on well known port...	
 	nl = new NetworkLayer();
 	dl = new DataLink();
-	pl = new PhysicalLayer("localhost");
+	pl = new PhysicalLayer(hostname);
 	
 	pthread_mutex_init(&mutSP, NULL);
 	pthread_mutex_init(&mutRP, NULL);
