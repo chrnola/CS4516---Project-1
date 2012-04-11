@@ -32,3 +32,11 @@ Changes in Design:
 
 Added payload length field in packets and frames
 Using polling on mutex to see when information is ready instead of signals
+
+General Division of Work:
+
+Go-Back-N, Frame Generation                         Ray Short
+TCP, Layer Interactions, Error Checking	            Aaron Sikes
+User/Database Interactions, Packet Generation	      Chris Pinola
+General Debugging                                   All
+
