@@ -50,6 +50,7 @@ Frame* Frame::Unserialize(char* d) {
 	f->seq = (unsigned short) atoi(str.substr(1, 5).c_str());
 	d[6] == 0x30 ? f->end = false : f-> end = true;
 	f->payloadLength = (unsigned short) atoi(str.substr(7, 5).c_str());
-	f->payload = (unsigned char*) str.substr(12, f->payloadLength).c_str();
+	f->payload = (unsigned char*) calloc(f->payloadLength, sizeof(unsigned char));
+	memcpy(f->payload, str.substr(12, f->payloadLength).c_str(), f->payloadLength);
 	return f;
 }

@@ -42,11 +42,12 @@ unsigned char* Packet::Serialize(){
  */
 Packet* Packet::Unserialize(char* d) {
 	Packet* p = new Packet();
+	string str((char*)d);
 	d[0] == 0x30 ? p->type = DATA : p->type = ACK;
-	string str(d);
 	p->seq = (unsigned short) atoi(str.substr(1,5).c_str());
 	d[6] == 0x30 ? p->end = false : p-> end = true;
 	p->payloadLength = (unsigned short) atoi(str.substr(7,5).c_str());
-	p->payload = (unsigned char*) str.substr(12,p->payloadLength).c_str();
+	p->payload = (unsigned char*) calloc(p->payloadLength, sizeof(unsigned char));
+	memcpy(p->payload, str.substr(12, p->payloadLength).c_str(), p->payloadLength);
 	return p;
 }

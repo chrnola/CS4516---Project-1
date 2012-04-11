@@ -219,6 +219,7 @@ void startPrompt(){
 					strcat(cmd, argvNew[1]); strcat(cmd, " ");
 					strcat(cmd, argvNew[2]);
 					m->setCmd(cmd);
+					string str((char*) m->serialize(size));
 					nl -> FromApplicationLayer(m);
 					
 					Message *incoming = nl -> FromDataLinkLayer();

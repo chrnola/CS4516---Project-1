@@ -308,7 +308,7 @@ void DataLink::ToNetworkLayer() {
 		}
 		pthread_mutex_unlock(&mutRP);
 	}
-	Packet* pkt = (Packet*) calloc(1, sizeof(Packet));
+	Packet* pkt = new Packet();// = (Packet*) calloc(1, sizeof(Packet));
 	Frame* fr1 = (Frame*) calloc(1, sizeof(Frame));
 	Frame* fr2 = (Frame*) calloc(1, sizeof(Frame));
 	pthread_mutex_lock(&mutRF);
@@ -324,9 +324,9 @@ void DataLink::ToNetworkLayer() {
 	if(fr2 != NULL) { // long packet
 		unsigned char* f1 = fr1->payload;
 		unsigned char* f2 = fr2->payload;
-		char* pload = (char*) calloc(fr1->payloadLength + fr2->payloadLength + 8, sizeof(char));
+		char* pload = (char*) calloc(fr1->payloadLength + fr2->payloadLength, sizeof(char));
 		memcpy(pload, f1, fr1->payloadLength);
-		memcpy(pload + fr1->payloadLength, f2, fr2->payloadLength + 8);
+		memcpy(pload + fr1->payloadLength, f2, fr2->payloadLength);
 		pkt = Packet:: Unserialize((char*) pload);
 	} else { // short packet
 		pkt = Packet::Unserialize((char*) fr1->payload);
