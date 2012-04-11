@@ -3,7 +3,8 @@ General functionality is complete, and there are not any modules that are not wo
 
 The program may be started by first unzipping all source files to the desired folder. Then, a
 command of 'make' or 'make all' will compile the executables for the client and server, which
-can be run using './client' and './server' respectively.
+can be run using './client <server name>' and './server' respectively. If the server name is
+not specified when launching the client, it will assume localhost.
 
 The following commands are included in this program:
 
