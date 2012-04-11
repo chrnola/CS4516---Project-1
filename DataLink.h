@@ -22,13 +22,6 @@ extern pthread_mutex_t mutSP, mutRP, mutSF, mutRF;
 
 #define MAX_READY 20
 
-// make some of my own signals
-#define SIGPSND 40
-#define SIGFSND 41
-#define SIGFRCV 42
-#define SIGPRCV 43
-#define SIGFERR 44
-
 enum Event{arrival, error, timeout, pktReady, none};
 
 class DataLink {

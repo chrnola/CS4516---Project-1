@@ -43,7 +43,7 @@ void NetworkLayer::FromApplicationLayer(Message *m){
 	//make whole packets
 	for (int i = 1; i <= pToMake; i++){
 		Packet *p = new Packet();
-		p->type = data;
+		p->type = DATA;
 		inc(s);
 		p->seq = s;
 		if((i == pToMake) && (leftover == 0)){
@@ -61,7 +61,7 @@ void NetworkLayer::FromApplicationLayer(Message *m){
 	//make partial packet
 	if(leftover > 0){
 		Packet *p = new Packet();
-		p->type = data;
+		p->type = DATA;
 		p->end = true;
 		inc(s);
 		p->seq = s;

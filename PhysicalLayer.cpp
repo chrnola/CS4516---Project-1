@@ -110,15 +110,18 @@ void PhysicalLayer::SendAFrame(){
 		cereal = FoldSerializedFrame(cereal, len);
 		len += 2;
 
+		cout << "Sending a frame !!!";
 		if(send(sockfd, cereal, len, 0) != len){
 			cout << "Crap! Couldn't send the whole frame" << endl;
 		}
+		cout << "Sent a frame !!!";
 	}
 }
 
 
 // Checks if a frame is waiting on the wire. Validates it and sends it on up.
 void PhysicalLayer::ReceiveFrames(){
+	//cout << ".";
 	struct pollfd pfd;
 	pfd.fd = sockfd;
 	pfd.events = POLLIN;		// Use poll, so we don't block on the recv call
@@ -126,6 +129,8 @@ void PhysicalLayer::ReceiveFrames(){
 		int len = MAX_FRAME + FRAME_HEAD + FRAME_TAIL;
 		char *incoming = (char *) malloc(len);
 		int recvd = recv(sockfd, (void*)incoming, len, 0);
+		//cout << "\nreceived something from thw wire\n";
+		fflush(stdout);
 		if(recvd == 0){
 			connected = false;
 			return;

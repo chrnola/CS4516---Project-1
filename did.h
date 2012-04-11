@@ -41,9 +41,10 @@
 #define MAX_RECV_PACKET 1
 #define MAX_RECV_FRAME 1
 
-#define inc(k) if (k < MAX_SEQ) k++; else k = 0;
+#define DATA 0
+#define ACK 1
 
-enum Type{data, ack};
+#define inc(k) if (k < MAX_SEQ) k++; else k = 0;
 
 using namespace std;
 
