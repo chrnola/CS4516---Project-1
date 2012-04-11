@@ -27,9 +27,6 @@ class NetworkLayer {
 		void ToDataLinkLayer(Packet *p);
 		Message *FromDataLinkLayer();
 		void FromApplicationLayer(Message *m);
-		void Run();
-		void SendAPacket(Packet *p);
-		void ReceivePackets();
 };
 
 #endif
