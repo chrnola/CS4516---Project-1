@@ -111,6 +111,7 @@ void PhysicalLayer::SendAFrame(){
 		len += 2;
 
 		cout << "Sending a frame !!!";
+		theFrame->Print();
 		if(send(sockfd, cereal, len, 0) != len){
 			cout << "Crap! Couldn't send the whole frame" << endl;
 		}

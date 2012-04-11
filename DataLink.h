@@ -42,7 +42,6 @@ public:
 	
 private:
 	queue<Frame*> window, ready, reconstructFrames;
-	char numReady, numWindow;
 	unsigned short nextSend, frameExpect;
 };
 

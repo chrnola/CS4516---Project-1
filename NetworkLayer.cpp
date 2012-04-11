@@ -88,7 +88,7 @@ Packet *ReceiveAPacket(queue<Packet*> *buildBuffer){
 	while(!hasPacket){
 		pthread_mutex_lock(&mutRP);
 		if(!recvPackets.empty()){
-			cout << "NL - Pulling packet from recvPackets" << endl;
+			///cout << "NL - Pulling packet from recvPackets" << endl;
 			result = recvPackets.front();
 			buildBuffer->push(result);
 			recvPackets.pop();
@@ -100,7 +100,7 @@ Packet *ReceiveAPacket(queue<Packet*> *buildBuffer){
 }
 
 Message *Assemble(queue<Packet*> *buildBuffer){
-	cout << "Assembling packets into a message" << endl;
+	///cout << "Assembling packets into a message" << endl;
 	unsigned char *result = (unsigned char *) malloc(sizeof(unsigned char) * MAX_PACKET * buildBuffer->size());
 	for(int i = 0; i < (int)buildBuffer->size(); i++){
 		Packet *tPack = buildBuffer->front();
