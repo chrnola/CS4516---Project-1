@@ -18,6 +18,8 @@
 
 #include "did.h"
 
+
+
 using namespace std;
 
 // Constructor called by client. It connects to the well-known port of the server,
@@ -74,7 +76,9 @@ PhysicalLayer::PhysicalLayer(int sockfd) {
 // Should send out any frames received from DL, and pass up any frames received.
 // Placeholder tester code for now.
 void PhysicalLayer::run(){
-	while(true){
+	int i = 0;
+	while(connected){
+		if(verboseDebug && i % 100 == 0) cout<<"[PhysicalLayer:run] Run loop #"<<i<<endl;
 		if(!pthread_mutex_trylock(&mutSF)){
 			if(!sendFrames.empty()){
 				SendAFrame();
@@ -83,25 +87,21 @@ void PhysicalLayer::run(){
 			pthread_mutex_unlock(&mutSF);
 		}
 		ReceiveFrames();
+		i++;
 	}
 
-	/*
-	int i = 3;
-	sleep(1);
-	send(sockfd, &i, 4, 0);
-	i = 2;
-	recv(sockfd, &i, 4, 0);
-	cout << "Frame received! i=" << i << endl; */
 }
 
 // Assumes it has a mutex on mutSF.
 // Sends 1 frame from sendFrames out on the wire.
 void PhysicalLayer::SendAFrame(){
-	Frame *theFrame;
+	if(debug) cout <<"[PhysicalLayer:SendAFrame] Function start"<<endl;
+	Frame *theFrame = NULL;
 	if(!sendFrames.empty()) {
 		theFrame = sendFrames.front();
 		sendFrames.pop();
 	}
+	else cerr<<"[PhysicalLayer:SendAFrame] Who's touching my queue?!"<<endl;
 	pthread_mutex_unlock(&mutSF);
 
 	if(theFrame != NULL) {
@@ -115,24 +115,26 @@ void PhysicalLayer::SendAFrame(){
 		if(send(sockfd, cereal, len, 0) != len){
 			cout << "Crap! Couldn't send the whole frame" << endl;
 		}
-		///cout << "Sent a frame !!!";
+		if(debug) cout << "[PhysicalLayer:SendAFrame] Sent a frame"<<endl;
 	}
+	else cerr<<"[PhysicalLayer:SendAFrame] theFrame was NULL, weird"<<endl;
 }
 
 
 // Checks if a frame is waiting on the wire. Validates it and sends it on up.
 void PhysicalLayer::ReceiveFrames(){
-	//cout << ".";
+	if(verboseDebug) cout <<"[PhysicalLayer:ReceiveFrames] Function start"<<endl;
 	struct pollfd pfd;
 	pfd.fd = sockfd;
 	pfd.events = POLLIN;		// Use poll, so we don't block on the recv call
-	if(poll(&pfd, 1, 10)){
+	if(poll(&pfd, 1, 10) > 0){
+		if(debug) cout <<"[PhysicalLayer:ReceiveFrames] Poll says there's stuff"<<endl;
 		int len = MAX_FRAME + FRAME_HEAD + FRAME_TAIL;
 		char *incoming = (char *) malloc(len);
 		int recvd = recv(sockfd, (void*)incoming, len, 0);
-		//cout << "\nreceived something from thw wire\n";
-		fflush(stdout);
+		if(debug) cout <<"[PhysicalLayer:ReceiveFrames] Received "<<recvd<<" bytes from the wire"<<endl;
 		if(recvd == 0){
+			if(debug) cout<<"[PhysicalLayer:ReceiveFrames] Connection was closed"<<endl;
 			connected = false;
 			return;
 		}
@@ -146,6 +148,8 @@ void PhysicalLayer::ReceiveFrames(){
 			pthread_mutex_unlock(&mutRF);
 		}
 	}
+	else if(verboseDebug) cout <<"[PhysicalLayer:ReceiveFrames] Nothing available on the wire"<<endl;
+	if(verboseDebug) cout <<"[PhysicalLayer:ReceiveFrames] Function end"<<endl;
 }
 
 // NB: sFrame may no longer be valid!

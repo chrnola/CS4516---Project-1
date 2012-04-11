@@ -15,6 +15,8 @@ using namespace std;
 
 extern queue<Frame*> sendFrames, recvFrames;
 extern pthread_mutex_t mutSF, mutRF;
+extern bool debug;
+extern bool verboseDebug;
 
 class PhysicalLayer {
 private:

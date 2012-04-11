@@ -9,6 +9,9 @@
 #include <unistd.h>		// For close()
 #include <pthread.h>
 
+bool debug = true;
+bool verboseDebug = false;
+
 class NetworkLayer;
 class Message;
 
@@ -61,6 +64,7 @@ int main(){
 	
 	while(connected){
 		Message *incoming = nl -> FromDataLinkLayer();
+
 		///cout << "Got message from the shadow realm" << endl;
 		///short q = incoming->getContentSize() + strlen(incoming->getCmd());
 		///cout << "$$$$$$$$$$$$$$$ " << q << endl;
