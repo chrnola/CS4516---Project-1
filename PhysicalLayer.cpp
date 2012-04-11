@@ -15,10 +15,7 @@
 #include <pthread.h>
 #include <sys/poll.h>		// For poll
 
-
 #include "did.h"
-
-
 
 using namespace std;
 
@@ -62,15 +59,12 @@ PhysicalLayer::PhysicalLayer(const char *hostname) {
 	connected = true;
 }
 
-
 // Constructor called by server. sockfd is already connected with the client,
 // so just passes control to the general physical layer code.
 PhysicalLayer::PhysicalLayer(int sockfd) {
 	PhysicalLayer::sockfd = sockfd;
 	connected = true;
 }
-
-
 
 // Generic physical layer code
 // Should send out any frames received from DL, and pass up any frames received.
@@ -89,7 +83,6 @@ void PhysicalLayer::run(){
 		ReceiveFrames();
 		i++;
 	}
-
 }
 
 // Assumes it has a mutex on mutSF.
@@ -123,7 +116,6 @@ void PhysicalLayer::SendAFrame(){
 	}
 	else cerr<<"[PhysicalLayer:SendAFrame] theFrame was NULL, weird"<<endl;
 }
-
 
 // Checks if a frame is waiting on the wire. Validates it and sends it on up.
 void PhysicalLayer::ReceiveFrames(){
@@ -204,4 +196,3 @@ bool PhysicalLayer::FrameValid(char* sFrame, int length){
 PhysicalLayer::~PhysicalLayer() {
 	close(sockfd);
 }
-

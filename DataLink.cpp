@@ -76,6 +76,7 @@ void DataLink::GoBack1() {
 			if(r == NULL) continue;
 			if(r->type == ACK) {
 				StopTimer(0);
+				// clear ack off queues
 				if(!ready.empty()) 
 					ready.pop();
 				if(!window.empty())

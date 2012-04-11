@@ -22,7 +22,6 @@ using namespace std;
 void handleMessage(Message *m);
 void testPL();
 
-
 queue<Packet*> sendPackets, recvPackets;
 queue<Frame*> sendFrames, recvFrames;
 pthread_mutex_t mutSP, mutRP, mutSF, mutRF;
@@ -47,11 +46,9 @@ int main(){
 	pthread_mutex_init(&mutSF, NULL);
 	pthread_mutex_init(&mutRF, NULL);
 
-
 	int sockfd = AcceptConn();  /* Parent never leaves this call
 	here. Past here, we're a child with a valid, connected socket file descriptor. */
 
-	
 	connected = connectToDB(); //true if connected
 	nl = new NetworkLayer();
 	
@@ -73,7 +70,6 @@ int main(){
 	}
 	
 	disconnectFromDB();
-	
 	return 0;
 }
 
@@ -120,7 +116,6 @@ void handleMessage(Message *inm){
 		//and makes fills in our new message object with the
 		//response
 		if(strcmp(argvNew[0], "locations") == 0){
-			///cout << "awesome" << endl;
 			char *r = locationsWithMissing();
 			cout << r << endl;
 			m->setCmd(r);
@@ -262,10 +257,8 @@ void handleMessage(Message *inm){
 		} else{
 			cerr << "Server received unrecognized command: " << cmd << endl;
 		}
-		
 	}
 }
-
 
 int AcceptConn(){
 	int listen_socket;
@@ -274,7 +267,7 @@ int AcceptConn(){
 		exit(EXIT_FAILURE);
 	}
 
-	struct    sockaddr_in servaddr;  /*  socket address structure  */
+	struct sockaddr_in servaddr;  /*  socket address structure  */
 	memset(&servaddr, 0, sizeof(servaddr));
 	servaddr.sin_family      = AF_INET;
 	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -296,7 +289,6 @@ int AcceptConn(){
 	}
 
 	cout << "Setup complete!" << endl;
-
 	int sockfd;
 
 	while(true){
@@ -307,5 +299,4 @@ int AcceptConn(){
 		int pid = fork();
 		if(pid == 0) return sockfd;
 	}
-
 }

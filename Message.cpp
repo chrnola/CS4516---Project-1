@@ -60,6 +60,7 @@ unsigned char *Message::getContentRaw(){
 	return this->content;
 }
 
+// make a Message into a character string
 unsigned char *Message::serialize(long size){
 	unsigned char *data = (unsigned char*) calloc(size, sizeof(unsigned char));
 	short cmdLen = strlen(this->getCmd());
@@ -73,6 +74,7 @@ unsigned char *Message::serialize(long size){
 	return data;
 }
 
+// make a Message out of a previously serialized Message
 Message* Message::unserialize(unsigned char *pkt){
 	Message *m = new Message();
 	string str(reinterpret_cast<char*>(pkt));

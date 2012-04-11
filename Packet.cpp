@@ -27,6 +27,7 @@ void Packet::Print() {
 /*
  * Author: Ray Short
  */
+// serialize Packet into a character array
 unsigned char* Packet::Serialize(){
 	unsigned char* data = (unsigned char*) calloc(this->payloadLength + PACKET_HEAD, sizeof(unsigned char));
 	this->type == ACK ? memcpy(data, "1", 1) : memcpy(data, "0", 1);
@@ -40,6 +41,7 @@ unsigned char* Packet::Serialize(){
 /*
  * Author: Ray Short
  */
+// make a Packet out of a previously serialized Packet
 Packet* Packet::Unserialize(char* d) {
 	Packet* p = new Packet();
 	string str((char*)d);

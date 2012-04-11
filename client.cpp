@@ -21,12 +21,10 @@ pthread_mutex_t mutSP, mutRP, mutSF, mutRF;
 void startPrompt();
 bool checkLength(char *field, int max);
 void quit();
-
 void* RunDLThread(void* ptr);
 void *RunPLThread(void* ptr);
 
 struct timeval* start, * end;
-
 char *hostname = (char *) malloc(100);
 
 int main(int argc, char **argv) {
@@ -39,7 +37,7 @@ int main(int argc, char **argv) {
 	end = (struct timeval*) calloc(1, sizeof(struct timeval));
 	gettimeofday(start, NULL);
 	
-	// init lower leves, spawn threads, etc
+	// init lower levels, spawn threads, etc
 	// once connected on well known port...	
 	nl = new NetworkLayer();
 	dl = new DataLink();
@@ -58,11 +56,13 @@ int main(int argc, char **argv) {
 	startPrompt();
 }
 
+// run thread for physical layer
 void *RunPLThread(void* ptr){
 	PhysicalLayer *pl = (PhysicalLayer*) ptr;
 	pl->run();
 }
 
+// run thread for data link layer
 void *RunDLThread(void* ptr){
 	DataLink* dl = (DataLink*) ptr;
 	dl->GoBack1();
@@ -85,6 +85,7 @@ void quit(){
 	exit(0);
 }
 
+// user input handling
 void startPrompt(){
 	char input[128];
 	char *tmp;
@@ -105,6 +106,7 @@ void startPrompt(){
 	if((tmp = strtok(input, " ")) != NULL){
 		argvNew[0] = tmp;
 		
+		// general error handling
 		while ((tmp = strtok(NULL, " ")) != NULL){
 			if(i < 7){
 				argvNew[i] = tmp;
@@ -117,6 +119,7 @@ void startPrompt(){
 
 		argvNew[i] = NULL;
 		
+		// help message
 		if(strcmp(argvNew[0], "help") == 0){
 			cout << "*addbodyphoto" << endl;
 			cout << "addphoto" << endl;
@@ -135,10 +138,10 @@ void startPrompt(){
 			cout << "quit" << endl;
 			cout << endl;
 			cout << "* commands require login first" << endl;
-		} else if(strcmp(argvNew[0], "quit") == 0){
+		} else if(strcmp(argvNew[0], "quit") == 0){ // quit message
 			cout << "Bye!" << endl;
 			quit();
-		} else if(strcmp(argvNew[0], "locations") == 0){
+		} else if(strcmp(argvNew[0], "locations") == 0){ // handle locations
 			Message *m = new Message();
 			m->setCmd("locations");
 			nl -> FromApplicationLayer(m);
@@ -147,7 +150,7 @@ void startPrompt(){
 			
 			cout << incoming->getCmd() << endl;
 			
-		} else if(strcmp(argvNew[0], "createmissing") == 0){
+		} else if(strcmp(argvNew[0], "createmissing") == 0){ // handle createmissing
 			if((argvNew[1] != NULL) && 
 			 (argvNew[2] != NULL) &&
 			 (argvNew[3] != NULL)){
@@ -171,7 +174,7 @@ void startPrompt(){
 			} else{
 				cout << "Error: createmissing expects firstName lastName lastKnownLocation" << endl;
 			}
-		} else if(strcmp(argvNew[0], "login") == 0){
+		} else if(strcmp(argvNew[0], "login") == 0){ // handle login
 			if((argvNew[1] != NULL) && (argvNew[2] != NULL)){
 				if(checkLength(argvNew[1], MAX_USER) && checkLength(argvNew[2], MAX_USER)){
 					Message *m = new Message();
@@ -192,7 +195,7 @@ void startPrompt(){
 			} else{
 				cout << "Error: login expects username password" << endl;
 			}
-		} else if(strcmp(argvNew[0], "query") == 0){
+		} else if(strcmp(argvNew[0], "query") == 0){ // handle query
 			if((argvNew[1] != NULL) && 
 			 (argvNew[2] != NULL)){
 				if(checkLength(argvNew[1], MAX_FIRST) && checkLength(argvNew[2], MAX_LAST)) {
@@ -215,7 +218,7 @@ void startPrompt(){
 			} else{
 				cout << "Error: query expects firstName lastName" << endl;
 			}
-		} else if(strcmp(argvNew[0], "adduser") == 0){
+		} else if(strcmp(argvNew[0], "adduser") == 0){ // handle adduser
 			if((argvNew[1] != NULL) && 
 			 (argvNew[2] != NULL)){
 				if(checkLength(argvNew[1], MAX_USER) && checkLength(argvNew[2], MAX_USER)) {
@@ -237,7 +240,7 @@ void startPrompt(){
 			 } else{
 				cout << "Error: adduser expects username password" << endl;
 				}
-		} else if(strcmp(argvNew[0], "id") == 0){
+		} else if(strcmp(argvNew[0], "id") == 0){ // handle id
 			if((argvNew[1] != NULL) && 
 			 (argvNew[2] != NULL) &&
 			 (argvNew[3] != NULL)){
@@ -261,7 +264,7 @@ void startPrompt(){
 			} else{
 				cout << "Error: id expects id firstName lastName" << endl;
 			}
-		} else if(strcmp(argvNew[0], "password") == 0){
+		} else if(strcmp(argvNew[0], "password") == 0){ // handle password
 			if((argvNew[1] != NULL) && 
 			 (argvNew[2] != NULL)){
 				if(checkLength(argvNew[1], MAX_USER) && checkLength(argvNew[2], MAX_USER)) {
@@ -283,7 +286,7 @@ void startPrompt(){
 			} else{
 				cout << "Error: password expects oldPassword newPassword" << endl;
 			}
-		} else if(strcmp(argvNew[0], "removemissing") == 0){
+		} else if(strcmp(argvNew[0], "removemissing") == 0){ // handle removemissing
 			if(argvNew[1] != NULL){
 				if(checkLength(argvNew[1], MAX_ID)) {
 					Message *m = new Message();
@@ -302,7 +305,7 @@ void startPrompt(){
 			} else{
 				cout << "Error: removemissing expects id" << endl;
 			}
-		} else if(strcmp(argvNew[0], "removebody") == 0){
+		} else if(strcmp(argvNew[0], "removebody") == 0){ // handle removebody
 			if(argvNew[1] != NULL){
 				if(checkLength(argvNew[1], MAX_ID)) {
 					Message *m = new Message();
@@ -321,7 +324,7 @@ void startPrompt(){
 			} else{
 				cout << "Error: removebody expects id" << endl;
 			}
-		} else if(strcmp(argvNew[0], "createbody") == 0){
+		} else if(strcmp(argvNew[0], "createbody") == 0){ // handle createbody
 			if((argvNew[1] != NULL) && (argvNew[2] != NULL) &&
 			(argvNew[3] != NULL) && (argvNew[4] != NULL)){
 				if(checkLength(argvNew[1], MAX_ID) && checkLength(argvNew[2], MAX_LOCATION) && 
@@ -363,7 +366,7 @@ void startPrompt(){
 			} else{
 				cout << "Error: createbody expects id location [firstName lastName]" << endl;
 			}
-		} else if((strcmp(argvNew[0], "addphoto") == 0) || (strcmp(argvNew[0], "addbodyphoto") == 0)){
+		} else if((strcmp(argvNew[0], "addphoto") == 0) || (strcmp(argvNew[0], "addbodyphoto") == 0)){ // handle photos
 			if((argvNew[1] != NULL) && (argvNew[2] != NULL)){
 				if(checkLength(argvNew[1], MAX_ID)){
 					Message *m = new Message();
@@ -404,7 +407,7 @@ void startPrompt(){
 					cout << "Error: addbodyphoto expects id filename" << endl;
 				}
 			}
-		} else if(strcmp(argvNew[0], "dlmissingphoto") == 0){
+		} else if(strcmp(argvNew[0], "dlmissingphoto") == 0){ // handle dlphoto
 			if((argvNew[1] != NULL) && (argvNew[2] != NULL)){
 				if(checkLength(argvNew[1], MAX_ID)) {
 					Message *m = new Message();
@@ -435,11 +438,11 @@ void startPrompt(){
 			} else{
 				cout << "Error: dlmissingphoto expects id" << endl;
 			}
-		} else{
+		} else{ // when all else fails
 			cout << "Bad command!" << endl;
 		}
 
-		startPrompt();
+		startPrompt(); // restart
 	}
 	
 }

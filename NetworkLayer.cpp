@@ -133,6 +133,3 @@ Message *NetworkLayer::FromDataLinkLayer(){
 	
 	return NULL;
 }
-
-
-

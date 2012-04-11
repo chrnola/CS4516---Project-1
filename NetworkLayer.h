@@ -20,8 +20,6 @@ class NetworkLayer {
 		NetworkLayer();
 		virtual ~NetworkLayer();
 		
-		//static unsigned char *Serialize(Message *m);
-		//static Message *Unserialize(const unsigned char *d);
 		void ToDataLinkLayer(Packet *p);
 		Message *FromDataLinkLayer();
 		void FromApplicationLayer(Message *m);
