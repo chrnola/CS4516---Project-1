@@ -36,8 +36,8 @@ DataLink::DataLink() {
 	
 	// initialize handling variables
 	frmTimeout = false;
-	frmArrive = true;
-	pktSend = true;
+	frmArrive = false;
+	pktSend = false;
 	signal(SIGALRM, HandleFrameTimeout);
 	
 	// initialize mutex variable for timeout
@@ -64,27 +64,25 @@ void DataLink::GoBack1() {
 	
 	buffer = FromNetworkLayer(buffer);
 	MakeFrames(buffer);
-	cout << "ready has " << ready.size();
-	cout << "ready is empty? " << ready.empty();
+	cout << "ready has " << ready.size() << endl;
+	cout << "ready is empty? " << ready.empty() << endl;
 	if(!ready.empty()) {
 		ToPhysicalLayer(ready.front());
 		StartTimer(0);
 	}
-	// testing code
-	r->type = ACK;
+
+	/* testing code
+	r->type = ack;
 	*event = arrival;
-	// end testing code
+	// end testing code*/
 	while(true) {
 		// for testing
 		numWindow = 0;
 		// end for testing
-		cout << "Waiting for an event, pktready is " << pktReady << " and none is " << none<< "\n";
-		cout << "pktsend is now " << pktSend;
-		fflush(stdout);
+
+		cout << "Waiting for an event; arrival:"<<arrival<<" error:"<<error<<" timeout:"<<timeout<<" pktready:"<<pktReady<<" none:"<<none<<endl;
 		event = WaitForEvent(event);
-		fflush(stdout);
-		cout << "got event " << *event;
-		fflush(stdout);
+		cout << "pktsend is now " << pktSend << endl;
 		if(*event == arrival) {
 			r = FromPhysicalLayer(r);
 			cout << "received is";
@@ -190,15 +188,15 @@ void DataLink::MakeFrames(Packet* p) {
 	unsigned char* currPacket;
 	Frame* f1 = new Frame(), * f2 = new Frame();
 	
-	cout << "Got packet";
+	cout << "Got packet" << endl;
 	p->Print();
-	cout << "Making into frames\n";
+	cout << "Making into frames" << endl;
 	
 	// get length of packet and serialize into char array
 	unsigned short pktLen = p->payloadLength + PACKET_HEAD;
 	currPacket = p->Serialize();
 	if(pktLen <= MAX_FRAME) { // 1 frame's worth
-		cout << "one frame";
+		cout << "one frame" << endl;
 		f1->payload = (unsigned char*) calloc(pktLen, sizeof(unsigned char));
 		memcpy(f1->payload, currPacket, pktLen);
 		f1->type = DATA;
@@ -209,7 +207,7 @@ void DataLink::MakeFrames(Packet* p) {
 		ready.push(f1);
 		f1->Print();
 	} else { // 2 frame's worth (never more than 2)
-		cout << "two frames";
+		cout << "two frames" << endl;
 		// assign first frame
 		f1->payload = (unsigned char*) calloc(MAX_FRAME, sizeof(unsigned char));
 		f2->payload = (unsigned char*) calloc(pktLen - MAX_FRAME, sizeof(unsigned char));
@@ -254,7 +252,7 @@ void DataLink::SendAck() {
  */
 // poll for signals and change event as needed
 Event* DataLink::WaitForEvent(Event* e) {
-	cout << "inside waiting for event";
+	cout << "inside waitForEvent, ";
 	while(*e == none) {
 		if(frmTimeout) {
 			frmTimeout = false;
@@ -279,6 +277,7 @@ Event* DataLink::WaitForEvent(Event* e) {
 			pthread_mutex_unlock(&mutSP);
 		}
 	}
+	cout << "got event " << *e << endl;
 	return e;
 }
 
@@ -356,8 +355,7 @@ void DataLink::ToNetworkLayer() {
 Frame* DataLink::FromPhysicalLayer(Frame* r) {
 	if(!frmArrive) return NULL;
 	pthread_mutex_lock(&mutRF);
-	cout << "receivedFrames has size " << recvFrames.size();
-	fflush(stdout);
+	cout << "receivedFrames has size " << recvFrames.size() << endl;
 	if(!recvFrames.empty()) {
 		r = recvFrames.front();
 		recvFrames.pop();
