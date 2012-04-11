@@ -17,16 +17,17 @@ Packet::~Packet() {
  * Author: Ray Short
  */
 void Packet::Print() {
-	cout << "\nPacket is data: " << (this->type == DATA);
-	cout << "\nPacket sequence number: " << this->seq;
-	cout << "\nPacket is end: " << this->end;
-	cout << "\nPacket payload length is: " << this->payloadLength;
-	cout << "\nPacket message: " << this->payload << "\n";
+	cout << "Packet is data: " << (this->type == DATA)<<endl;
+	cout << "Packet sequence number: " << this->seq<<endl;
+	cout << "Packet is end: " << this->end<<endl;
+	cout << "Packet payload length is: " << this->payloadLength<<endl;
+	cout << "Packet message: " << this->payload << endl;
 }
 
 /*
  * Author: Ray Short
  */
+// serialize Packet into a character array
 unsigned char* Packet::Serialize(){
 	unsigned char* data = (unsigned char*) calloc(this->payloadLength + PACKET_HEAD, sizeof(unsigned char));
 	this->type == ACK ? memcpy(data, "1", 1) : memcpy(data, "0", 1);
@@ -40,6 +41,7 @@ unsigned char* Packet::Serialize(){
 /*
  * Author: Ray Short
  */
+// make a Packet out of a previously serialized Packet
 Packet* Packet::Unserialize(char* d) {
 	Packet* p = new Packet();
 	string str((char*)d);

@@ -62,55 +62,37 @@ void DataLink::GoBack1() {
 	
 	buffer = FromNetworkLayer(buffer);
 	MakeFrames(buffer);
-	///cout << "ready has " << ready.size() << endl;
-	///cout << "ready is empty? " << ready.empty() << endl;
+
 	if(!ready.empty()) {
 		ToPhysicalLayer(ready.front());
 		StartTimer(0);
 	}
 
-	/* testing code
-	r->type = ack;
-	*event = arrival;
-	// end testing code*/
 	while(true) {
-		///cout << "Waiting for an event; arrival:"<<arrival<<" error:"<<error<<" timeout:"<<timeout<<" pktready:"<<pktReady<<" none:"<<none<<endl;
 		event = WaitForEvent(event);
-		//cout << "pktsend is now " << pktSend << endl;
 		if(*event == arrival) {
 			r = FromPhysicalLayer(r);
 
-			///cout << "received is";
-			///r->Print();
-			//cout << (r->seq == frameExpect) << " seq:expect " << r->seq << ":" << frameExpect;
-			fflush(stdout);
 			if(r == NULL) continue;
 			if(r->type == ACK) {
-				///cout << "Got an ack";
 				StopTimer(0);
+				// clear ack off queues
 				if(!ready.empty()) 
 					ready.pop();
 				if(!window.empty())
 					window.pop();
 				if(!sendFrames.empty())
 					sendFrames.pop();
-				// remove ack from queue of received frames
 				pthread_mutex_lock(&mutRF);
 				if(!recvFrames.empty()) recvFrames.pop();
-				///cout << "3424recvFrames has size " << recvFrames.size();
 				pthread_mutex_unlock(&mutRF);
 			} else if(r->seq == frameExpect) {
-				///cout << "this is the expected frame";
 				if(r->end == true) {
 					ToNetworkLayer();
 				}
-				//cout << "Sending an ack";
 				SendAck();
-				//cout << "Ack sent";
 				inc(frameExpect);
-			} else { 
-				///cout << "this is not the expected frame nor an ack"; 
-			}
+			} 
 		}
 		// reset for waiting
 		*event = none;
@@ -119,7 +101,7 @@ void DataLink::GoBack1() {
 			MakeFrames(buffer);
 			pktSend = false;
 		}
-		//cout << "Curr ready is " << currReady+0 << " and num ready is " << numReady+0;
+
 		if(!ready.empty()) {
 			ToPhysicalLayer(ready.front());
 			StartTimer(0);
@@ -181,15 +163,10 @@ void DataLink::MakeFrames(Packet* p) {
 	unsigned char* currPacket;
 	Frame* f1 = new Frame(), * f2 = new Frame();
 	
-	///cout << "Got packet" << endl;
-	///p->Print();
-	///cout << "Making into frames" << endl;
-	
 	// get length of packet and serialize into char array
 	unsigned short pktLen = p->payloadLength + PACKET_HEAD;
 	currPacket = p->Serialize();
 	if(pktLen <= MAX_FRAME) { // 1 frame's worth
-		///cout << "one frame" << endl;
 		f1->payload = (unsigned char*) calloc(pktLen, sizeof(unsigned char));
 		memcpy(f1->payload, currPacket, pktLen);
 		f1->type = DATA;
@@ -198,9 +175,7 @@ void DataLink::MakeFrames(Packet* p) {
 		f1->end = true;
 		inc(nextSend);
 		ready.push(f1);
-		///f1->Print();
 	} else { // 2 frame's worth (never more than 2)
-		///cout << "two frames" << endl;
 		// assign first frame
 		f1->payload = (unsigned char*) calloc(MAX_FRAME, sizeof(unsigned char));
 		f2->payload = (unsigned char*) calloc(pktLen - MAX_FRAME, sizeof(unsigned char));
@@ -211,7 +186,6 @@ void DataLink::MakeFrames(Packet* p) {
 		f1->end = false;
 		inc(nextSend);
 		ready.push(f1);
-		///f1->Print();
 		//assign second frame
 		memcpy(f2->payload, currPacket + MAX_FRAME, pktLen - MAX_FRAME);
 		f2->type = DATA;
@@ -220,7 +194,6 @@ void DataLink::MakeFrames(Packet* p) {
 		f2->end = true;
 		inc(nextSend);
 		ready.push(f2);
-		///f2->Print();
 	}
 }
 
@@ -234,9 +207,6 @@ void DataLink::SendAck() {
 	f->seq = frameExpect;
 	f->end = true;
 	f->payloadLength = 0;
-	///cout << "Sending ACK:\n";
-	///f->Print();
-	///cout << "Serialized is " << f->Serialize();
 	ToPhysicalLayer(f);
 }
 
@@ -251,26 +221,29 @@ Event* DataLink::WaitForEvent(Event* e) {
 			frmTimeout = false;
 			*e = timeout;
 			if(debug) cout<<"[DataLink:WaitForEvent] Timeout event"<<endl;
+			return e;
 		}
 		if(pthread_mutex_trylock(&mutRF) == 0) {
 			if(!recvFrames.empty()) {
 				frmArrive = true;
 				*e = arrival;
 				if(debug) cout<<"[DataLink:WaitForEvent] Frame arrival"<<endl;
+				pthread_mutex_unlock(&mutRF);
+				return e;
 			}
 			pthread_mutex_unlock(&mutRF);
 		}
 		if(!pktSend && pthread_mutex_trylock(&mutSP) == 0) {
-			//cout << "checking sendpackets\n";
 			if(!sendPackets.empty()) {
 				pktSend = true;
 				*e = pktReady;
 				if(debug) cout<<"[DataLink:WaitForEvent] Packet waitin to be sent"<<endl;
+				pthread_mutex_unlock(&mutSP);
+				return e;
 			}
 			pthread_mutex_unlock(&mutSP);
 		}
 	}
-	if(debug) cout << "[DataLink:WaitForEvent] Got event: " << *e << endl;
 	return e;
 }
 
@@ -280,15 +253,21 @@ Event* DataLink::WaitForEvent(Event* e) {
 // move a packet from the shared buffer into a local Packet
 Packet* DataLink::FromNetworkLayer(Packet* p) {
 	if(!pktSend) return NULL;
+	bool gotOne = false;
 	pthread_mutex_lock(&mutSP);
 	if(!sendPackets.empty()) {
 		p = sendPackets.front();
 		sendPackets.pop();
+		gotOne = true;
 	} else {
 		p = NULL;
 	}
+	if(sendPackets.empty()) pktSend = false;
 	pthread_mutex_unlock(&mutSP);
-	pktSend = false;
+	if(gotOne && debug){
+		cout<<"[DataLink:FromNetworkLayer] Found a packet:"<<endl;
+		p->Print();
+	}
 	return p;
 }
 
@@ -308,7 +287,7 @@ void DataLink::ToNetworkLayer() {
 		}
 		pthread_mutex_unlock(&mutRP);
 	}
-	Packet* pkt = new Packet();// = (Packet*) calloc(1, sizeof(Packet));
+	Packet* pkt = new Packet();
 	Frame* fr1 = (Frame*) calloc(1, sizeof(Frame));
 	Frame* fr2 = (Frame*) calloc(1, sizeof(Frame));
 	pthread_mutex_lock(&mutRF);
@@ -360,7 +339,6 @@ Frame* DataLink::FromPhysicalLayer(Frame* r) {
 	if(r != NULL && r->type == DATA) {
 		reconstructFrames.push(r);
 	}
-	///cout << "receivedFrames has size after reconstruct " << recvFrames.size();
 	
 	return r;
 }
@@ -372,36 +350,18 @@ Frame* DataLink::FromPhysicalLayer(Frame* r) {
 // as the shared buffer with the physical layer,
 // signalling the physical layer that a frame is ready
 void DataLink::ToPhysicalLayer(Frame* s) {
-	///cout << "attempting to send to physical layer";
-	///cout << "Window size is " << window.size();
-	
 	if(window.size() == 1) return; // 1-sliding window
-	//if(numWindow == 4) return; // 4-sliding window
-	///cout << "Sending frame";
-	///s->Print();
-	///cout << "size of window is " << window.size();
-	fflush(stdout);
 	if(s->type == DATA)
 		window.push(s);
-	///cout << "size of window is " << window.size();
-	fflush(stdout);
-	///cout << "locking mutex to send frame";
-	fflush(stdout);
-	int lock;
-	if((lock = (int) pthread_mutex_trylock(&mutSF)) == 0) {
+
+	if(pthread_mutex_trylock(&mutSF) == 0) {
 		sendFrames.push(s);
-		///cout << "pushed frame";
 		pthread_mutex_unlock(&mutSF);
+		if(debug){
+			cout<<"[DataLink:ToPhysicalLayer] Sending a frame down:"<<endl;
+			s->Print();
+		}
 	}
-	//cout << "lock was " << lock;
-	//fflush(stdout);
-	// testing below
-	//cout << "adding to recvFrames";
-	/*pthread_mutex_lock(&mutRF);
-	recvFrames.push(s);
-	pthread_mutex_unlock(&mutRF);*/
-	//Packet* p = Packet::Unserialize((char*) s->payload);
-	//p->Print();
 }
 
 /*

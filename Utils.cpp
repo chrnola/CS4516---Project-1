@@ -3,6 +3,7 @@
 /*
  * Author: Ray Short
  */
+// convert short integer into ASCII characters
 unsigned char* Utils::itoa(unsigned short n) {
 	char val = 0;
 	unsigned char* num = (unsigned char*) calloc(5, sizeof(unsigned char));
@@ -38,6 +39,7 @@ unsigned char* Utils::itoa(unsigned short n) {
 }
 
 // Author: Chris Pinola
+// convert long integer into ASCII characters
 unsigned char *Utils::ltoa(long n){
 	char val = 0;
 	unsigned char *num = (unsigned char *) calloc(17, sizeof(unsigned char));

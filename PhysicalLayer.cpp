@@ -15,10 +15,7 @@
 #include <pthread.h>
 #include <sys/poll.h>		// For poll
 
-
 #include "did.h"
-
-
 
 using namespace std;
 
@@ -62,15 +59,12 @@ PhysicalLayer::PhysicalLayer(const char *hostname) {
 	connected = true;
 }
 
-
 // Constructor called by server. sockfd is already connected with the client,
 // so just passes control to the general physical layer code.
 PhysicalLayer::PhysicalLayer(int sockfd) {
 	PhysicalLayer::sockfd = sockfd;
 	connected = true;
 }
-
-
 
 // Generic physical layer code
 // Should send out any frames received from DL, and pass up any frames received.
@@ -89,7 +83,6 @@ void PhysicalLayer::run(){
 		ReceiveFrames();
 		i++;
 	}
-
 }
 
 // Assumes it has a mutex on mutSF.
@@ -115,11 +108,14 @@ void PhysicalLayer::SendAFrame(){
 		if(send(sockfd, cereal, len, 0) != len){
 			cout << "Crap! Couldn't send the whole frame" << endl;
 		}
-		if(debug) cout << "[PhysicalLayer:SendAFrame] Sent a frame"<<endl;
+		if(debug){
+			cout << "[PhysicalLayer:SendAFrame] Sent this frame"<<endl;
+			theFrame->Print();
+			cout<<"But serialized to this:"<<endl<<cereal<<endl;
+		}
 	}
 	else cerr<<"[PhysicalLayer:SendAFrame] theFrame was NULL, weird"<<endl;
 }
-
 
 // Checks if a frame is waiting on the wire. Validates it and sends it on up.
 void PhysicalLayer::ReceiveFrames(){
@@ -138,14 +134,19 @@ void PhysicalLayer::ReceiveFrames(){
 			connected = false;
 			return;
 		}
-
+		if(debug) cout<<"[PhysicalLayer:ReceiveFrames] Got these bytes off the wire:"<<endl<<incoming<<endl;
 		if(FrameValid(incoming, recvd)){
+			if(debug) cout<<"[PhysicalLayer:ReceiveFrames] Frame was valid"<<endl;
 			Frame *result = Frame::Unserialize(incoming);
 			pthread_mutex_lock(&mutRF);
 			recvFrames.push(result);
 			pthread_mutex_unlock(&mutRF);
-			if(debug) cout<<"[PhysicalLayer:ReceiveFrames] Pushed the received frame"<<endl;
+			if(debug){
+				cout<<"[PhysicalLayer:ReceiveFrames] Pushed the received frame:"<<endl;
+				result->Print();
+			}
 		}
+		else if(debug) cout<<"[PhysicalLayer:ReceiveFrames] Frame wasn't valid";
 	}
 	else if(verboseDebug) cout <<"[PhysicalLayer:ReceiveFrames] Nothing available on the wire"<<endl;
 	if(verboseDebug) cout <<"[PhysicalLayer:ReceiveFrames] Function end"<<endl;
@@ -195,4 +196,3 @@ bool PhysicalLayer::FrameValid(char* sFrame, int length){
 PhysicalLayer::~PhysicalLayer() {
 	close(sockfd);
 }
-

@@ -30,6 +30,7 @@ void Frame::Print() {
 /*
  * Author: Ray Short
  */
+// serialize Frame into a character array
 unsigned char* Frame::Serialize() {
 	unsigned char* data = (unsigned char*) calloc(this->payloadLength + FRAME_HEAD, sizeof(unsigned char));
 	this->type == ACK ? memcpy(data, "1", 1) : memcpy(data, "0", 1);
@@ -43,6 +44,7 @@ unsigned char* Frame::Serialize() {
 /*
  * Author: Ray Short
  */
+// make a Frame out of a previously serialized Frame
 Frame* Frame::Unserialize(char* d) {
 	Frame* f = new Frame();
 	d[0] == 0x30 ? f->type = DATA : f->type = ACK;

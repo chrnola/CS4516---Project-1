@@ -15,6 +15,7 @@ class Message{
 		Message();
 		Message(char *_cmd, char *_content);
 		~Message();
+		void Print();
 		void setCmd(char *_cmd);
 		char *getCmd();
 		unsigned char *getCmdRaw();
