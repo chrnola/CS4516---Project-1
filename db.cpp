@@ -332,6 +332,8 @@ long createMissing(const char *first, const char *last, const char *location){
 		mysql_real_escape_string(&mysql, cleanLast, last, strlen(last));
 		mysql_real_escape_string(&mysql, cleanLocation, location, strlen(location));
 		
+		cout << "Clean location: " << cleanLocation << endl;
+		
 		//dynamically allocate final string
 		int size = 1;
 		size += strlen(qIns) + strlen(qEnd);
@@ -346,7 +348,7 @@ long createMissing(const char *first, const char *last, const char *location){
 		
 		//free the temp strings
 		free(cleanFirst); free(cleanLast); free(cleanLocation);
-
+		cout << qry << endl;
 		// issue the query to the database
 		if(mysql_query(&mysql, qry) != 0){
 			// attempts to fetch and output the error message
@@ -533,7 +535,7 @@ bool changePassword(const char *username, const char *oldPass, const char *newPa
 	// deallocate temp strings
 	free(cleanUser);
 	free(cleanPassword);
-
+	
 	// issue the query statement to the server
 	if(mysql_query(&mysql, qry) != 0){
 		free(qry);

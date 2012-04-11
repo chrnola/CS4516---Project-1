@@ -29,7 +29,7 @@ pthread_mutex_t mutSP, mutRP, mutSF, mutRF;
 
 bool connected = false;
 bool auth = false;
-char *user;
+string u;
 
 NetworkLayer *nl;
 DataLink* dl;
@@ -122,14 +122,14 @@ void handleMessage(Message *inm){
 		if(strcmp(argvNew[0], "locations") == 0){
 			///cout << "awesome" << endl;
 			char *r = locationsWithMissing();
-			cout << r << endl;
+			//cout << r << endl;
 			m->setCmd(r);
 			nl -> FromApplicationLayer(m);
 		} else if(strcmp(argvNew[0], "quit") == 0){
 			connected = false;
 		} else if(strcmp(argvNew[0], "createmissing") == 0){
 			long newID;
-			if((newID = createMissing(argvNew[1], argvNew[2], argvNew[3])) <= 0){
+			if((newID = createMissing(argvNew[1], argvNew[2], "loc")) <= 0){
 				m->setCmd(err);
 			} else{
 				m->setCmd((char *) newID);
@@ -147,9 +147,9 @@ void handleMessage(Message *inm){
 				//already signed in
 				m->setCmd("You're already signed in");
 			} else{
+				u.assign(argvNew[1]);
 				if(authenticateUser(argvNew[1], argvNew[2])){
 					auth = true;
-					user = argvNew[1];
 					m->setCmd("You have successfully signed in!");
 				} else{
 					m->setCmd("Invalid credentials");
@@ -202,10 +202,14 @@ void handleMessage(Message *inm){
 			nl -> FromApplicationLayer(m);
 		} else if(strcmp(argvNew[0], "password") == 0){
 			if(auth){
-				if(changePassword(argvNew[1], argvNew[2], argvNew[3])){
-					m->setCmd("Successfully changed password");
+				if(changePassword(u.c_str(), argvNew[1], argvNew[2])){
+					char *pwdsuc = "Successfully changed password";
+					cout << pwdsuc << endl;
+					m->setCmd(pwdsuc);
 				} else{
-					m->setCmd("Either the given username does not exist, or the old password doesn't match for that user.");
+					char *pwderr = "Either the given username does not exist, or the old password doesn't match for that user.";
+					cout << pwderr << endl;
+					m->setCmd(pwderr);
 				}
 			} else{
 				m->setCmd(nauth);

@@ -258,8 +258,7 @@ void startPrompt(){
 			 (argvNew[3] != NULL)){
 				if(checkLength(argvNew[1], MAX_ID) && checkLength(argvNew[2], MAX_FIRST) && checkLength(argvNew[3], MAX_LAST)) {
 					Message *m = new Message();
-					int size = strlen(argvNew[0]) + strlen(argvNew[1]) + 
-							strlen(argvNew[2]) + strlen(argvNew[3]) +3;
+					int size = strlen(argvNew[0]) + strlen(argvNew[1]) + strlen(argvNew[2]) + strlen(argvNew[3]) + 3;
 					char *cmd = (char *) calloc(size, sizeof(char));
 					strcpy(cmd, argvNew[0]); strcat(cmd, " ");
 					strcat(cmd, argvNew[1]); strcat(cmd, " ");
@@ -448,7 +447,7 @@ void startPrompt(){
 					}
 				}
 			} else{
-				cout << "Error: dlmissingphoto expects id" << endl;
+				cout << "Error: dlmissingphoto expects id filename" << endl;
 			}
 		} else{
 			cout << "Bad command!" << endl;
@@ -461,7 +460,8 @@ void startPrompt(){
 
 //returns true if the string is of valid length
 bool checkLength(char *field, int max){
-	if(strlen(field) > max){
+	int sf = strlen(field);
+	if((sf > max) || (sf < 1)){
 		switch(max){
 			case MAX_FIRST:
 				cout << "First names must not exceed " << MAX_FIRST << " characters!" << endl;

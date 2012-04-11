@@ -24,22 +24,22 @@ int main(){
 		return -1;
 	}
 	
-	Message *m = new Message();
-	m->setCmd("this is a command!");
-	m->setImg(img, (long)size);
+// 	Message *m = new Message();
+// 	m->setCmd("this is a command!");
+// 	m->setImg(img, (long)size);
 	
-	delete[] img;
+	//delete[] img;
 	
-	unsigned char *raw = m->serialize();
+	//unsigned char *raw = m->serialize(MESSAGE_HEAD + size + strlen("this is a command!"));
 	// to lower layers
 	
 	// from lower layers
-	Message *moreOfTheSame = Message::unserialize(raw);
-	cout << m->getCmd() << endl;
+	//Message *moreOfTheSame = Message::unserialize(raw);
+	//cout << m->getCmd() << endl;
 	
-	long newSize = m->getContentSize();
-	char *newImg = (char *) calloc(newSize, sizeof(char));
-	memcpy(newImg, m->getContent(), newSize);
+	//long newSize = m->getContentSize();
+	//char *newImg = (char *) calloc(newSize, sizeof(char));
+	//memcpy(newImg, m->getContent(), newSize);
 	
 	//FILE *tmpFile;
 	//tmpFile = tmpFile();
@@ -47,17 +47,17 @@ int main(){
 	//fwrite(newImg, sizeof(char), newSize, tmpFile);
 	
 	if(connectToDB()){
-		if(addPhotoPublic("2", newImg, newSize)){
+		if(addPhotoPublic("4", img, size)){
 			cout << "added" << endl;
 		}
-		unsigned long fsize = 0;
-		char *newImg = getPhotoPublic("1", &fsize);
-		ofstream newPic;
-		newPic.open("new.jpg", ios::out|ios::binary);
-	 	if(newPic.is_open()){
-	 		newPic.write(newImg, fsize);
-	 		newPic.close();
-	 	}
+		//unsigned long fsize = 0;
+		//char *newImg = getPhotoPublic("1", &fsize);
+		//ofstream newPic;
+		//newPic.open("new.jpg", ios::out|ios::binary);
+	 	//if(newPic.is_open()){
+	 	//	newPic.write(newImg, fsize);
+	 	//	newPic.close();
+	 	//}
 	}
 	
 	disconnectFromDB();
